@@ -2,21 +2,21 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from supabase import create_client
-from pygwalker.api.streamlit import StreamlitRenderer
+from datetime import datetime, timedelta
 
-# 1. Инициализация страницы
+# 1. Page Configuration
 st.set_page_config(page_title="Correlli Intelligence", layout="wide", page_icon="🦅")
 
-# Скрываем стандартное меню Streamlit для "дорогого" вида
-hide_style = """
+# CSS for Dark Mode & Clean UI
+st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
+    .stMetric { background-color: #1e1e1e; padding: 15px; border-radius: 10px; border: 1px solid #333; }
     </style>
-"""
-st.markdown(hide_style, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# 2. Подключение к Supabase
+# 2. Supabase Connection
 @st.cache_resource
 def init_connection():
     url = st.secrets["SUPABASE_URL"]
@@ -25,84 +25,115 @@ def init_connection():
 
 supabase = init_connection()
 
-# 3. Загрузка данных (используем нашу View из прошлых шагов)
-@st.cache_data(ttl=600)
-def load_data(view_name):
-    response = supabase.table(view_name).select("*").execute()
-    return pd.DataFrame(response.data)
+# 3. Data Loading Logic
+@st.cache_data(ttl=300)
+def fetch_performance_data():
+    # Fetching from our unified View
+    response = supabase.table("v_sales_performance_metrics").select("*").execute()
+    df = pd.DataFrame(response.data)
+    df['date'] = pd.to_datetime(df['date'])
+    return df
 
-# Загружаем основную аналитику и сырые данные
-df_market = load_data("ceo_market_analytics")
-# ВАЖНО: загрузи основную таблицу для конструктора
-# response_raw = supabase.table("Algonova_Calls_Raw").select("*").limit(1000).execute()
-# df_raw = pd.DataFrame(response_raw.data)
+df_main = fetch_performance_data()
 
-# 4. Боковая панель (Навигация)
-st.sidebar.image("https://via.placeholder.com/150?text=CORRELLI", width=150) # Замени на свой лого
-st.sidebar.title("Correlli Platform")
-role = st.sidebar.selectbox("Выберите роль:", ["CEO (Стратег)", "CMO (Маркетинг)", "CSO (Продажи)", "Data Lab (Конструктор)"])
-
+# 4. Sidebar Navigation
+st.sidebar.title("🦅 Correlli Intelligence")
+role = st.sidebar.selectbox("Access Level:", ["CEO (Strategist)", "Data Lab (Explorer)"])
 st.sidebar.markdown("---")
-market_filter = st.sidebar.multiselect("Рынок:", df_market['market'].unique(), default=df_market['market'].unique())
 
-# Фильтруем данные
-df_filtered = df_market[df_market['market'].isin(market_filter)]
+# 5. CEO Dashboard Logic
+if role == "CEO (Strategist)":
+    st.title("Executive Intelligence Radar")
+    
+    # --- TIME CALCULATIONS ---
+    # We compare Yesterday vs Same Day Last Week
+    yesterday = (datetime.now() - timedelta(days=1)).date()
+    last_week_sdw = yesterday - timedelta(days=7)
+    
+    # Filter Data
+    df_yesterday = df_main[df_main['date'].dt.date == yesterday]
+    df_last_week = df_main[df_main['date'].dt.date == last_week_sdw]
 
-# 5. Отрисовка интерфейса в зависимости от роли
-if role == "CEO (Стратег)":
-    st.title("🦅 Executive Dashboard")
-    st.subheader("Состояние бизнеса в реальном времени")
-
-    # Метрики с динамикой (имитация дельты для MVP)
+    # --- TOP KPI ROW (Pulse) ---
     col1, col2, col3, col4 = st.columns(4)
+
+    def get_delta(curr, prev):
+        if prev == 0: return 0
+        return ((curr - prev) / prev) * 100
+
+    # Metrics Calculations
+    q_curr = df_yesterday['avg_quality_score'].mean()
+    q_prev = df_last_week['avg_quality_score'].mean()
+    
+    v_curr = df_yesterday['viscosity_index'].mean()
+    v_prev = df_last_week['viscosity_index'].mean()
+
+    f_curr = (df_yesterday['friction_intro'].mean() + df_yesterday['friction_sales'].mean()) / 2
+    f_prev = (df_last_week['friction_intro'].mean() + df_last_week['friction_sales'].mean()) / 2
+
+    vol_curr = df_yesterday['total_calls_qty'].sum()
+    vol_prev = df_last_week['total_calls_qty'].sum()
+
     with col1:
-        st.metric("Среднее качество", f"{df_filtered['avg_market_quality'].mean():.1f}", delta="1.2%", help="Сравнение с прошлой неделей")
+        st.metric("Avg Quality Score", f"{q_curr:.2f}", delta=f"{q_curr-q_prev:.2f}", help="AI-based quality benchmark")
     with col2:
-        st.metric("Friction Index", f"{df_filtered['friction_index'].mean():.2f}", delta="-0.05", delta_color="normal")
+        st.metric("Viscosity Index", f"{v_curr:.1f}%", delta=f"{v_curr-v_prev:.1f}%", delta_color="inverse", help="% of vague/undefined outcomes")
     with col3:
-        st.metric("Вязкость (Vague)", f"{df_filtered['vague_ratio_percent'].mean():.1f}%", delta="2.1%", delta_color="inverse")
+        st.metric("Friction Index", f"{f_curr:.2f}", delta=f"{f_curr-f_prev:.2f}", delta_color="inverse", help="Follow-ups per initial call")
     with col4:
-        st.metric("Всего звонков", f"{df_filtered['total_calls'].sum()}", delta="140")
+        st.metric("Total Call Volume", int(vol_curr), delta=int(vol_curr-vol_prev), help="Absolute call count yesterday")
 
     st.markdown("---")
 
-    # График Friction Index по рынкам
-    c1, c2 = st.columns(2)
+    # --- MARKET BATTLEFIELD (Competition) ---
+    st.subheader("🏁 Yesterday's Market Battlefield")
+    st.info("Relative performance comparison across active markets.")
+    
+    # Group by market for yesterday
+    battle_df = df_yesterday.groupby('market').agg({
+        'viscosity_index': 'mean',
+        'pipeline_balance': 'mean',
+        'avg_quality_score': 'mean'
+    }).reset_index()
+
+    c1, c2, c3 = st.columns(3)
+    
     with c1:
-        st.subheader("Индекс трения по рынкам")
-        fig_friction = px.bar(df_filtered, x='market', y='friction_index', color='market', 
-                             text_auto=True, title="Чем выше бар, тем сложнее закрывать сделки")
-        st.plotly_chart(fig_friction, use_container_width=True)
-    
+        # Lower Viscosity is better
+        fig_v = px.bar(battle_df.sort_values('viscosity_index'), x='market', y='viscosity_index', 
+                       title="Viscosity (Lower is Better)", color='market', text_auto=True)
+        st.plotly_chart(fig_v, use_container_width=True)
+        
     with c2:
-        st.subheader("Качество vs Вязкость")
-        fig_scatter = px.scatter(df_filtered, x='avg_market_quality', y='vague_ratio_percent', size='total_calls', 
-                                color='market', hover_name='market', title="Идеальная зона: Справа внизу")
-        st.plotly_chart(fig_scatter, use_container_width=True)
+        # Higher Quality is better
+        fig_q = px.bar(battle_df.sort_values('avg_quality_score', ascending=False), x='market', y='avg_quality_score', 
+                       title="Quality Score (Higher is Better)", color='market', text_auto=True)
+        st.plotly_chart(fig_q, use_container_width=True)
 
-elif role == "CMO (Маркетинг)":
-    st.title("🎯 Marketing Intelligence")
-    st.info("Здесь анализируется резонанс лидов и эффективность UTM-меток.")
-    # Тут можно добавить графики по buying_intent из основной таблицы
-    st.warning("Подключите UTM-данные для полной визуализации резонанса.")
+    with c3:
+        # Pipeline Balance (Lower ratio means more efficient transition to Sales)
+        fig_b = px.bar(battle_df.sort_values('pipeline_balance'), x='market', y='pipeline_balance', 
+                       title="Pipeline Balance Ratio", color='market', text_auto=True)
+        st.plotly_chart(fig_b, use_container_width=True)
 
-elif role == "CSO (Продажи)":
-    st.title("📈 Sales Operations")
-    st.subheader("Эффективность отделов и РОПов")
+    # --- RHYTHM COMPARISON ---
+    st.markdown("---")
+    st.subheader("📈 Call Volume Rhythm: Yesterday vs Last Week")
     
-    # Таблица эффективности
-    st.dataframe(df_filtered[['market', 'total_calls', 'avg_market_quality', 'friction_index']].sort_values(by='avg_market_quality', ascending=False), 
-                 use_container_width=True)
+    # Create a trend for the last 14 days to see the rhythm
+    recent_trend = df_main[df_main['date'].dt.date >= last_week_sdw].groupby(['date', 'market'])['total_calls_qty'].sum().reset_index()
+    fig_trend = px.line(recent_trend, x='date', y='total_calls_qty', color='market', 
+                        title="Daily Volume Dynamics", markers=True)
+    st.plotly_chart(fig_trend, use_container_width=True)
 
-elif role == "Data Lab (Конструктор)":
-    st.title("🧬 Лаборатория данных")
-    st.markdown("Перетаскивайте поля слева, чтобы создать любой график самостоятельно.")
-    
-    # Инициализируем PyGWalker (Визуальный конструктор для клиента)
-    # Используем df_filtered для примера
-    renderer = StreamlitRenderer(df_filtered)
+elif role == "Data Lab (Explorer)":
+    from pygwalker.api.streamlit import StreamlitRenderer
+    st.title("🧬 Data Laboratory")
+    st.markdown("Custom analysis and raw metric exploration.")
+    renderer = StreamlitRenderer(df_main)
     renderer.explorer()
 
-# 6. Подвал
-st.sidebar.markdown(f"**Аккаунт:** Algonova Admin")
-st.sidebar.write("2026 © Correlli AI Intelligence")
+# Footer
+st.sidebar.markdown("---")
+st.sidebar.write(f"Refreshed: {datetime.now().strftime('%H:%M:%S')}")
+st.sidebar.write("2026 © Correlli Intelligence")
