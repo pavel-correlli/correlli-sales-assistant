@@ -12,23 +12,26 @@ st.set_page_config(
     page_title="Strategic Intelligence Radar",
     layout="wide"
 )
+
+MARKETS_ALLOWED = ["CZ", "RUK", "SK"]
+
+# ------------------------------------------------------------------
+# SUPABASE
+# ------------------------------------------------------------------
 @st.cache_resource
-def init_connection():
+def get_supabase():
     return create_client(
         st.secrets["SUPABASE_URL"],
         st.secrets["SUPABASE_KEY"]
     )
-
-supabase = init_connection()
-
-
-MARKETS_ALLOWED = ["CZ", "RUK", "SK"]
 
 # ------------------------------------------------------------------
 # DATA
 # ------------------------------------------------------------------
 @st.cache_data(ttl=300)
 def load_data():
+    supabase = get_supabase()
+
     resp = (
         supabase
         .table("v_sales_performance_metrics")
@@ -42,11 +45,10 @@ def load_data():
     if df.empty:
         return df
 
-    # --- strict filtering
     df = df[df["market"].isin(MARKETS_ALLOWED)]
 
-    # --- typing
     df["call_date"] = pd.to_datetime(df["call_date"])
+
     numeric_cols = [
         "quality_score",
         "viscosity_index",
@@ -67,9 +69,8 @@ def load_data():
 
     return df
 
-
 # ------------------------------------------------------------------
-# UI: STRATEGIC CONTROL PANEL
+# UI: SIDEBAR
 # ------------------------------------------------------------------
 st.sidebar.title("Strategic Control")
 
@@ -126,68 +127,37 @@ for market in MARKETS_ALLOWED:
         (df_m["call_date"] < pd.to_datetime(reference_end))
     ]
 
-    # --------------------------------------------------------------
-    # KPI PULSE
-    # --------------------------------------------------------------
     c1, c2, c3, c4 = st.columns(4)
 
-    def kpi(col, label):
-        cur_v = cur[col].mean()
-        ref_v = ref[col].mean()
-        delta = cur_v - ref_v
-        return cur_v, delta
+    def kpi(col):
+        return cur[col].mean(), cur[col].mean() - ref[col].mean()
 
     with c1:
-        v, d = kpi("quality_score", "Quality")
+        v, d = kpi("quality_score")
         st.metric("Avg Quality", f"{v:.2f}", f"{d:+.2f}")
 
     with c2:
-        v, d = kpi("viscosity_index", "Viscosity")
+        v, d = kpi("viscosity_index")
         st.metric("Viscosity Index", f"{v:.2%}", f"{d:+.2%}")
 
     with c3:
-        v, d = kpi("intro_friction", "Intro Friction")
+        v, d = kpi("intro_friction")
         st.metric("Intro Friction", f"{v:.2f}", f"{d:+.2f}")
 
     with c4:
-        v, d = kpi("sales_friction", "Sales Friction")
+        v, d = kpi("sales_friction")
         st.metric("Sales Friction", f"{v:.2f}", f"{d:+.2f}")
 
-    # --------------------------------------------------------------
-    # OUTCOME PRECISION (100% BASELINE)
-    # --------------------------------------------------------------
     ref_calls = ref["total_calls"].sum()
     cur_calls = cur["total_calls"].sum()
 
-    if ref_calls == 0:
-        st.info("Not enough reference data")
-        continue
+    if ref_calls > 0:
+        fig = go.Figure()
+        fig.add_bar(name="Reference", x=["Total Calls"], y=[100])
+        fig.add_bar(name="Current", x=["Total Calls"], y=[(cur_calls / ref_calls) * 100])
+        fig.update_layout(height=300, yaxis_title="% vs Reference", barmode="group")
+        st.plotly_chart(fig, use_container_width=True)
 
-    bar = go.Figure()
-
-    bar.add_bar(
-        name="Reference",
-        x=["Total Calls"],
-        y=[100]
-    )
-
-    bar.add_bar(
-        name="Current",
-        x=["Total Calls"],
-        y=[(cur_calls / ref_calls) * 100]
-    )
-
-    bar.update_layout(
-        height=300,
-        yaxis_title="% vs Reference",
-        barmode="group"
-    )
-
-    st.plotly_chart(bar, use_container_width=True)
-
-    # --------------------------------------------------------------
-    # RHYTHM LINE
-    # --------------------------------------------------------------
     rhythm = (
         df_m
         .set_index("call_date")
@@ -197,45 +167,11 @@ for market in MARKETS_ALLOWED:
     )
 
     fig = go.Figure()
-
-    fig.add_scatter(
-        x=rhythm["call_date"],
-        y=rhythm["intro_calls"],
-        mode="lines",
-        name="Intro — Fresh",
-        line=dict(color="green")
-    )
-
-    fig.add_scatter(
-        x=rhythm["call_date"],
-        y=rhythm["intro_followups"],
-        mode="lines",
-        name="Intro — Follow-up",
-        line=dict(color="green", dash="dot")
-    )
-
-    fig.add_scatter(
-        x=rhythm["call_date"],
-        y=rhythm["sales_calls"],
-        mode="lines",
-        name="Sales — Fresh",
-        line=dict(color="orange")
-    )
-
-    fig.add_scatter(
-        x=rhythm["call_date"],
-        y=rhythm["sales_followups"],
-        mode="lines",
-        name="Sales — Follow-up",
-        line=dict(color="orange", dash="dot")
-    )
-
-    fig.update_layout(
-        height=350,
-        margin=dict(t=30),
-        showlegend=True
-    )
-
+    fig.add_scatter(x=rhythm["call_date"], y=rhythm["intro_calls"], mode="lines", name="Intro Fresh")
+    fig.add_scatter(x=rhythm["call_date"], y=rhythm["intro_followups"], mode="lines", name="Intro Follow-up")
+    fig.add_scatter(x=rhythm["call_date"], y=rhythm["sales_calls"], mode="lines", name="Sales Fresh")
+    fig.add_scatter(x=rhythm["call_date"], y=rhythm["sales_followups"], mode="lines", name="Sales Follow-up")
+    fig.update_layout(height=350)
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
@@ -243,6 +179,4 @@ for market in MARKETS_ALLOWED:
 # ------------------------------------------------------------------
 # FOOTER
 # ------------------------------------------------------------------
-st.caption(
-    f"Last sync: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}"
-)
+st.caption(f"Last sync: {datetime.utcnow():%Y-%m-%d %H:%M UTC}")
