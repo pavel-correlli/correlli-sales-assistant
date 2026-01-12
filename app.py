@@ -1,26 +1,20 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
+import plotly.express as px
 from datetime import datetime, timedelta
-import numpy as np
-from dataclasses import dataclass
-from typing import Optional, List, Dict, Any
-import logging
+import supabase
+from supabase import create_client, Client
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Supabase connection
+SUPABASE_URL = st.secrets["supabase"]["url"]
+SUPABASE_KEY = st.secrets["supabase"]["key"]
+supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Page configuration
-st.set_page_config(
-    page_title="Correlli Sales Assistant",
-    page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(page_title="Correlli Sales Assistant", layout="wide")
 
-# Custom CSS for better UI
+# Custom CSS for better styling
 st.markdown("""
     <style>
     .metric-card {
@@ -29,683 +23,460 @@ st.markdown("""
         border-radius: 10px;
         margin: 10px 0;
     }
-    .success-box {
-        background-color: #d4edda;
-        border: 1px solid #c3e6cb;
-        color: #155724;
-        padding: 12px;
-        border-radius: 4px;
-        margin: 10px 0;
+    .header-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
     }
-    .error-box {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
-        padding: 12px;
-        border-radius: 4px;
+    .warning-box {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        border-radius: 5px;
         margin: 10px 0;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# Data Models
-@dataclass
-class SalesMetrics:
-    """Sales metrics data structure"""
-    total_revenue: float
-    total_deals: int
-    avg_deal_size: float
-    pipeline_value: float
-    conversion_rate: float
-    win_rate: float
-    sales_cycle_days: int
+# Initialize session state
+if 'page' not in st.session_state:
+    st.session_state.page = 'Dashboard'
 
-class ErrorHandler:
-    """Centralized error handling"""
-    @staticmethod
-    def handle_data_validation(df: pd.DataFrame, required_columns: List[str]) -> tuple[bool, str]:
-        """Validate dataframe has required columns"""
-        try:
-            missing_cols = [col for col in required_columns if col not in df.columns]
-            if missing_cols:
-                return False, f"Missing required columns: {', '.join(missing_cols)}"
-            return True, "Validation successful"
-        except Exception as e:
-            logger.error(f"Data validation error: {str(e)}")
-            return False, f"Validation error: {str(e)}"
-    
-    @staticmethod
-    def safe_divide(numerator: float, denominator: float, default: float = 0) -> float:
-        """Safely divide two numbers"""
-        try:
-            return numerator / denominator if denominator != 0 else default
-        except Exception as e:
-            logger.error(f"Division error: {str(e)}")
-            return default
-
-# Data Visualization Functions
-def create_revenue_trend_chart(data: pd.DataFrame) -> go.Figure:
-    """Create revenue trend visualization"""
+@st.cache_data
+def get_sales_data():
+    """Fetch sales performance metrics from Supabase"""
     try:
-        fig = px.line(
-            data,
-            x='date',
-            y='revenue',
-            title='Revenue Trend',
-            markers=True,
-            template='plotly_white'
-        )
-        fig.update_traces(line=dict(color='#1f77b4', width=2))
-        return fig
+        response = supabase_client.table('v_sales_performance_metrics').select('*').execute()
+        return pd.DataFrame(response.data)
     except Exception as e:
-        logger.error(f"Error creating revenue trend chart: {str(e)}")
-        return None
-
-def create_deal_pipeline_chart(data: pd.DataFrame) -> go.Figure:
-    """Create deal pipeline visualization"""
-    try:
-        stage_counts = data['stage'].value_counts()
-        colors = ['#2ecc71', '#f39c12', '#e74c3c', '#3498db', '#9b59b6']
-        
-        fig = go.Figure(data=[
-            go.Bar(
-                x=stage_counts.index,
-                y=stage_counts.values,
-                marker=dict(color=colors[:len(stage_counts)])
-            )
-        ])
-        fig.update_layout(
-            title='Deal Pipeline by Stage',
-            xaxis_title='Stage',
-            yaxis_title='Number of Deals',
-            template='plotly_white'
-        )
-        return fig
-    except Exception as e:
-        logger.error(f"Error creating pipeline chart: {str(e)}")
-        return None
-
-def create_conversion_funnel(data: pd.DataFrame) -> go.Figure:
-    """Create conversion funnel visualization"""
-    try:
-        stages = ['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won']
-        values = [100, 75, 50, 35, 20]  # Example conversion values
-        
-        fig = go.Figure(go.Funnel(
-            y=stages,
-            x=values,
-            marker=dict(color=['#2ecc71', '#f39c12', '#e74c3c', '#3498db', '#9b59b6'])
-        ))
-        fig.update_layout(title='Sales Conversion Funnel')
-        return fig
-    except Exception as e:
-        logger.error(f"Error creating funnel chart: {str(e)}")
-        return None
-
-def create_territory_performance_chart(data: pd.DataFrame) -> go.Figure:
-    """Create territory performance heatmap"""
-    try:
-        fig = px.bar(
-            data,
-            x='territory',
-            y='quota_attainment',
-            color='quota_attainment',
-            title='Territory Performance vs Quota',
-            color_continuous_scale='RdYlGn',
-            template='plotly_white'
-        )
-        return fig
-    except Exception as e:
-        logger.error(f"Error creating territory chart: {str(e)}")
-        return None
-
-# Sample Data Generation
-def generate_sample_sales_data(num_records: int = 50) -> pd.DataFrame:
-    """Generate sample sales data for demonstration"""
-    try:
-        np.random.seed(42)
-        dates = pd.date_range(end=datetime.now(), periods=num_records, freq='D')
-        
-        data = {
-            'date': dates,
-            'stage': np.random.choice(['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won'], num_records),
-            'revenue': np.random.randint(5000, 100000, num_records),
-            'territory': np.random.choice(['North', 'South', 'East', 'West'], num_records),
-            'quota_attainment': np.random.uniform(60, 150, num_records),
-            'deal_size': np.random.randint(10000, 500000, num_records)
-        }
-        
-        return pd.DataFrame(data)
-    except Exception as e:
-        logger.error(f"Error generating sample data: {str(e)}")
+        st.error(f"Error fetching data: {str(e)}")
         return pd.DataFrame()
 
-# CMO Dashboard
-def render_cmo_dashboard():
-    """Chief Marketing Officer Dashboard"""
-    st.header("📈 CMO Dashboard")
-    
+@st.cache_data
+def get_sales_by_representative():
+    """Fetch sales by representative"""
     try:
-        # Load or generate data
-        data = generate_sample_sales_data(50)
-        
-        if data.empty:
-            st.error("Unable to load sales data")
-            return
-        
-        # Key metrics row
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            total_pipeline = data['revenue'].sum()
-            st.metric("Pipeline Value", f"${total_pipeline:,.0f}", "+12%")
-        
-        with col2:
-            avg_deal = data['deal_size'].mean()
-            st.metric("Avg Deal Size", f"${avg_deal:,.0f}", "+5%")
-        
-        with col3:
-            num_deals = len(data)
-            st.metric("Total Deals", num_deals, "+8")
-        
-        with col4:
-            conversion_rate = len(data[data['stage'] == 'Closed Won']) / len(data) * 100
-            st.metric("Conversion Rate", f"{conversion_rate:.1f}%", "-2%")
-        
-        # Marketing metrics and visualizations
-        st.subheader("Campaign Performance")
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            trend_fig = create_revenue_trend_chart(data)
-            if trend_fig:
-                st.plotly_chart(trend_fig, use_container_width=True)
-            else:
-                st.warning("Could not create revenue trend chart")
-        
-        with col2:
-            funnel_fig = create_conversion_funnel(data)
-            if funnel_fig:
-                st.plotly_chart(funnel_fig, use_container_width=True)
-            else:
-                st.warning("Could not create funnel chart")
-        
-        # Territory analysis
-        st.subheader("Territory Analysis")
-        territory_fig = create_territory_performance_chart(data)
-        if territory_fig:
-            st.plotly_chart(territory_fig, use_container_width=True)
+        response = supabase_client.table('v_sales_performance_metrics').select('*').execute()
+        df = pd.DataFrame(response.data)
+        if not df.empty:
+            return df.groupby('sales_rep_name')['total_sales'].sum().sort_values(ascending=False)
+        return pd.Series()
+    except Exception as e:
+        st.error(f"Error fetching representative data: {str(e)}")
+        return pd.Series()
+
+@st.cache_data
+def get_pipeline_data():
+    """Fetch pipeline data"""
+    try:
+        response = supabase_client.table('v_sales_performance_metrics').select('*').execute()
+        df = pd.DataFrame(response.data)
+        if not df.empty:
+            return df.groupby('stage')['value'].sum().sort_values(ascending=False)
+        return pd.Series()
+    except Exception as e:
+        st.error(f"Error fetching pipeline data: {str(e)}")
+        return pd.Series()
+
+def create_executive_dashboard():
+    """Create the CEO Executive Dashboard"""
+    st.markdown('<div class="header-section"><h2>📊 CEO Executive Dashboard</h2></div>', unsafe_allow_html=True)
+    
+    # Get data
+    sales_data = get_sales_data()
+    
+    if sales_data.empty:
+        st.warning("No sales data available. Please check your Supabase connection.")
+        return
+    
+    # Key metrics
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        total_sales = sales_data['total_sales'].sum() if 'total_sales' in sales_data.columns else 0
+        st.metric("Total Sales", f"${total_sales:,.2f}")
+    
+    with col2:
+        total_deals = len(sales_data) if sales_data.shape[0] > 0 else 0
+        st.metric("Total Deals", total_deals)
+    
+    with col3:
+        avg_deal_size = (sales_data['total_sales'].sum() / len(sales_data)) if len(sales_data) > 0 else 0
+        st.metric("Average Deal Size", f"${avg_deal_size:,.2f}")
+    
+    with col4:
+        win_rate = (sales_data['total_sales'].sum() / 100) if 'total_sales' in sales_data.columns else 0
+        st.metric("Pipeline Health", f"{win_rate:.1f}%")
+    
+    # Charts
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Sales by Representative")
+        sales_by_rep = get_sales_by_representative()
+        if not sales_by_rep.empty:
+            fig = px.bar(x=sales_by_rep.index, y=sales_by_rep.values, 
+                        labels={'x': 'Sales Representative', 'y': 'Total Sales'},
+                        color=sales_by_rep.values, color_continuous_scale='Viridis')
+            st.plotly_chart(fig, use_container_width=True)
         else:
-            st.warning("Could not create territory chart")
-        
-        # Marketing insights
-        st.subheader("Key Insights")
-        insights_col1, insights_col2, insights_col3 = st.columns(3)
-        
-        with insights_col1:
-            st.markdown("""
-            **Lead Quality**: 85% of leads are sales-qualified
-            
-            Trend: ↑ 5% improvement this month
-            """)
-        
-        with insights_col2:
-            st.markdown("""
-            **Campaign ROI**: 3.2x average return
-            
-            Top performer: Digital marketing campaigns
-            """)
-        
-        with insights_col3:
-            st.markdown("""
-            **Market Share**: Growing in key segments
-            
-            Next: Focus on enterprise segment
-            """)
+            st.info("No sales representative data available")
     
-    except Exception as e:
-        logger.error(f"CMO Dashboard error: {str(e)}")
-        st.error(f"Error rendering CMO Dashboard: {str(e)}")
+    with col2:
+        st.subheader("Pipeline by Stage")
+        pipeline_data = get_pipeline_data()
+        if not pipeline_data.empty:
+            fig = go.Figure(data=[go.Pie(labels=pipeline_data.index, values=pipeline_data.values)])
+            fig.update_layout(title="Deal Pipeline Distribution")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No pipeline data available")
+    
+    # Detailed table
+    st.subheader("Sales Performance Details")
+    st.dataframe(sales_data, use_container_width=True)
 
-# CSO Dashboard
-def render_cso_dashboard():
-    """Chief Sales Officer Dashboard"""
-    st.header("💼 CSO Dashboard")
+def create_cmo_dashboard():
+    """Create the CMO (Chief Marketing Officer) Dashboard"""
+    st.markdown('<div class="header-section"><h2>📢 CMO Dashboard - Marketing Performance</h2></div>', unsafe_allow_html=True)
     
-    try:
-        data = generate_sample_sales_data(100)
+    sales_data = get_sales_data()
+    
+    if sales_data.empty:
+        st.warning("No marketing data available. Please check your Supabase connection.")
+        return
+    
+    # Marketing metrics
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        total_leads = len(sales_data) if sales_data.shape[0] > 0 else 0
+        st.metric("Total Leads Generated", total_leads)
+    
+    with col2:
+        conversion_rate = (len(sales_data) / max(len(sales_data), 1)) * 100
+        st.metric("Conversion Rate", f"{conversion_rate:.1f}%")
+    
+    with col3:
+        total_marketing_pipeline = sales_data['total_sales'].sum() if 'total_sales' in sales_data.columns else 0
+        st.metric("Marketing Pipeline Value", f"${total_marketing_pipeline:,.2f}")
+    
+    with col4:
+        avg_lead_value = (sales_data['total_sales'].sum() / max(len(sales_data), 1)) if len(sales_data) > 0 else 0
+        st.metric("Average Lead Value", f"${avg_lead_value:,.2f}")
+    
+    # Marketing charts
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Lead Distribution by Source")
+        if not sales_data.empty and 'source' in sales_data.columns:
+            source_dist = sales_data['source'].value_counts()
+            fig = px.pie(values=source_dist.values, names=source_dist.index, 
+                        title="Lead Sources Distribution")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No source data available")
+    
+    with col2:
+        st.subheader("Marketing Campaign Performance")
+        if not sales_data.empty and 'campaign' in sales_data.columns:
+            campaign_perf = sales_data.groupby('campaign')['total_sales'].sum().sort_values(ascending=False)
+            fig = px.bar(x=campaign_perf.index, y=campaign_perf.values,
+                        labels={'x': 'Campaign', 'y': 'Revenue'},
+                        title="Revenue by Campaign")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No campaign data available")
+    
+    st.subheader("Lead Quality Analysis")
+    st.dataframe(sales_data, use_container_width=True)
+
+def create_cso_dashboard():
+    """Create the CSO (Chief Sales Officer) Dashboard"""
+    st.markdown('<div class="header-section"><h2>💼 CSO Dashboard - Sales Operations</h2></div>', unsafe_allow_html=True)
+    
+    sales_data = get_sales_data()
+    
+    if sales_data.empty:
+        st.warning("No sales operations data available. Please check your Supabase connection.")
+        return
+    
+    # Sales operations metrics
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        total_revenue = sales_data['total_sales'].sum() if 'total_sales' in sales_data.columns else 0
+        st.metric("Total Revenue", f"${total_revenue:,.2f}")
+    
+    with col2:
+        active_deals = len(sales_data) if sales_data.shape[0] > 0 else 0
+        st.metric("Active Deals", active_deals)
+    
+    with col3:
+        avg_deal_size = (sales_data['total_sales'].sum() / max(len(sales_data), 1)) if len(sales_data) > 0 else 0
+        st.metric("Average Deal Size", f"${avg_deal_size:,.2f}")
+    
+    with col4:
+        sales_reps = sales_data['sales_rep_name'].nunique() if 'sales_rep_name' in sales_data.columns else 0
+        st.metric("Active Sales Reps", sales_reps)
+    
+    # Sales operations charts
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Revenue by Sales Stage")
+        pipeline_data = get_pipeline_data()
+        if not pipeline_data.empty:
+            fig = px.bar(x=pipeline_data.index, y=pipeline_data.values,
+                        labels={'x': 'Pipeline Stage', 'y': 'Value'},
+                        title="Deal Value by Stage",
+                        color=pipeline_data.values, color_continuous_scale='Blues')
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No pipeline data available")
+    
+    with col2:
+        st.subheader("Sales Team Performance")
+        sales_by_rep = get_sales_by_representative()
+        if not sales_by_rep.empty:
+            fig = px.bar(x=sales_by_rep.index, y=sales_by_rep.values,
+                        labels={'x': 'Sales Rep', 'y': 'Total Sales'},
+                        title="Individual Rep Performance",
+                        color=sales_by_rep.values, color_continuous_scale='Greens')
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No representative data available")
+    
+    st.subheader("Sales Deal Details")
+    st.dataframe(sales_data, use_container_width=True)
+
+def create_manager_lab():
+    """Create the Manager Lab - Sales Manager Coaching & Development"""
+    st.markdown('<div class="header-section"><h2>🎓 Manager Lab - Coaching & Development</h2></div>', unsafe_allow_html=True)
+    
+    sales_data = get_sales_data()
+    
+    if sales_data.empty:
+        st.warning("No manager data available. Please check your Supabase connection.")
+        return
+    
+    # Manager metrics
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        total_team_size = sales_data['sales_rep_name'].nunique() if 'sales_rep_name' in sales_data.columns else 0
+        st.metric("Team Size", total_team_size)
+    
+    with col2:
+        team_revenue = sales_data['total_sales'].sum() if 'total_sales' in sales_data.columns else 0
+        st.metric("Team Revenue", f"${team_revenue:,.2f}")
+    
+    with col3:
+        avg_rep_revenue = (sales_data['total_sales'].sum() / max(sales_data['sales_rep_name'].nunique(), 1)) if 'sales_rep_name' in sales_data.columns else 0
+        st.metric("Avg Revenue per Rep", f"${avg_rep_revenue:,.2f}")
+    
+    with col4:
+        total_deals = len(sales_data) if sales_data.shape[0] > 0 else 0
+        st.metric("Team Deals", total_deals)
+    
+    # Manager coaching tabs
+    tab1, tab2, tab3 = st.tabs(["Team Performance", "Rep Coaching Insights", "Development Resources"])
+    
+    with tab1:
+        st.subheader("Team Performance Overview")
+        sales_by_rep = get_sales_by_representative()
+        if not sales_by_rep.empty:
+            fig = px.bar(x=sales_by_rep.index, y=sales_by_rep.values,
+                        labels={'x': 'Sales Rep', 'y': 'Sales'},
+                        title="Individual Performance Ranking",
+                        color=sales_by_rep.values, color_continuous_scale='Purples')
+            st.plotly_chart(fig, use_container_width=True)
         
-        if data.empty:
-            st.error("Unable to load sales data")
-            return
+        st.subheader("Performance Metrics Table")
+        st.dataframe(sales_data, use_container_width=True)
+    
+    with tab2:
+        st.subheader("Rep Coaching Insights")
+        st.info("📌 Use these insights for 1-on-1 coaching sessions with your team members:")
         
-        # Executive summary metrics
-        col1, col2, col3, col4, col5 = st.columns(5)
+        if not sales_data.empty and 'sales_rep_name' in sales_data.columns:
+            rep_summary = sales_data.groupby('sales_rep_name').agg({
+                'total_sales': 'sum',
+            }).sort_values('total_sales', ascending=False)
+            
+            rep_summary.columns = ['Total Sales']
+            rep_summary = rep_summary.reset_index()
+            rep_summary['Rank'] = range(1, len(rep_summary) + 1)
+            
+            st.dataframe(rep_summary, use_container_width=True)
         
-        with col1:
-            total_revenue = data['revenue'].sum()
-            st.metric("YTD Revenue", f"${total_revenue:,.0f}", "+18%")
-        
-        with col2:
-            quota_pct = 94
-            st.metric("Quota %", f"{quota_pct}%", "-6%")
-        
-        with col3:
-            win_rate = 28
-            st.metric("Win Rate", f"{win_rate}%", "+4%")
-        
-        with col4:
-            avg_cycle = 42
-            st.metric("Sales Cycle", f"{avg_cycle} days", "-3 days")
-        
-        with col5:
-            deals_in_pipeline = len(data)
-            st.metric("Active Deals", deals_in_pipeline, "+12")
-        
-        # Sales performance visualizations
-        st.subheader("Sales Pipeline Analysis")
+        st.markdown("### Coaching Areas:")
         col1, col2 = st.columns(2)
-        
         with col1:
-            pipeline_fig = create_deal_pipeline_chart(data)
-            if pipeline_fig:
-                st.plotly_chart(pipeline_fig, use_container_width=True)
-            else:
-                st.warning("Could not create pipeline chart")
-        
+            st.markdown("""
+            **Top Performers:**
+            - Recognition opportunities
+            - Peer mentoring roles
+            - Advanced training options
+            """)
         with col2:
-            # Revenue by stage
-            revenue_by_stage = data.groupby('stage')['revenue'].sum().sort_values(ascending=False)
-            fig = px.bar(
-                x=revenue_by_stage.index,
-                y=revenue_by_stage.values,
-                title='Revenue by Stage',
-                labels={'x': 'Stage', 'y': 'Revenue'},
-                template='plotly_white'
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            st.markdown("""
+            **Development Needed:**
+            - Training resources
+            - Mentoring assignments
+            - Skill development focus
+            """)
+    
+    with tab3:
+        st.subheader("Development Resources & Tools")
+        st.markdown("""
+        #### Sales Manager Resources:
+        - **Coaching Framework**: Weekly 1-on-1 templates
+        - **Training Modules**: Product knowledge, objection handling
+        - **Performance Tools**: Goal tracking, activity monitoring
+        - **Best Practices**: Sales techniques from top performers
         
-        # Sales team performance
-        st.subheader("Team Performance")
-        team_metrics = pd.DataFrame({
-            'Rep': ['Sarah Chen', 'Mike Johnson', 'Lisa Wong', 'David Park', 'Emma Davis'],
-            'Quota': [250000, 200000, 180000, 220000, 190000],
-            'Actual': [265000, 175000, 195000, 198000, 210000],
-            'Attainment %': [106, 87.5, 108, 90, 111]
-        })
+        #### Team Development:
+        - Regular training schedules
+        - Mentorship programs
+        - Certification opportunities
+        - Industry certifications
+        """)
         
-        col1, col2 = st.columns([3, 1])
+        # Resource download section
+        st.markdown("#### Quick Access:")
+        col1, col2, col3 = st.columns(3)
         with col1:
-            fig = px.bar(
-                team_metrics,
-                x='Rep',
-                y=['Quota', 'Actual'],
-                title='Sales Rep Performance vs Quota',
-                barmode='group',
-                template='plotly_white'
+            st.download_button(
+                label="📄 Weekly Coaching Template",
+                data="Coaching Template:\n\n1. Performance Review\n2. Development Areas\n3. Action Items\n4. Next Steps",
+                file_name="coaching_template.txt"
             )
-            st.plotly_chart(fig, use_container_width=True)
-        
         with col2:
-            st.dataframe(team_metrics[['Rep', 'Attainment %']], use_container_width=True)
-        
-        # Forecast accuracy
-        st.subheader("Sales Forecast vs Actuals")
-        forecast_data = pd.DataFrame({
-            'Month': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            'Forecast': [250000, 280000, 310000, 290000, 320000, 350000],
-            'Actual': [245000, 275000, 305000, 285000, 315000, None]
-        })
-        
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=forecast_data['Month'], y=forecast_data['Forecast'],
-                                mode='lines+markers', name='Forecast'))
-        fig.add_trace(go.Scatter(x=forecast_data['Month'], y=forecast_data['Actual'],
-                                mode='lines+markers', name='Actual'))
-        fig.update_layout(title='Forecast Accuracy', template='plotly_white')
-        st.plotly_chart(fig, use_container_width=True)
-    
-    except Exception as e:
-        logger.error(f"CSO Dashboard error: {str(e)}")
-        st.error(f"Error rendering CSO Dashboard: {str(e)}")
-
-# Manager Lab Dashboard
-def render_manager_lab():
-    """Manager Lab - Advanced Tools and Analytics"""
-    st.header("🔬 Manager Lab")
-    
-    try:
-        # Lab features tabs
-        lab_tab1, lab_tab2, lab_tab3, lab_tab4 = st.tabs([
-            "Deal Analysis",
-            "Pipeline Health",
-            "Predictive Analytics",
-            "Reports & Export"
-        ])
-        
-        with lab_tab1:
-            st.subheader("Deal-by-Deal Analysis")
-            
-            # Create sample deal data
-            deals_data = pd.DataFrame({
-                'Deal ID': ['D001', 'D002', 'D003', 'D004', 'D005'],
-                'Company': ['Acme Corp', 'TechStart Inc', 'Global Systems', 'Innovation Labs', 'Enterprise Co'],
-                'Amount': [150000, 75000, 250000, 100000, 180000],
-                'Stage': ['Negotiation', 'Proposal', 'Closed Won', 'Qualification', 'Proposal'],
-                'Days in Stage': [45, 30, 5, 15, 20],
-                'Next Action': ['Pricing review', 'Demo scheduled', 'Closed', 'Needs assessment', 'Proposal sent'],
-                'Risk': ['Medium', 'Low', 'Closed', 'High', 'Medium']
-            })
-            
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                st.dataframe(deals_data, use_container_width=True)
-            
-            with col2:
-                risk_counts = deals_data['Risk'].value_counts()
-                fig = px.pie(
-                    values=risk_counts.values,
-                    names=risk_counts.index,
-                    title='Deal Risk Distribution'
-                )
-                st.plotly_chart(fig, use_container_width=True)
-            
-            # Deal health indicators
-            st.subheader("Deal Health Indicators")
-            with st.expander("View Health Metrics"):
-                health_metrics = pd.DataFrame({
-                    'Metric': ['Stalled Deals', 'At-Risk Deals', 'High-Value Deals', 'Fast-Moving Deals'],
-                    'Count': [3, 5, 8, 12],
-                    'Action': ['Follow-up needed', 'Risk mitigation', 'Executive engagement', 'Nurture pipeline']
-                })
-                st.dataframe(health_metrics, use_container_width=True)
-        
-        with lab_tab2:
-            st.subheader("Pipeline Health Score")
-            
-            # Pipeline health metrics
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Pipeline Health", "78%", "+5%", delta_color="normal")
-            with col2:
-                st.metric("Velocity Score", "72%", "+2%")
-            with col3:
-                st.metric("Quality Score", "84%", "+8%")
-            
-            # Pipeline distribution
-            stages = ['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won']
-            values = [15, 25, 20, 18, 12]
-            
-            fig = go.Figure(data=[
-                go.Bar(
-                    y=stages,
-                    x=values,
-                    orientation='h',
-                    marker=dict(color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'])
-                )
-            ])
-            fig.update_layout(
-                title='Pipeline Distribution by Stage',
-                xaxis_title='Number of Deals',
-                template='plotly_white'
+            st.download_button(
+                label="📊 Team Metrics Export",
+                data=sales_data.to_csv() if not sales_data.empty else "No data available",
+                file_name="team_metrics.csv"
             )
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Stage health
-            st.subheader("Stage Health Analysis")
-            stage_health = pd.DataFrame({
-                'Stage': stages,
-                'Deals': values,
-                'Avg Value': [45000, 75000, 120000, 180000, 250000],
-                'Health': ['Good', 'Fair', 'Good', 'Excellent', 'Excellent']
-            })
-            st.dataframe(stage_health, use_container_width=True)
-        
-        with lab_tab3:
-            st.subheader("Predictive Analytics")
-            
-            # Forecast prediction
-            st.write("**Revenue Forecast (Next 6 Months)**")
-            forecast_months = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-            predicted_revenue = [320000, 350000, 380000, 410000, 445000, 480000]
-            confidence = [95, 92, 88, 85, 80, 75]
-            
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=forecast_months,
-                y=predicted_revenue,
-                mode='lines+markers',
-                name='Predicted Revenue',
-                line=dict(color='#2ecc71', width=3)
-            ))
-            fig.add_trace(go.Scatter(
-                x=forecast_months,
-                y=[r * 0.9 for r in predicted_revenue],
-                mode='lines',
-                name='Conservative Estimate',
-                line=dict(color='#e74c3c', dash='dash')
-            ))
-            fig.update_layout(
-                title='Revenue Forecast with Confidence Intervals',
-                xaxis_title='Month',
-                yaxis_title='Revenue ($)',
-                template='plotly_white'
-            )
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Prediction confidence
-            st.write("**Forecast Confidence by Month**")
-            confidence_df = pd.DataFrame({
-                'Month': forecast_months,
-                'Confidence %': confidence
-            })
-            
-            fig = px.bar(
-                confidence_df,
-                x='Month',
-                y='Confidence %',
-                title='Prediction Confidence Levels',
-                color='Confidence %',
-                color_continuous_scale='RdYlGn',
-                template='plotly_white'
-            )
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Win probability predictions
-            st.subheader("Deal Win Probability")
-            with st.expander("View AI-Powered Win Probabilities"):
-                win_prob_data = pd.DataFrame({
-                    'Deal': ['D001', 'D002', 'D003', 'D004', 'D005'],
-                    'Company': ['Acme Corp', 'TechStart', 'Global Sys', 'Innovation', 'Enterprise'],
-                    'Win Probability': [75, 45, 92, 35, 68],
-                    'Key Factor': ['Strong engagement', 'Budget concerns', 'Exec alignment', 'Competitor threat', 'Timeline risk']
-                })
-                st.dataframe(win_prob_data, use_container_width=True)
-        
-        with lab_tab4:
-            st.subheader("Reports & Data Export")
-            
-            # Report generation
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.write("**Available Reports**")
-                report_options = st.multiselect(
-                    "Select reports to generate:",
-                    [
-                        "Pipeline Summary",
-                        "Sales Rep Performance",
-                        "Territory Analysis",
-                        "Deal Status Report",
-                        "Forecast Accuracy",
-                        "Conversion Funnel"
-                    ],
-                    default=["Pipeline Summary", "Sales Rep Performance"]
-                )
-            
-            with col2:
-                st.write("**Export Options**")
-                export_format = st.radio(
-                    "Select export format:",
-                    ["CSV", "Excel", "PDF", "Power BI"]
-                )
-            
-            # Generate button
-            if st.button("📊 Generate Reports", use_container_width=True):
-                st.success(f"✓ Generated {len(report_options)} report(s) in {export_format} format")
-                st.info("Reports would be downloaded as files (demo mode)")
-            
-            # Scheduled reports
-            st.subheader("Scheduled Reports")
-            scheduled = pd.DataFrame({
-                'Report': ['Weekly Pipeline', 'Monthly Forecast', 'Quarterly Review'],
-                'Frequency': ['Every Monday', 'Month-end', 'Quarterly'],
-                'Last Run': ['2026-01-12', '2026-01-10', '2025-12-31'],
-                'Status': ['✓ Scheduled', '✓ Scheduled', '✓ Scheduled']
-            })
-            st.dataframe(scheduled, use_container_width=True)
-    
-    except Exception as e:
-        logger.error(f"Manager Lab error: {str(e)}")
-        st.error(f"Error rendering Manager Lab: {str(e)}")
-
-# Sales Rep Dashboard
-def render_sales_rep_dashboard():
-    """Individual Sales Rep Dashboard"""
-    st.header("👤 Sales Rep Dashboard")
-    
-    try:
-        # Sales rep info
-        col1, col2 = st.columns([1, 4])
-        with col1:
-            st.image("https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah", width=100)
-        with col2:
-            st.subheader("Sarah Chen")
-            st.write("Territory: Pacific Region | Team: Enterprise Sales")
-        
-        # Personal metrics
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.metric("Quota", "$250K", "$265K", "+6%")
-        with col2:
-            st.metric("Attainment", "106%", "+6%")
         with col3:
-            st.metric("Active Deals", 12, "+3")
-        with col4:
-            st.metric("Close Rate", "32%", "+4%")
-        
-        # My pipeline
-        st.subheader("My Pipeline")
-        my_deals = pd.DataFrame({
-            'Account': ['Acme Corp', 'TechStart', 'Global Systems', 'InnovateLabs'],
-            'Amount': [150000, 75000, 250000, 100000],
-            'Stage': ['Negotiation', 'Proposal', 'Closed Won', 'Qualification'],
-            'Probability': [85, 45, 100, 25],
-            'Next Step': ['Price discussion', 'Technical demo', 'Contract setup', 'Discovery call']
-        })
-        st.dataframe(my_deals, use_container_width=True)
-        
-        # Activity tracker
-        st.subheader("This Week's Activity")
-        activity_col1, activity_col2, activity_col3, activity_col4 = st.columns(4)
-        with activity_col1:
-            st.metric("Calls", 24, "+5")
-        with activity_col2:
-            st.metric("Meetings", 8, "+2")
-        with activity_col3:
-            st.metric("Emails", 67, "+12")
-        with activity_col4:
-            st.metric("Proposals", 3, "+1")
-    
-    except Exception as e:
-        logger.error(f"Sales Rep Dashboard error: {str(e)}")
-        st.error(f"Error rendering Sales Rep Dashboard: {str(e)}")
+            st.download_button(
+                label="📋 Action Plan Template",
+                data="Action Plan:\n\nGoals:\n\nTimeline:\n\nSuccess Metrics:",
+                file_name="action_plan.txt"
+            )
 
-# Settings and Data Management
-def render_settings():
-    """Settings and configuration page"""
-    st.header("⚙️ Settings")
+def create_data_lab():
+    """Create the Data Lab for advanced analytics"""
+    st.markdown('<div class="header-section"><h2>🔬 Data Lab - Advanced Analytics</h2></div>', unsafe_allow_html=True)
     
-    try:
-        settings_tab1, settings_tab2, settings_tab3 = st.tabs([
-            "User Preferences",
-            "Data Management",
-            "System"
-        ])
-        
-        with settings_tab1:
-            st.subheader("User Preferences")
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.selectbox("Dashboard Theme", ["Light", "Dark", "Auto"])
-                st.selectbox("Currency", ["USD", "EUR", "GBP", "CAD"])
-            
-            with col2:
-                st.selectbox("Date Format", ["MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD"])
-                st.selectbox("Notification Frequency", ["Real-time", "Hourly", "Daily"])
-        
-        with settings_tab2:
-            st.subheader("Data Management")
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                if st.button("📥 Import Data", use_container_width=True):
-                    st.success("Import feature enabled - upload CSV files here")
-            
-            with col2:
-                if st.button("📤 Export All Data", use_container_width=True):
-                    st.info("Export in progress - would generate comprehensive export")
-        
-        with settings_tab3:
-            st.subheader("System Information")
-            st.write(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            st.write(f"Application Version: 1.0.0 MVP")
-            st.write(f"Database Status: ✓ Connected")
+    sales_data = get_sales_data()
     
-    except Exception as e:
-        logger.error(f"Settings error: {str(e)}")
-        st.error(f"Error rendering Settings: {str(e)}")
+    if sales_data.empty:
+        st.warning("No data available for analysis. Please check your Supabase connection.")
+        return
+    
+    tab1, tab2, tab3 = st.tabs(["Raw Data", "Custom Queries", "Analytics"])
+    
+    with tab1:
+        st.subheader("Raw Sales Data")
+        st.dataframe(sales_data, use_container_width=True)
+        
+        # Export options
+        st.markdown("**Export Options:**")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.download_button(
+                label="📥 Download as CSV",
+                data=sales_data.to_csv(index=False),
+                file_name=f"sales_data_{datetime.now().strftime('%Y%m%d')}.csv"
+            )
+        with col2:
+            st.download_button(
+                label="📥 Download as JSON",
+                data=sales_data.to_json(),
+                file_name=f"sales_data_{datetime.now().strftime('%Y%m%d')}.json"
+            )
+    
+    with tab2:
+        st.subheader("Custom Query Builder")
+        st.info("Filter and analyze data based on your specific needs")
+        
+        # Filter options
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if 'sales_rep_name' in sales_data.columns:
+                selected_reps = st.multiselect(
+                    "Filter by Sales Rep",
+                    sales_data['sales_rep_name'].unique(),
+                    default=sales_data['sales_rep_name'].unique()
+                )
+                filtered_data = sales_data[sales_data['sales_rep_name'].isin(selected_reps)]
+            else:
+                filtered_data = sales_data
+        
+        with col2:
+            if 'stage' in sales_data.columns:
+                selected_stages = st.multiselect(
+                    "Filter by Stage",
+                    sales_data['stage'].unique(),
+                    default=sales_data['stage'].unique()
+                )
+                filtered_data = filtered_data[filtered_data['stage'].isin(selected_stages)]
+        
+        with col3:
+            date_range = st.date_input(
+                "Date Range",
+                value=(datetime.now() - timedelta(days=30), datetime.now())
+            )
+        
+        st.subheader("Filtered Results")
+        st.dataframe(filtered_data, use_container_width=True)
+    
+    with tab3:
+        st.subheader("Advanced Analytics")
+        
+        # Summary statistics
+        st.markdown("**Summary Statistics:**")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("Total Records", len(sales_data))
+        with col2:
+            st.metric("Total Value", f"${sales_data['total_sales'].sum():,.2f}" if 'total_sales' in sales_data.columns else "$0")
+        with col3:
+            st.metric("Average Value", f"${sales_data['total_sales'].mean():,.2f}" if 'total_sales' in sales_data.columns else "$0")
+        
+        # Distribution analysis
+        if 'total_sales' in sales_data.columns:
+            st.subheader("Value Distribution")
+            fig = px.histogram(sales_data, x='total_sales', nbins=20, 
+                             title="Distribution of Deal Sizes",
+                             labels={'total_sales': 'Deal Value'})
+            st.plotly_chart(fig, use_container_width=True)
 
-# Main application
-def main():
-    """Main application function"""
-    st.sidebar.title("📊 Correlli Sales Assistant")
-    
-    # Navigation
-    page = st.sidebar.radio(
-        "Select Dashboard",
-        [
-            "CMO Dashboard",
-            "CSO Dashboard",
-            "Sales Rep Dashboard",
-            "Manager Lab",
-            "Settings"
-        ],
-        index=0
-    )
-    
-    # Page routing
-    try:
-        if page == "CMO Dashboard":
-            render_cmo_dashboard()
-        elif page == "CSO Dashboard":
-            render_cso_dashboard()
-        elif page == "Sales Rep Dashboard":
-            render_sales_rep_dashboard()
-        elif page == "Manager Lab":
-            render_manager_lab()
-        elif page == "Settings":
-            render_settings()
-    except Exception as e:
-        logger.error(f"Application error: {str(e)}")
-        st.error(f"An error occurred: {str(e)}")
-        st.info("Please try refreshing the page or contact support.")
-    
-    # Footer
-    st.sidebar.divider()
-    st.sidebar.write(f"*Last synced: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*")
-    st.sidebar.write("*Correlli Sales Assistant v1.0.0*")
+# Sidebar navigation
+st.sidebar.title("Navigation")
+page = st.sidebar.radio(
+    "Select Dashboard:",
+    ["CEO Dashboard", "CMO Dashboard", "CSO Dashboard", "Manager Lab", "Data Lab"]
+)
 
-if __name__ == "__main__":
-    main()
+# Main content
+if page == "CEO Dashboard":
+    create_executive_dashboard()
+elif page == "CMO Dashboard":
+    create_cmo_dashboard()
+elif page == "CSO Dashboard":
+    create_cso_dashboard()
+elif page == "Manager Lab":
+    create_manager_lab()
+elif page == "Data Lab":
+    create_data_lab()
+
+# Footer
+st.markdown("---")
+st.markdown(f"<p style='text-align: center; color: gray;'>Correlli Sales Assistant | Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>", unsafe_allow_html=True)
