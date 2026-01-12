@@ -4,19 +4,18 @@ import plotly.express as px
 from supabase import create_client
 from datetime import datetime, timedelta
 
-# 1. Page Configuration
+# --- 1. PAGE CONFIG ---
 st.set_page_config(page_title="Correlli Intelligence", layout="wide", page_icon="🦅")
 
-# CSS for Dark Mode & Clean UI
 st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    .stMetric { background-color: #1e1e1e; padding: 15px; border-radius: 10px; border: 1px solid #333; }
+    .stMetric { background-color: #1a1a1a; padding: 15px; border-radius: 10px; border: 1px solid #333; }
     </style>
 """, unsafe_allow_html=True)
 
-# 2. Supabase Connection
+# --- 2. SUPABASE CONNECTION ---
 @st.cache_resource
 def init_connection():
     url = st.secrets["SUPABASE_URL"]
@@ -25,115 +24,130 @@ def init_connection():
 
 supabase = init_connection()
 
-# 3. Data Loading Logic
+# --- 3. DATA LOADING & CLEANING ---
 @st.cache_data(ttl=300)
-def fetch_performance_data():
-    # Fetching from our unified View
-    response = supabase.table("v_sales_performance_metrics").select("*").execute()
-    df = pd.DataFrame(response.data)
-    df['date'] = pd.to_datetime(df['date'])
+def fetch_and_clean_data():
+    # Тянем данные из основной витрины
+    res = supabase.table("v_sales_performance_metrics").select("*").execute()
+    df = pd.DataFrame(res.data)
+    
+    if df.empty:
+        return df
+
+    # ЧИСТКА 1: Превращаем текст в даты (формат 12/23/2025)
+    df['date'] = pd.to_datetime(df['date'], format='%m/%d/%Y')
+    
+    # ЧИСТКА 2: Превращаем строки в числа (из-за особенностей Postgres views)
+    numeric_cols = [
+        'friction_intro', 'friction_sales', 'viscosity_index', 
+        'pipeline_balance', 'avg_quality_score', 'total_calls_qty'
+    ]
+    for col in numeric_cols:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+            
     return df
 
-df_main = fetch_performance_data()
+df_metrics = fetch_and_clean_data()
 
-# 4. Sidebar Navigation
+# --- 4. SIDEBAR ---
 st.sidebar.title("🦅 Correlli Intelligence")
 role = st.sidebar.selectbox("Access Level:", ["CEO (Strategist)", "Data Lab (Explorer)"])
-st.sidebar.markdown("---")
 
-# 5. CEO Dashboard Logic
+if df_metrics.empty:
+    st.error("Data not found. Check your Supabase table 'v_sales_performance_metrics'")
+    st.stop()
+
+# --- 5. CEO DASHBOARD ---
 if role == "CEO (Strategist)":
     st.title("Executive Intelligence Radar")
     
-    # --- TIME CALCULATIONS ---
-    # We compare Yesterday vs Same Day Last Week
-    yesterday = (datetime.now() - timedelta(days=1)).date()
-    last_week_sdw = yesterday - timedelta(days=7)
-    
-    # Filter Data
-    df_yesterday = df_main[df_main['date'].dt.date == yesterday]
-    df_last_week = df_main[df_main['date'].dt.date == last_week_sdw]
+    # Расчет дат: Вчера vs Тот же день неделю назад
+    # Используем max_date из базы, чтобы дашборд не был пустым, если данных за сегодня еще нет
+    latest_date = df_metrics['date'].max()
+    yesterday_date = latest_date
+    last_week_date = yesterday_date - timedelta(days=7)
 
-    # --- TOP KPI ROW (Pulse) ---
+    st.sidebar.info(f"Analysis: {yesterday_date.strftime('%d %b')} vs {last_week_date.strftime('%d %b')}")
+
+    # Фильтруем периоды
+    current_df = df_metrics[df_metrics['date'] == yesterday_date]
+    reference_df = df_metrics[df_metrics['date'] == last_week_date]
+
+    # --- BLOCK A: GLOBAL KPI (Yesterday vs Last Week) ---
     col1, col2, col3, col4 = st.columns(4)
 
-    def get_delta(curr, prev):
-        if prev == 0: return 0
-        return ((curr - prev) / prev) * 100
+    def calc_metrics(target_df):
+        return {
+            "q": target_df['avg_quality_score'].mean(),
+            "v": target_df['viscosity_index'].mean(),
+            "f": (target_df['friction_intro'].mean() + target_df['friction_sales'].mean()) / 2,
+            "vol": target_df['total_calls_qty'].sum()
+        }
 
-    # Metrics Calculations
-    q_curr = df_yesterday['avg_quality_score'].mean()
-    q_prev = df_last_week['avg_quality_score'].mean()
-    
-    v_curr = df_yesterday['viscosity_index'].mean()
-    v_prev = df_last_week['viscosity_index'].mean()
-
-    f_curr = (df_yesterday['friction_intro'].mean() + df_yesterday['friction_sales'].mean()) / 2
-    f_prev = (df_last_week['friction_intro'].mean() + df_last_week['friction_sales'].mean()) / 2
-
-    vol_curr = df_yesterday['total_calls_qty'].sum()
-    vol_prev = df_last_week['total_calls_qty'].sum()
+    curr = calc_metrics(current_df)
+    prev = calc_metrics(reference_df)
 
     with col1:
-        st.metric("Avg Quality Score", f"{q_curr:.2f}", delta=f"{q_curr-q_prev:.2f}", help="AI-based quality benchmark")
+        st.metric("Avg Quality", f"{curr['q']:.2f}", delta=f"{curr['q']-prev['q']:.2f}")
     with col2:
-        st.metric("Viscosity Index", f"{v_curr:.1f}%", delta=f"{v_curr-v_prev:.1f}%", delta_color="inverse", help="% of vague/undefined outcomes")
+        # Вязкость (Viscosity): рост - это плохо, поэтому инвертируем цвет дельты
+        st.metric("Viscosity Index", f"{curr['v']:.1f}%", delta=f"{curr['v']-prev['v']:.1f}%", delta_color="inverse")
     with col3:
-        st.metric("Friction Index", f"{f_curr:.2f}", delta=f"{f_curr-f_prev:.2f}", delta_color="inverse", help="Follow-ups per initial call")
+        # Трение (Friction): рост - это плохо
+        st.metric("Friction Index", f"{curr['f']:.2f}", delta=f"{curr['f']-prev['f']:.2f}", delta_color="inverse")
     with col4:
-        st.metric("Total Call Volume", int(vol_curr), delta=int(vol_curr-vol_prev), help="Absolute call count yesterday")
+        st.metric("Total Volume", int(curr['vol']), delta=int(curr['vol']-prev['vol']))
 
     st.markdown("---")
 
-    # --- MARKET BATTLEFIELD (Competition) ---
+    # --- BLOCK B: MARKET BATTLEFIELD (Relative Competition) ---
     st.subheader("🏁 Yesterday's Market Battlefield")
-    st.info("Relative performance comparison across active markets.")
     
-    # Group by market for yesterday
-    battle_df = df_yesterday.groupby('market').agg({
+    # Агрегируем за вчера по рынкам
+    m_battle = current_df.groupby('market').agg({
         'viscosity_index': 'mean',
         'pipeline_balance': 'mean',
         'avg_quality_score': 'mean'
     }).reset_index()
 
     c1, c2, c3 = st.columns(3)
-    
     with c1:
-        # Lower Viscosity is better
-        fig_v = px.bar(battle_df.sort_values('viscosity_index'), x='market', y='viscosity_index', 
-                       title="Viscosity (Lower is Better)", color='market', text_auto=True)
-        st.plotly_chart(fig_v, use_container_width=True)
-        
+        fig1 = px.bar(m_battle, x='market', y='viscosity_index', color='market', 
+                     title="Viscosity % (Lower is Better)", text_auto=True, template="plotly_dark")
+        st.plotly_chart(fig1, use_container_width=True)
     with c2:
-        # Higher Quality is better
-        fig_q = px.bar(battle_df.sort_values('avg_quality_score', ascending=False), x='market', y='avg_quality_score', 
-                       title="Quality Score (Higher is Better)", color='market', text_auto=True)
-        st.plotly_chart(fig_q, use_container_width=True)
-
+        fig2 = px.bar(m_battle, x='market', y='avg_quality_score', color='market', 
+                     title="Quality Score (Higher is Better)", text_auto=True, template="plotly_dark")
+        st.plotly_chart(fig2, use_container_width=True)
     with c3:
-        # Pipeline Balance (Lower ratio means more efficient transition to Sales)
-        fig_b = px.bar(battle_df.sort_values('pipeline_balance'), x='market', y='pipeline_balance', 
-                       title="Pipeline Balance Ratio", color='market', text_auto=True)
-        st.plotly_chart(fig_b, use_container_width=True)
+        fig3 = px.bar(m_battle, x='market', y='pipeline_balance', color='market', 
+                     title="Pipeline Balance (Lead/Sales Ratio)", text_auto=True, template="plotly_dark")
+        st.plotly_chart(fig3, use_container_width=True)
 
-    # --- RHYTHM COMPARISON ---
+    # --- BLOCK C: DAILY RHYTHM ---
     st.markdown("---")
-    st.subheader("📈 Call Volume Rhythm: Yesterday vs Last Week")
+    st.subheader("📈 Call Volume Rhythm (Last 14 Days)")
     
-    # Create a trend for the last 14 days to see the rhythm
-    recent_trend = df_main[df_main['date'].dt.date >= last_week_sdw].groupby(['date', 'market'])['total_calls_qty'].sum().reset_index()
-    fig_trend = px.line(recent_trend, x='date', y='total_calls_qty', color='market', 
-                        title="Daily Volume Dynamics", markers=True)
-    st.plotly_chart(fig_trend, use_container_width=True)
+    # График динамики объемов по рынкам
+    recent_days = latest_date - timedelta(days=14)
+    trend_df = df_metrics[df_metrics['date'] >= pd.Timestamp(recent_days)].groupby(['date', 'market'])['total_calls_qty'].sum().reset_index()
+    
+    fig_line = px.line(trend_df, x='date', y='total_calls_qty', color='market', markers=True, 
+                       title="Daily Call Volume Dynamics", template="plotly_dark")
+    st.plotly_chart(fig_line, use_container_width=True)
 
+# --- 6. DATA LAB ---
 elif role == "Data Lab (Explorer)":
     from pygwalker.api.streamlit import StreamlitRenderer
     st.title("🧬 Data Laboratory")
-    st.markdown("Custom analysis and raw metric exploration.")
-    renderer = StreamlitRenderer(df_main)
+    
+    # Для лаборатории дадим более детальный View
+    res_raw = supabase.table("v_analytics_calls").select("*").execute()
+    df_raw = pd.DataFrame(res_raw.data)
+    
+    renderer = StreamlitRenderer(df_raw)
     renderer.explorer()
 
-# Footer
 st.sidebar.markdown("---")
-st.sidebar.write(f"Refreshed: {datetime.now().strftime('%H:%M:%S')}")
-st.sidebar.write("2026 © Correlli Intelligence")
+st.sidebar.caption(f"Last sync: {datetime.now().strftime('%H:%M:%S')}")
