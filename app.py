@@ -2,8 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from supabase import create_client
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
 
 # ------------------------------------------------------------------
 # CONFIG
@@ -32,71 +31,31 @@ def get_supabase():
 def load_data():
     supabase = get_supabase()
 
-    resp = (
-        supabase
-        .table("v_sales_performance_metrics")
-        .select("*")
-        .limit(10000)
-        .execute()
-    )
-
-    df = pd.DataFrame(resp.data)
+    res = supabase.table("v_sales_performance_metrics").select("*").execute()
+    df = pd.DataFrame(res.data)
 
     if df.empty:
         return df
 
+    # ✅ РЕАЛЬНОЕ ИМЯ КОЛОНКИ
+    df["date"] = pd.to_datetime(df["date"], format="%m/%d/%Y")
+
     df = df[df["market"].isin(MARKETS_ALLOWED)]
 
-    df["call_date"] = pd.to_datetime(df["call_date"])
-
     numeric_cols = [
-        "quality_score",
+        "friction_intro",
+        "friction_sales",
         "viscosity_index",
-        "intro_friction",
-        "sales_friction",
-        "total_calls",
-        "vague_calls",
-        "not_interested_calls",
-        "intro_calls",
-        "intro_followups",
-        "sales_calls",
-        "sales_followups",
+        "pipeline_balance",
+        "avg_quality_score",
+        "total_calls_qty",
     ]
 
     for col in numeric_cols:
         if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
     return df
-
-# ------------------------------------------------------------------
-# UI: SIDEBAR
-# ------------------------------------------------------------------
-st.sidebar.title("Strategic Control")
-
-scale = st.sidebar.selectbox(
-    "Analysis Scale",
-    ["Day", "Week", "Month"]
-)
-
-analysis_start = st.sidebar.date_input(
-    "Analysis Start Date",
-    datetime.today() - relativedelta(days=14)
-)
-
-reference_start = st.sidebar.date_input(
-    "Reference Start Date",
-    datetime.today() - relativedelta(days=28)
-)
-
-WINDOW_MAP = {
-    "Day": relativedelta(days=1),
-    "Week": relativedelta(weeks=1),
-    "Month": relativedelta(months=1),
-}
-
-analysis_end = analysis_start + WINDOW_MAP[scale]
-reference_end = reference_start + WINDOW_MAP[scale]
 
 # ------------------------------------------------------------------
 # LOAD DATA
@@ -110,71 +69,43 @@ if df.empty:
     st.stop()
 
 # ------------------------------------------------------------------
-# MARKET LOOP
+# DATE LOGIC (как в рабочей версии)
 # ------------------------------------------------------------------
-for market in MARKETS_ALLOWED:
-    st.markdown(f"## Market Dynamics: {market}")
+latest_date = df["date"].max()
+current_date = latest_date
+reference_date = latest_date - timedelta(days=7)
 
-    df_m = df[df["market"] == market]
+st.sidebar.info(
+    f"Analysis: {current_date.strftime('%d %b')} vs {reference_date.strftime('%d %b')}"
+)
 
-    cur = df_m[
-        (df_m["call_date"] >= pd.to_datetime(analysis_start)) &
-        (df_m["call_date"] < pd.to_datetime(analysis_end))
-    ]
+cur = df[df["date"] == current_date]
+ref = df[df["date"] == reference_date]
 
-    ref = df_m[
-        (df_m["call_date"] >= pd.to_datetime(reference_start)) &
-        (df_m["call_date"] < pd.to_datetime(reference_end))
-    ]
+# ------------------------------------------------------------------
+# KPI
+# ------------------------------------------------------------------
+c1, c2, c3, c4 = st.columns(4)
 
-    c1, c2, c3, c4 = st.columns(4)
+def kpi(col):
+    return cur[col].mean(), cur[col].mean() - ref[col].mean()
 
-    def kpi(col):
-        return cur[col].mean(), cur[col].mean() - ref[col].mean()
+with c1:
+    v, d = kpi("avg_quality_score")
+    st.metric("Avg Quality", f"{v:.2f}", f"{d:+.2f}")
 
-    with c1:
-        v, d = kpi("quality_score")
-        st.metric("Avg Quality", f"{v:.2f}", f"{d:+.2f}")
+with c2:
+    v, d = kpi("viscosity_index")
+    st.metric("Viscosity Index", f"{v:.1f}%", f"{d:+.1f}%", delta_color="inverse")
 
-    with c2:
-        v, d = kpi("viscosity_index")
-        st.metric("Viscosity Index", f"{v:.2%}", f"{d:+.2%}")
+with c3:
+    v = (cur["friction_intro"].mean() + cur["friction_sales"].mean()) / 2
+    d = v - ((ref["friction_intro"].mean() + ref["friction_sales"].mean()) / 2)
+    st.metric("Friction Index", f"{v:.2f}", f"{d:+.2f}", delta_color="inverse")
 
-    with c3:
-        v, d = kpi("intro_friction")
-        st.metric("Intro Friction", f"{v:.2f}", f"{d:+.2f}")
-
-    with c4:
-        v, d = kpi("sales_friction")
-        st.metric("Sales Friction", f"{v:.2f}", f"{d:+.2f}")
-
-    ref_calls = ref["total_calls"].sum()
-    cur_calls = cur["total_calls"].sum()
-
-    if ref_calls > 0:
-        fig = go.Figure()
-        fig.add_bar(name="Reference", x=["Total Calls"], y=[100])
-        fig.add_bar(name="Current", x=["Total Calls"], y=[(cur_calls / ref_calls) * 100])
-        fig.update_layout(height=300, yaxis_title="% vs Reference", barmode="group")
-        st.plotly_chart(fig, use_container_width=True)
-
-    rhythm = (
-        df_m
-        .set_index("call_date")
-        .resample("D")
-        .sum(numeric_only=True)
-        .reset_index()
-    )
-
-    fig = go.Figure()
-    fig.add_scatter(x=rhythm["call_date"], y=rhythm["intro_calls"], mode="lines", name="Intro Fresh")
-    fig.add_scatter(x=rhythm["call_date"], y=rhythm["intro_followups"], mode="lines", name="Intro Follow-up")
-    fig.add_scatter(x=rhythm["call_date"], y=rhythm["sales_calls"], mode="lines", name="Sales Fresh")
-    fig.add_scatter(x=rhythm["call_date"], y=rhythm["sales_followups"], mode="lines", name="Sales Follow-up")
-    fig.update_layout(height=350)
-    st.plotly_chart(fig, use_container_width=True)
-
-    st.markdown("---")
+with c4:
+    v, d = kpi("total_calls_qty")
+    st.metric("Total Calls", int(v), int(d))
 
 # ------------------------------------------------------------------
 # FOOTER
