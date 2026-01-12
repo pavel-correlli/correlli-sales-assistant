@@ -1,14 +1,13 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 from supabase import create_client
 from datetime import datetime, timedelta
 
 # --- 1. PAGE CONFIG ---
 st.set_page_config(page_title="Executive Analytics Radar", layout="wide", page_icon="🦅")
 
-# Clean UI: No dark backgrounds, readable text
+# Clean UI without dark backgrounds for metrics
 st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
@@ -22,7 +21,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. DB CONNECTION & LOADING ---
+# --- 2. DB CONNECTION ---
 @st.cache_resource
 def init_connection():
     return create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
@@ -35,10 +34,10 @@ def load_data():
     df = pd.DataFrame(res.data)
     if df.empty: return df
     
-    # Exclude SWI Market
-    df = df[df['market'] != 'SWI']
+    # STRICT MARKET FILTER
+    df = df[df['market'].isin(['CZ', 'RUK', 'SK'])]
     
-    # Cleaning
+    # Data Cleaning
     df['date'] = pd.to_datetime(df['date'], format='%m/%d/%Y')
     num_cols = ['friction_intro', 'friction_sales', 'viscosity_index', 'pipeline_balance', 
                 'avg_quality_score', 'total_calls_qty', 'vague_qty', 'not_interested_qty',
@@ -59,7 +58,8 @@ if role == "CEO (Strategic Radar)":
     st.title("🦅 Strategic Intelligence Control")
     
     # CONTROL PANEL
-    with st.expander("📅 Period & Comparison Settings", expanded=True):
+    with st.container():
+        st.subheader("Strategic Control Panel")
         c1, c2, c3 = st.columns(3)
         period_type = c1.selectbox("Analysis Window:", ["Day", "Week", "Month"], index=1)
         analysis_start = c2.date_input("Analysis Start Date:", df_metrics['date'].max())
@@ -74,27 +74,27 @@ if role == "CEO (Strategic Radar)":
     df_curr = df_metrics[(df_metrics['date'] >= curr_range[0]) & (df_metrics['date'] <= curr_range[1])]
     df_ref = df_metrics[(df_metrics['date'] >= ref_range[0]) & (df_metrics['date'] <= ref_range[1])]
 
-    # --- TOP METRICS & TOOLTIPS ---
+    # --- TOOLTIP DEFINITIONS ---
+    tt_quality = """**Avg Quality Score (0-10)** Overall benchmark of call standards.  
+    **Components:** Structure, Communication, Trust Building, Objection Handling, Engagement, Technical Quality, Scheduling Efficiency.  
+    **Goal:** Higher is better."""
+    
+    tt_viscosity = r"""**Viscosity Index** Measures "imprecise" or "vague" communication results.  
+    **Formula:** $$ \frac{Vague + Not Interested}{Total Calls} \times 100\% $$  
+    **Goal:** Minimize. High values indicate a lack of control and inability to secure firm next steps.  
+    **Note:** Productive outcomes (Trials, Closed Won, Scheduled Callbacks) are excluded from this penalty."""
+    
+    tt_fric_intro = r"""**Intro Friction** Effort required to schedule a Trial Lesson.  
+    **Formula:** $$ \frac{Intro Followup}{Intro Initial} $$  
+    **Goal:** Minimize. Shows extra touches needed to move a lead from first contact to a scheduled Trial Lesson."""
+    
+    tt_fric_sales = r"""**Sales Friction** Resistance encountered after a Trial Lesson.  
+    **Formula:** $$ \frac{Sales Followup}{Sales Initial} $$  
+    **Goal:** Minimize. Measures the difficulty in closing the deal after the product (Trial) has been presented."""
+
+    # --- TOP METRICS BY MARKET ---
     st.subheader("Global Performance Benchmark")
     active_markets = sorted(df_curr['market'].unique())
-
-    # Tooltip Definitions with Math Formulas
-    tt_quality = """**Avg Quality Score (0-10)**
-    \n**Formula:** Mean of (Structure, Communication, Trust Building, Objection Handling, Engagement, Technical Quality, Scheduling Efficiency).
-    \n**Goal:** Higher is better. Reflects adherence to sales standards."""
-    
-    tt_viscosity = r"""**Viscosity Index**
-    \n**Formula:** $\frac{Vague + Not Interested}{Total Calls} \times 100\%$
-    \n**Goal:** Minimize. Measures wasted effort.
-    \n**Note:** Excludes productive outcomes like 'trial_scheduled', 'callback_scheduled', 'closed_won', and 'firm_refusal'."""
-    
-    tt_fric_intro = r"""**Intro Friction**
-    \n**Formula:** $\frac{Intro Followup}{Intro Initial}$
-    \n**Goal:** Minimize. Shows how many extra touches are needed to qualify a lead."""
-    
-    tt_fric_sales = r"""**Sales Friction**
-    \n**Formula:** $\frac{Sales Followup}{Sales Initial}$
-    \n**Goal:** Minimize. Measures the resistance of the market to the actual offer/closing."""
 
     for market in active_markets:
         st.markdown(f"#### Market: {market.upper()}")
@@ -104,12 +104,11 @@ if role == "CEO (Strategic Radar)":
         m1, m2, m3, m4 = st.columns(4)
 
         def get_delta(c_df, r_df, col):
-            c_val = c_df[col].mean()
-            r_val = r_df[col].mean()
+            c_val = c_df[col].mean() if not c_df.empty else 0
+            r_val = r_df[col].mean() if not r_df.empty else 0
             return c_val, c_val - r_val
 
-        # Metric Row 1
-        val, delta = get_vals = get_delta(m_curr, m_ref, 'avg_quality_score')
+        val, delta = get_delta(m_curr, m_ref, 'avg_quality_score')
         m1.metric("Avg Quality", f"{val:.2f}", delta=f"{delta:.2f}", help=tt_quality)
         
         val, delta = get_delta(m_curr, m_ref, 'viscosity_index')
@@ -121,47 +120,39 @@ if role == "CEO (Strategic Radar)":
         val, delta = get_delta(m_curr, m_ref, 'friction_sales')
         m4.metric("Sales Friction", f"{val:.2f}", delta=f"{delta:.2f}", delta_color="inverse", help=tt_fric_sales)
 
-        # --- OUTCOME COMPARISON CHART ---
-        st.write(f"**Outcome Dynamics: {market} (Absolutes vs %)**")
+        # --- CALL OUTCOME PRECISION ---
+        st.write(f"**Call Outcome Precision: {market}**")
         
-        # Build specific comparison dataframe
+        
         chart_data = []
         for label, d in [("Current", m_curr), ("Reference", m_ref)]:
             total = d['total_calls_qty'].sum()
             vague = d['vague_qty'].sum()
             ni = d['not_interested_qty'].sum()
             
-            # Values: Absolute for Total, % for others
-            chart_data.append({"Period": label, "Metric": "Total Calls (Abs)", "Value": total})
-            chart_data.append({"Period": label, "Metric": "Vague (%)", "Value": (vague/total*100) if total > 0 else 0})
-            chart_data.append({"Period": label, "Metric": "Not Interested (%)", "Value": (ni/total*100) if total > 0 else 0})
+            chart_data.append({"Period": label, "Metric": "Total Calls (Qty)", "Value": total})
+            chart_data.append({"Period": label, "Metric": "Vague Ratio (%)", "Value": (vague/total*100) if total > 0 else 0})
+            chart_data.append({"Period": label, "Metric": "Not Interested Ratio (%)", "Value": (ni/total*100) if total > 0 else 0})
 
-        df_chart = pd.DataFrame(chart_data)
-        
-        fig = px.bar(df_chart, x="Metric", y="Value", color="Period", barmode="group",
-                     text_auto=".1f", height=350, template="plotly_white",
-                     color_discrete_map={"Current": "#4CAF50", "Reference": "#CED4DA"})
-        
-        # Add labels to differentiate Units
-        fig.update_layout(yaxis_title="Quantity / Percentage")
-        st.plotly_chart(fig, use_container_width=True)
+        fig_out = px.bar(pd.DataFrame(chart_data), x="Metric", y="Value", color="Period", barmode="group",
+                         text_auto=".1f", height=350, template="plotly_white",
+                         color_discrete_map={"Current": "#4CAF50", "Reference": "#CED4DA"})
+        st.plotly_chart(fig_out, use_container_width=True)
         st.markdown("---")
 
-    # --- GRANULAR TRENDS ---
+    # --- DETAILED VOLUME DYNAMICS (PER MARKET) ---
     st.subheader("📈 Detailed Volume Dynamics")
     
-    sections = {
-        "Intro Funnel (Initial vs Follow-up)": ["intro_call_qty", "intro_followup_qty"],
-        "Sales Funnel (Initial vs Follow-up)": ["sales_call_qty", "sales_followup_qty"]
-    }
     
-    for title, cols in sections.items():
-        st.write(f"**{title}**")
-        t_df = df_metrics.groupby(['date', 'market'])[cols].sum().reset_index()
-        t_melt = t_df.melt(id_vars=['date', 'market'], value_vars=cols, var_name='Type', value_name='Qty')
+    call_cols = ['intro_call_qty', 'intro_followup_qty', 'sales_call_qty', 'sales_followup_qty']
+    
+    for market in active_markets:
+        st.write(f"**Market Dynamics: {market.upper()}**")
+        m_trend = df_metrics[df_metrics['market'] == market].groupby('date')[call_cols].sum().reset_index()
+        m_melt = m_trend.melt(id_vars=['date'], value_vars=call_cols, var_name='Call Type', value_name='Qty')
         
-        fig_l = px.line(t_melt, x="date", y="Qty", color="market", line_dash="Type",
-                       markers=True, height=400, template="plotly_white")
+        fig_l = px.line(m_melt, x="date", y="Qty", color='Call Type', markers=True, 
+                       height=400, template="plotly_white", title=f"All Call Types Rhythm - {market}")
         st.plotly_chart(fig_l, use_container_width=True)
 
 elif role == "Data Lab (Explorer)":
