@@ -144,15 +144,6 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         if total_raw_rows > 0:
             st.progress(len(df_global) / total_raw_rows, text=f"Showing {len(df_global)} / {total_raw_rows} calls")
 
-    if "cso_preset_initialized" not in st.session_state:
-        today = date.today()
-        prev_day = _get_prev_ops_day(today)
-        st.session_state["date_range_v2"] = [prev_day, prev_day]
-        st.session_state["all_time_v1"] = False
-        st.session_state["cso_preset_initialized"] = True
-        st.session_state["cso_date_preset"] = "day"
-        st.rerun()
-
     st.markdown("<h2 style='text-align:center;'>Sales Operations Feed</h2>", unsafe_allow_html=True)
 
     preset_cols = st.columns(3)
@@ -165,10 +156,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             type="primary" if current_preset == "day" else "secondary",
         )
         if btn_day:
-            prev_day = _get_prev_ops_day(today)
-            st.session_state["date_range_v2"] = [prev_day, prev_day]
-            st.session_state["all_time_v1"] = False
             st.session_state["cso_date_preset"] = "day"
+            st.session_state["cso_date_preset_request"] = "day"
             st.rerun()
 
     with preset_cols[1]:
@@ -177,10 +166,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             type="primary" if current_preset == "week" else "secondary",
         )
         if btn_week:
-            start_w, end_w = _get_prev_ops_week(today)
-            st.session_state["date_range_v2"] = [start_w, end_w]
-            st.session_state["all_time_v1"] = False
             st.session_state["cso_date_preset"] = "week"
+            st.session_state["cso_date_preset_request"] = "week"
             st.rerun()
 
     with preset_cols[2]:
@@ -189,10 +176,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             type="primary" if current_preset == "month" else "secondary",
         )
         if btn_month:
-            start_m, end_m = _get_prev_ops_month(today)
-            st.session_state["date_range_v2"] = [start_m, end_m]
-            st.session_state["all_time_v1"] = False
             st.session_state["cso_date_preset"] = "month"
+            st.session_state["cso_date_preset_request"] = "month"
             st.rerun()
 
     df_feed = df_global.copy()

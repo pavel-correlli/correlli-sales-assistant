@@ -9,6 +9,27 @@ from views.lab_view import render_data_lab
 
 BUILD_ID = "2026-01-17-deploy-01"
 
+
+def _get_prev_ops_day(today: date) -> date:
+    d = today - timedelta(days=1)
+    while d.weekday() > 4:
+        d = d - timedelta(days=1)
+    return d
+
+
+def _get_prev_ops_week(today: date) -> tuple[date, date]:
+    current_monday = today - timedelta(days=today.weekday())
+    prev_monday = current_monday - timedelta(days=7)
+    prev_friday = prev_monday + timedelta(days=4)
+    return prev_monday, prev_friday
+
+
+def _get_prev_ops_month(today: date) -> tuple[date, date]:
+    first_this_month = date(today.year, today.month, 1)
+    prev_month_last_day = first_this_month - timedelta(days=1)
+    prev_month_first_day = date(prev_month_last_day.year, prev_month_last_day.month, 1)
+    return prev_month_first_day, prev_month_last_day
+
 # --- 1. CONFIG & STYLE ---
 st.set_page_config(page_title="Executive Analytics Radar", layout="wide", page_icon="🦅")
 st.markdown(get_css(), unsafe_allow_html=True)
@@ -47,7 +68,13 @@ def render_sidebar():
             if (
                 k.startswith("chk_market_")
                 or k.startswith("chk_pl_")
-                or k in {"date_range_v2", "all_time_v1", "selected_managers_v1"}
+                or k in {
+                    "date_range_v2",
+                    "all_time_v1",
+                    "selected_managers_v1",
+                    "cso_date_preset",
+                    "cso_date_preset_request",
+                }
             ):
                 st.session_state.pop(k, None)
         st.rerun()
@@ -55,6 +82,27 @@ def render_sidebar():
     # Date range filter
     today = date.today()
     start_of_year = date(2025, 1, 1)
+
+    if st.session_state.get("page") == "CSO" and "cso_date_preset" not in st.session_state:
+        prev_day = _get_prev_ops_day(today)
+        st.session_state["date_range_v2"] = [prev_day, prev_day]
+        st.session_state["all_time_v1"] = False
+        st.session_state["cso_date_preset"] = "day"
+
+    preset_request = st.session_state.pop("cso_date_preset_request", None)
+    if st.session_state.get("page") == "CSO" and preset_request in {"day", "week", "month"}:
+        if preset_request == "day":
+            prev_day = _get_prev_ops_day(today)
+            st.session_state["date_range_v2"] = [prev_day, prev_day]
+        elif preset_request == "week":
+            start_w, end_w = _get_prev_ops_week(today)
+            st.session_state["date_range_v2"] = [start_w, end_w]
+        else:
+            start_m, end_m = _get_prev_ops_month(today)
+            st.session_state["date_range_v2"] = [start_m, end_m]
+        st.session_state["all_time_v1"] = False
+        st.session_state["cso_date_preset"] = preset_request
+
     all_time = st.sidebar.checkbox("All time", value=False, key="all_time_v1")
     if all_time:
         date_range = []
