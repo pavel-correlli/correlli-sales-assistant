@@ -17,10 +17,25 @@ def _determine_market(pipeline):
     return "Others"
 
 
-def _get_smart_yesterday(today: date) -> date:
-    if today.weekday() == 0:
-        return today - timedelta(days=3)
-    return today - timedelta(days=1)
+def _get_prev_ops_day(today: date) -> date:
+    d = today - timedelta(days=1)
+    while d.weekday() > 4:
+        d = d - timedelta(days=1)
+    return d
+
+
+def _get_prev_ops_week(today: date) -> tuple[date, date]:
+    current_monday = today - timedelta(days=today.weekday())
+    prev_monday = current_monday - timedelta(days=7)
+    prev_friday = prev_monday + timedelta(days=4)
+    return prev_monday, prev_friday
+
+
+def _get_prev_ops_month(today: date) -> tuple[date, date]:
+    first_this_month = date(today.year, today.month, 1)
+    prev_month_last_day = first_this_month - timedelta(days=1)
+    prev_month_first_day = date(prev_month_last_day.year, prev_month_last_day.month, 1)
+    return prev_month_first_day, prev_month_last_day
 
 
 def _existing_columns(df: pd.DataFrame, cols: list[str]) -> list[str]:
@@ -129,79 +144,199 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         if total_raw_rows > 0:
             st.progress(len(df_global) / total_raw_rows, text=f"Showing {len(df_global)} / {total_raw_rows} calls")
 
-    st.header("1. Daily Operations Feed")
-    smart_yesterday = _get_smart_yesterday(date.today())
-    st.info(f"Внимание: данные за {smart_yesterday}, игнорируя общие фильтры дат.")
+    if "cso_preset_initialized" not in st.session_state:
+        today = date.today()
+        prev_day = _get_prev_ops_day(today)
+        st.session_state["date_range_v2"] = [prev_day, prev_day]
+        st.session_state["all_time_v1"] = False
+        st.session_state["cso_preset_initialized"] = True
+        st.session_state["cso_date_preset"] = "day"
+        st.rerun()
 
-    df_ops = df_no_date[df_no_date["call_date"] == smart_yesterday].copy()
+    st.markdown("<h2 style='text-align:center;'>Sales Operations Feed</h2>", unsafe_allow_html=True)
 
-    if df_ops.empty:
-        st.warning("Нет данных за выбранный день по текущим фильтрам.")
+    preset_cols = st.columns(3)
+    current_preset = st.session_state.get("cso_date_preset", "day")
+    today = date.today()
+
+    with preset_cols[0]:
+        btn_day = st.button(
+            "Prev Ops. Day",
+            type="primary" if current_preset == "day" else "secondary",
+        )
+        if btn_day:
+            prev_day = _get_prev_ops_day(today)
+            st.session_state["date_range_v2"] = [prev_day, prev_day]
+            st.session_state["all_time_v1"] = False
+            st.session_state["cso_date_preset"] = "day"
+            st.rerun()
+
+    with preset_cols[1]:
+        btn_week = st.button(
+            "Prev Ops. Week",
+            type="primary" if current_preset == "week" else "secondary",
+        )
+        if btn_week:
+            start_w, end_w = _get_prev_ops_week(today)
+            st.session_state["date_range_v2"] = [start_w, end_w]
+            st.session_state["all_time_v1"] = False
+            st.session_state["cso_date_preset"] = "week"
+            st.rerun()
+
+    with preset_cols[2]:
+        btn_month = st.button(
+            "Prev Ops. Month",
+            type="primary" if current_preset == "month" else "secondary",
+        )
+        if btn_month:
+            start_m, end_m = _get_prev_ops_month(today)
+            st.session_state["date_range_v2"] = [start_m, end_m]
+            st.session_state["all_time_v1"] = False
+            st.session_state["cso_date_preset"] = "month"
+            st.rerun()
+
+    df_feed = df_global.copy()
+
+    if df_feed.empty:
+        st.warning("No data for current filters.")
     else:
-        ops_cols = st.columns(4)
-        total_calls_y = int(df_ops["call_id"].count()) if "call_id" in df_ops.columns else int(len(df_ops))
-        intro_calls_y = int(df_ops[df_ops["call_type"].isin(["intro_call", "intro_followup"])].shape[0]) if "call_type" in df_ops.columns else 0
-        sales_calls_y = int(df_ops[df_ops["call_type"].isin(["sales_call", "sales_followup"])].shape[0]) if "call_type" in df_ops.columns else 0
-        avg_quality_y = float(df_ops["Average_quality"].mean()) if "Average_quality" in df_ops.columns else float("nan")
+        ops_cols = st.columns(5)
+        total_calls = int(df_feed["call_id"].count()) if "call_id" in df_feed.columns else int(len(df_feed))
+        intro_calls = 0
+        intro_flup = 0
+        sales_calls = 0
+        sales_flup = 0
+        if "call_type" in df_feed.columns:
+            intro_calls = int(df_feed[df_feed["call_type"] == "intro_call"].shape[0])
+            intro_flup = int(df_feed[df_feed["call_type"] == "intro_followup"].shape[0])
+            sales_calls = int(df_feed[df_feed["call_type"] == "sales_call"].shape[0])
+            sales_flup = int(df_feed[df_feed["call_type"] == "sales_followup"].shape[0])
+        avg_quality = float(df_feed["Average_quality"].mean()) if "Average_quality" in df_feed.columns else float("nan")
 
         with ops_cols[0]:
-            st.metric("Total Calls Yesterday", f"{total_calls_y}")
+            st.metric("Total Calls", f"{total_calls}")
         with ops_cols[1]:
-            st.metric("Intro (Total)", f"{intro_calls_y}")
+            st.metric("Intro Calls", f"{intro_calls}")
         with ops_cols[2]:
-            st.metric("Sales (Total)", f"{sales_calls_y}")
+            st.metric("Intro Follow Up", f"{intro_flup}")
         with ops_cols[3]:
-            if pd.isna(avg_quality_y):
+            st.metric("Sales Calls", f"{sales_calls}")
+        with ops_cols[4]:
+            st.metric("Sales Follow Up", f"{sales_flup}")
+
+        qual_col = st.columns(1)[0]
+        with qual_col:
+            if pd.isna(avg_quality):
                 st.metric("Avg Quality", "—")
             else:
-                st.metric("Avg Quality", f"{avg_quality_y:.2f}")
+                st.metric("Avg Quality", f"{avg_quality:.2f}")
 
-        if "call_duration_sec" in df_ops.columns and "manager" in df_ops.columns:
-            mgr_minutes = (
-                df_ops.groupby("manager", dropna=False)["call_duration_sec"]
+        if "call_duration_sec" in df_feed.columns and "manager" in df_feed.columns and "call_type" in df_feed.columns:
+            mgr_group = (
+                df_feed.groupby(["manager", "call_type"], dropna=False)
+                .agg(
+                    total_sec=("call_duration_sec", "sum"),
+                    calls=("call_id", "count"),
+                )
+                .reset_index()
+            )
+            mgr_group["minutes"] = mgr_group["total_sec"] / 60.0
+            type_map = {
+                "intro_call": "Intro Call",
+                "intro_followup": "Intro Flup",
+                "sales_call": "Sales Call",
+                "sales_followup": "Sales Flup",
+            }
+            mgr_group["call_type_group"] = mgr_group["call_type"].map(type_map).fillna("Other")
+            mgr_totals = (
+                mgr_group.groupby("manager")["calls"]
                 .sum()
-                .div(60)
-                .reset_index(name="total_minutes")
-                .sort_values("total_minutes", ascending=False)
+                .rename("total_calls")
+                .reset_index()
+            )
+            mgr_group = mgr_group.merge(mgr_totals, on="manager", how="left")
+            type_order = ["Intro Call", "Intro Flup", "Sales Call", "Sales Flup"]
+            mgr_group["call_type_group"] = pd.Categorical(mgr_group["call_type_group"], categories=type_order, ordered=True)
+            mgr_group = mgr_group.sort_values(["manager", "call_type_group"])
+            last_type = type_order[-1]
+            mgr_group["label_calls"] = mgr_group.apply(
+                lambda r: str(r["total_calls"]) if r["call_type_group"] == last_type else "",
+                axis=1,
             )
             fig_ops = px.bar(
-                mgr_minutes,
+                mgr_group,
                 y="manager",
-                x="total_minutes",
+                x="minutes",
+                color="call_type_group",
                 orientation="h",
-                title="Talk Time Yesterday (Minutes) by Manager",
                 template="plotly_white",
+                title="Talk Time by Manager",
+                hover_data=["calls", "call_type_group", "total_calls"],
+                text="label_calls",
             )
-            fig_ops.update_layout(yaxis_title="", xaxis_title="Minutes")
+            fig_ops.update_traces(
+                hovertemplate="Manager: %{y}<br>Type: %{customdata[1]}<br>Minutes: %{x:.1f}<br>Calls: %{customdata[0]}<br>Total Calls: %{customdata[2]}<extra></extra>"
+            )
+            fig_ops.update_layout(yaxis_title="", xaxis_title="Minutes", legend_title="Call Type")
             st.plotly_chart(fig_ops, use_container_width=True)
 
-        if "pipeline_name" in df_ops.columns:
-            calls_by_pipeline = (
-                df_ops["pipeline_name"]
-                .fillna("Unknown")
-                .value_counts()
+        if "pipeline_name" in df_feed.columns and "call_duration_sec" in df_feed.columns and "call_type" in df_feed.columns:
+            pipe_group = (
+                df_feed.groupby(["pipeline_name", "call_type"], dropna=False)
+                .agg(
+                    calls=("call_id", "count"),
+                    total_sec=("call_duration_sec", "sum"),
+                )
                 .reset_index()
-                .rename(columns={"index": "pipeline_name", "pipeline_name": "calls"})
             )
-            calls_by_pipeline = calls_by_pipeline.head(10)
+            pipe_group["minutes"] = pipe_group["total_sec"] / 60.0
+            pipe_group["pipeline_name"] = pipe_group["pipeline_name"].fillna("Unknown")
+            type_map = {
+                "intro_call": "Intro Call",
+                "intro_followup": "Intro Flup",
+                "sales_call": "Sales Call",
+                "sales_followup": "Sales Flup",
+            }
+            pipe_group["call_type_group"] = pipe_group["call_type"].map(type_map).fillna("Other")
+            pipe_totals = (
+                pipe_group.groupby("pipeline_name")["minutes"]
+                .sum()
+                .rename("total_minutes")
+                .reset_index()
+            )
+            pipe_group = pipe_group.merge(pipe_totals, on="pipeline_name", how="left")
+            type_order = ["Intro Call", "Intro Flup", "Sales Call", "Sales Flup"]
+            pipe_group["call_type_group"] = pd.Categorical(pipe_group["call_type_group"], categories=type_order, ordered=True)
+            pipe_group = pipe_group.sort_values(["pipeline_name", "call_type_group"])
+            last_type = type_order[-1]
+            pipe_group["label_minutes"] = pipe_group.apply(
+                lambda r: f"{r['total_minutes']:.1f}" if r["call_type_group"] == last_type else "",
+                axis=1,
+            )
             fig_pipe = px.bar(
-                calls_by_pipeline,
-                x="calls",
+                pipe_group,
                 y="pipeline_name",
+                x="calls",
+                color="call_type_group",
                 orientation="h",
-                title="Total Calls Yesterday by Pipeline (Top 10)",
                 template="plotly_white",
+                title="Total Calls by Pipeline",
+                hover_data=["minutes", "call_type_group", "total_minutes"],
+                text="label_minutes",
             )
-            fig_pipe.update_layout(yaxis_title="", xaxis_title="Calls")
+            fig_pipe.update_traces(
+                hovertemplate="Pipeline: %{y}<br>Type: %{customdata[1]}<br>Calls: %{x}<br>Minutes: %{customdata[0]:.1f}<br>Total Minutes: %{customdata[2]:.1f}<extra></extra>"
+            )
+            fig_pipe.update_layout(yaxis_title="", xaxis_title="Calls", legend_title="Call Type")
             st.plotly_chart(fig_pipe, use_container_width=True)
 
-        tab_a, tab_b = st.tabs(["🚨 Critical Anomalies", "⚠️ Low Quality Calls"])
+        tab_a, tab_b = st.tabs(["📎 Anomalies", "⚠️ Low Quality Calls"])
 
         with tab_a:
-            if "call_duration_sec" in df_ops.columns and "next_step_type" in df_ops.columns:
-                anomalies = df_ops[
-                    (df_ops["call_duration_sec"] > 600)
-                    & df_ops["next_step_type"].apply(_is_callback_vague)
+            if "call_duration_sec" in df_feed.columns and "next_step_type" in df_feed.columns:
+                anomalies = df_feed[
+                    (df_feed["call_duration_sec"] > 600)
+                    & df_feed["next_step_type"].apply(_is_callback_vague)
                 ].copy()
                 anomalies["duration_min"] = (anomalies["call_duration_sec"] / 60).round(1)
                 show_cols = _existing_columns(
@@ -209,27 +344,27 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "kommo_link"],
                 )
                 if anomalies.empty:
-                    st.success("Нет критических аномалий за вчера.")
+                    st.success("No anomalies for current filters.")
                 else:
                     st.dataframe(
                         anomalies.sort_values("call_duration_sec", ascending=False)[show_cols],
                         use_container_width=True,
                         hide_index=True,
                     )
-            elif "call_duration_sec" not in df_ops.columns:
-                st.warning("call_duration_sec отсутствует в данных — аномалии по длительности недоступны.")
+            elif "call_duration_sec" not in df_feed.columns:
+                st.warning("call_duration_sec is missing, duration-based anomalies are unavailable.")
             else:
-                st.warning("next_step_type отсутствует в данных — аномалии по callback_vague недоступны.")
+                st.warning("next_step_type is missing, vague callback anomalies are unavailable.")
 
         with tab_b:
-            if "Average_quality" in df_ops.columns:
-                low_q = df_ops[df_ops["Average_quality"] < 4.0].copy()
+            if "Average_quality" in df_feed.columns:
+                low_q = df_feed[df_feed["Average_quality"] < 4.0].copy()
                 show_cols = _existing_columns(
                     low_q,
                     ["call_datetime", "manager", "pipeline_name", "Average_quality", "kommo_link"],
                 )
                 if low_q.empty:
-                    st.success("Нет звонков с низким качеством за вчера.")
+                    st.success("No low-quality calls for current filters.")
                 else:
                     st.dataframe(
                         low_q.sort_values("Average_quality", ascending=True)[show_cols],
@@ -237,13 +372,13 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                         hide_index=True,
                     )
             else:
-                st.warning("Average_quality отсутствует в данных — фильтр качества недоступен.")
+                st.warning("Average_quality is missing, quality filter is unavailable.")
 
     st.markdown("---")
 
     st.header("2. Manager Productivity Timeline")
     if "call_duration_sec" not in df_global.columns or "manager" not in df_global.columns:
-        st.warning("Недостаточно данных для построения таймлайна (нужны manager и call_duration_sec).")
+        st.warning("Not enough data for timeline (need manager and call_duration_sec).")
     else:
         timeline = df_global.dropna(subset=["manager", "call_date"]).copy()
         timeline["call_duration_sec"] = pd.to_numeric(timeline["call_duration_sec"], errors="coerce").fillna(0)
@@ -252,16 +387,14 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             timeline.groupby(["call_date", "manager", "computed_market"], dropna=False)
             .agg(
                 total_minutes=("call_duration_sec", lambda s: float(s.sum()) / 60.0),
-                total_calls=("call_id", "count"),
                 intro_calls=("call_type", lambda s: int((s == "intro_call").sum())),
-                followup_calls=("call_type", lambda s: int(s.isin(["intro_followup", "sales_followup"]).sum())),
-                avg_quality=("Average_quality", "mean"),
-                anomalies_15m=("call_duration_sec", lambda s: int((s > 900).sum())),
+                intro_flup=("call_type", lambda s: int((s == "intro_followup").sum())),
+                sales_calls=("call_type", lambda s: int((s == "sales_call").sum())),
+                sales_flup=("call_type", lambda s: int((s == "sales_followup").sum())),
             )
             .reset_index()
         )
         daily["total_minutes"] = daily["total_minutes"].fillna(0)
-        daily["avg_quality"] = daily["avg_quality"].fillna(0)
 
         market_color_map = {
             "CZ": "#1f77b4",
@@ -285,15 +418,15 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     marker={"size": 9},
                     line={"color": market_color_map.get(market, "#9467bd")},
                     customdata=sub[
-                        ["computed_market", "total_minutes", "total_calls", "intro_calls", "followup_calls", "avg_quality", "anomalies_15m"]
+                        ["computed_market", "intro_calls", "intro_flup", "sales_calls", "sales_flup"]
                     ].to_numpy(),
                     hovertemplate=(
                         "Date: %{x}<br>"
                         "Manager: %{fullData.name} (%{customdata[0]})<br>"
-                        "Talk Time: %{customdata[1]:.0f} min<br>"
-                        "Calls: %{customdata[2]} (Intro: %{customdata[3]} | FU: %{customdata[4]})<br>"
-                        "Avg Quality: %{customdata[5]:.2f}<br>"
-                        "Anomalies >15m: %{customdata[6]}<extra></extra>"
+                        "Intro Calls: %{customdata[1]}<br>"
+                        "Intro Flup: %{customdata[2]}<br>"
+                        "Sales Calls: %{customdata[3]}<br>"
+                        "Sales Flup: %{customdata[4]}<extra></extra>"
                     ),
                 )
             )
@@ -307,7 +440,14 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
     st.markdown("---")
 
-    st.header("3. Dialogue Steering Control")
+    st.header("3. Call Control")
+    st.info(
+        "Call Control shows how well managers keep initiative and close each conversation "
+        "with a specific next step instead of vague promises. Defined outcomes mean the manager "
+        "secured a clear follow-up action (for example: \"You said you want to discuss this "
+        "with your family, so let's talk on Wednesday to confirm if you join the trial lesson\"). "
+        "Vague outcomes leave the initiative with the lead and create confusion about what happens next."
+    )
     col_v1, col_v2 = st.columns([3, 2])
     mgr_stats = df_global.groupby("manager").agg(call_id=("call_id", "count"), Average_quality=("Average_quality", "mean")).reset_index()
     outcome_counts = df_global.groupby(["manager", "outcome_category"]).size().reset_index(name="count")
@@ -332,6 +472,10 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             )
             fig_vague.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="")
             st.plotly_chart(fig_vague, use_container_width=True)
+            st.caption(
+                "Defined outcomes include: lesson_scheduled, callback_scheduled, payment_pending, sold. "
+                "Vague outcomes include: callback_vague and other non-committal callbacks."
+            )
 
     with col_v2:
         lb_df = mgr_stats.sort_values("defined_rate", ascending=False).copy()
@@ -343,14 +487,14 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
     st.markdown("---")
 
-    st.header("4. Week-to-Date (WTD) Efficiency")
+    st.header("4. Friction & Resistance")
     wtd_start = date.today() - timedelta(days=date.today().weekday())
     df_wtd = df_no_date[(df_no_date["call_date"] >= wtd_start) & (df_no_date["call_date"] <= date.today())].copy()
 
     if df_wtd.empty:
-        st.warning("Нет данных за текущую неделю по текущим фильтрам.")
+        st.warning("No data for current week with selected filters.")
     elif "call_type" not in df_wtd.columns or "pipeline_name" not in df_wtd.columns:
-        st.warning("Недостаточно данных для расчета WTD метрик (нужны call_type и pipeline_name).")
+        st.warning("Not enough data for Friction & Resistance (need call_type and pipeline_name).")
     else:
         intro_prim = df_wtd[df_wtd["call_type"] == "intro_call"].groupby("pipeline_name").size()
         intro_fu = df_wtd[df_wtd["call_type"] == "intro_followup"].groupby("pipeline_name").size()
@@ -364,8 +508,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             ifu = int(intro_fu.get(p, 0))
             sp = int(sales_prim.get(p, 0))
             sfu = int(sales_fu.get(p, 0))
-            i_fric = ifu / ip if ip > 0 else 0
-            s_fric = sfu / sp if sp > 0 else 0
+            i_fric = ip / ifu if ifu > 0 else 0
+            s_fric = sp / sfu if sfu > 0 else 0
             friction_data.append({"Pipeline": p, "Type": "Intro Friction", "Value": round(i_fric, 2), "Total Calls": ip + ifu})
             friction_data.append({"Pipeline": p, "Type": "Sales Friction", "Value": round(s_fric, 2), "Total Calls": sp + sfu})
 
@@ -383,45 +527,46 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     color_discrete_map={"Intro Friction": "#3498db", "Sales Friction": "#e67e22"},
                     hover_data=["Total Calls"],
                 )
-                fig_friction.update_layout(yaxis_title="Friction Index (Follow-ups / Primary)", xaxis_title="")
+                fig_friction.update_layout(yaxis_title="Friction Index (Calls / Flup)", xaxis_title="")
                 st.plotly_chart(fig_friction, use_container_width=True)
 
             with col2:
                 st.metric(
                     "Avg Intro Friction (WTD)",
                     f"{df_fric[df_fric['Type'] == 'Intro Friction']['Value'].mean():.2f}",
-                    help=r"$Intro\ Friction=\frac{Intro\ Followups}{Intro\ Primaries}$",
+                    help=r"$Intro\ Friction=\frac{Intro\ Calls}{Intro\ Flups}$",
                 )
                 st.metric(
                     "Avg Sales Friction (WTD)",
                     f"{df_fric[df_fric['Type'] == 'Sales Friction']['Value'].mean():.2f}",
-                    help=r"$Friction=\frac{Followups}{Primaries}$",
+                    help=r"$Sales\ Friction=\frac{Sales\ Calls}{Sales\ Flups}$",
                 )
 
         st.subheader("Friction vs. Defined Rate (WTD)")
+        df_wtd["is_primary"] = df_wtd["call_type"].isin(["intro_call", "sales_call"])
+        df_wtd["is_followup"] = df_wtd["call_type"].isin(["intro_followup", "sales_followup"])
+        df_wtd["is_defined_primary"] = df_wtd["is_primary"] & (df_wtd["outcome_category"] != "Vague")
+
         bubble_stats = (
             df_wtd.groupby(["manager", "pipeline_name", "computed_market"], dropna=False)
-            .agg(Average_quality=("Average_quality", "mean"), total_calls=("call_id", "count"))
+            .agg(
+                Average_quality=("Average_quality", "mean"), 
+                total_calls=("call_id", "count"),
+                primaries=("is_primary", "sum"),
+                followups=("is_followup", "sum"),
+                defined_primaries=("is_defined_primary", "sum")
+            )
             .reset_index()
         )
         bubble_stats["Average_quality"] = bubble_stats["Average_quality"].round(2)
-
-        def get_mgr_pipe_defined(row):
-            sub = df_wtd[(df_wtd["manager"] == row["manager"]) & (df_wtd["pipeline_name"] == row["pipeline_name"])].copy()
-            prim = sub[sub["call_type"].isin(["intro_call", "sales_call"])]
-            if len(prim) == 0:
-                return 0
-            non_vague = prim[prim["outcome_category"] != "Vague"]
-            return len(non_vague) / len(prim)
-
-        def get_mgr_pipe_friction(row):
-            sub = df_wtd[(df_wtd["manager"] == row["manager"]) & (df_wtd["pipeline_name"] == row["pipeline_name"])]
-            prim = len(sub[sub["call_type"].isin(["intro_call", "sales_call"])])
-            fu = len(sub[sub["call_type"].isin(["intro_followup", "sales_followup"])])
-            return fu / prim if prim > 0 else 0
-
-        bubble_stats["defined_rate_pct"] = (bubble_stats.apply(get_mgr_pipe_defined, axis=1) * 100).round(2)
-        bubble_stats["friction_index"] = bubble_stats.apply(get_mgr_pipe_friction, axis=1).round(2)
+        bubble_stats["defined_rate_pct"] = (
+            (bubble_stats["defined_primaries"] / bubble_stats["primaries"]) * 100
+        ).fillna(0).round(2)
+        bubble_stats["friction_index"] = 0.0
+        mask_f = bubble_stats["followups"] > 0
+        bubble_stats.loc[mask_f, "friction_index"] = (
+            bubble_stats.loc[mask_f, "primaries"] / bubble_stats.loc[mask_f, "followups"]
+        ).round(2)
 
         if not bubble_stats.empty:
             market_color_map = {
@@ -442,11 +587,11 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 color_discrete_map=market_color_map,
                 labels={
                     "defined_rate_pct": "Defined Rate (%)",
-                    "friction_index": "Friction Index (FU / Primary)",
+                    "friction_index": "Friction Index (Calls / Flup)",
                     "total_calls": "Calls",
                     "computed_market": "Market",
                 },
-                hover_data=["pipeline_name", "total_calls", "Average_quality", "defined_rate_pct", "friction_index"],
+                hover_data=["pipeline_name", "total_calls", "Average_quality", "primaries", "followups", "defined_primaries"],
             )
             fig_bubble.add_vline(x=bubble_stats["defined_rate_pct"].mean(), line_dash="dot", annotation_text="Avg Defined")
             fig_bubble.add_hline(y=bubble_stats["friction_index"].mean(), line_dash="dot", annotation_text="Avg Friction")
@@ -455,43 +600,122 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
     st.markdown("---")
 
     st.header("5. Discovery Depth Index")
-    st.info(
-        "Note: Отсутствие возражений (Objections = None) — это не успех, а провал этапа Discovery. "
-        "Если менеджер не выявил барьеры, он не управляет сделкой."
+    st.caption(
+        "❓ Discovery Depth Index: Calls with no objections are not a success, they usually "
+        "mean the manager failed to surface real barriers. If the lead has no objections, "
+        "the manager is not in control of the deal."
     )
 
     if "call_type" not in df_global.columns or "main_objection_type" not in df_global.columns:
-        st.warning("Недостаточно данных для расчета Discovery Depth Index (нужны call_type и main_objection_type).")
+        st.warning("Not enough data for Discovery Depth Index (need call_type and main_objection_type).")
     else:
         silence_df = df_global[df_global["call_type"].isin(["intro_call", "sales_call"])].copy()
+
     if "call_type" in df_global.columns and "main_objection_type" in df_global.columns and not silence_df.empty:
         silence_df["is_sterile"] = silence_df["main_objection_type"].fillna("None").apply(
             lambda x: str(x).lower() in ["none", "", "nan"]
         )
-        mgr_silence = silence_df.groupby("manager").agg(call_id=("call_id", "count"), is_sterile=("is_sterile", "sum")).reset_index()
-        mgr_silence["sterile_rate"] = (mgr_silence["is_sterile"] / mgr_silence["call_id"] * 100).round(2)
-
-        total_calls = int(mgr_silence["call_id"].sum())
-        total_sterile = int(mgr_silence["is_sterile"].sum())
-        fig_waterfall = go.Figure(
-            go.Waterfall(
-                name="Discovery Depth",
-                orientation="v",
-                measure=["relative", "relative"],
-                x=["Total Calls", "Sterile (No Obj)"],
-                textposition="outside",
-                text=[f"{total_calls}", f"{total_sterile}"],
-                y=[total_calls, -total_sterile],
-                connector={"line": {"color": "rgb(63, 63, 63)"}},
-            )
+        mgr_silence = (
+            silence_df.groupby("manager")
+            .agg(call_id=("call_id", "count"), is_sterile=("is_sterile", "sum"))
+            .reset_index()
         )
-        fig_waterfall.update_layout(title="Sterile Calls Volume", showlegend=False)
-        st.plotly_chart(fig_waterfall, use_container_width=True)
+        mgr_silence["sterile_rate"] = (mgr_silence["is_sterile"] / mgr_silence["call_id"] * 100).round(2)
+        mgr_silence["with_objections"] = mgr_silence["call_id"] - mgr_silence["is_sterile"]
 
-        st.subheader("Manager Sterile Ratio Leaderboard")
-        silent_lb = mgr_silence.sort_values("sterile_rate", ascending=False).copy()
-        silent_lb.columns = ["Manager", "Total Calls", "Sterile Calls", "Sterile Rate %"]
-        st.dataframe(silent_lb, hide_index=True, use_container_width=True)
+        market_quality = (
+            silence_df.groupby("manager")
+            .agg(
+                market=("computed_market", lambda s: s.mode().iloc[0] if not s.mode().empty else "Mixed"),
+                avg_quality=("Average_quality", "mean"),
+            )
+            .reset_index()
+        )
+        mgr_chart = mgr_silence.merge(market_quality, on="manager", how="left")
+        chart_rows = []
+        for _, row in mgr_chart.iterrows():
+            chart_rows.append(
+                {
+                    "manager": row["manager"],
+                    "Bucket": "No Objections Calls",
+                    "value": row["is_sterile"],
+                    "market": row["market"],
+                    "avg_quality": row["avg_quality"],
+                }
+            )
+            chart_rows.append(
+                {
+                    "manager": row["manager"],
+                    "Bucket": "Calls With Objections",
+                    "value": row["with_objections"],
+                    "market": row["market"],
+                    "avg_quality": row["avg_quality"],
+                }
+            )
+        chart_df = pd.DataFrame(chart_rows)
+
+        fig_dd = px.bar(
+            chart_df,
+            x="manager",
+            y="value",
+            color="Bucket",
+            template="plotly_white",
+            barmode="relative",
+            labels={"value": "Share (%)"},
+            hover_data=["market", "avg_quality"],
+        )
+        fig_dd.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="", legend_title="")
+        st.plotly_chart(fig_dd, use_container_width=True)
+
+        st.subheader("No Objections Calls Rating")
+
+        intro_calls_mgr = df_global[df_global["call_type"] == "intro_call"].groupby("manager").size()
+        intro_flup_mgr = df_global[df_global["call_type"] == "intro_followup"].groupby("manager").size()
+        sales_calls_mgr = df_global[df_global["call_type"] == "sales_call"].groupby("manager").size()
+        sales_flup_mgr = df_global[df_global["call_type"] == "sales_followup"].groupby("manager").size()
+
+        mgr_silence["intro_calls"] = mgr_silence["manager"].map(intro_calls_mgr).fillna(0).astype(int)
+        mgr_silence["intro_flups"] = mgr_silence["manager"].map(intro_flup_mgr).fillna(0).astype(int)
+        mgr_silence["sales_calls"] = mgr_silence["manager"].map(sales_calls_mgr).fillna(0).astype(int)
+        mgr_silence["sales_flups"] = mgr_silence["manager"].map(sales_flup_mgr).fillna(0).astype(int)
+
+        mgr_silence["intro_friction"] = mgr_silence.apply(
+            lambda r: (r["intro_calls"] / r["intro_flups"]) if r["intro_flups"] > 0 else 0.0,
+            axis=1,
+        )
+        mgr_silence["sales_friction"] = mgr_silence.apply(
+            lambda r: (r["sales_calls"] / r["sales_flups"]) if r["sales_flups"] > 0 else 0.0,
+            axis=1,
+        )
+
+        lb = mgr_silence.merge(market_quality, on="manager", how="left")
+        lb = lb.sort_values("sterile_rate", ascending=False).copy()
+        lb["Avg Quality"] = lb["avg_quality"].round(2)
+        lb["Intro Friction"] = lb["intro_friction"].round(2)
+        lb["Sales Friction"] = lb["sales_friction"].round(2)
+        lb = lb[
+            [
+                "manager",
+                "call_id",
+                "is_sterile",
+                "sterile_rate",
+                "market",
+                "Avg Quality",
+                "Intro Friction",
+                "Sales Friction",
+            ]
+        ]
+        lb.columns = [
+            "Manager",
+            "Total Calls",
+            "No Objections Calls",
+            "No Objections Share %",
+            "Market",
+            "Avg Quality",
+            "Intro Friction",
+            "Sales Friction",
+        ]
+        st.dataframe(lb, hide_index=True, use_container_width=True)
 
     st.markdown("---")
 
@@ -516,7 +740,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 else:
                     st.success("No operational waste detected.")
             else:
-                st.warning("call_duration_sec отсутствует в данных — блок Operational Waste недоступен.")
+                st.warning("call_duration_sec is missing, Operational Waste block is unavailable.")
 
         with tab2:
             cols = _existing_columns(df_global, ["call_id", "manager", "call_date", "next_step_type"])

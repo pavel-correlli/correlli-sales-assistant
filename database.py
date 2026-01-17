@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from supabase import create_client, Client
 import os
+import time
+import httpx
 
 
 def _get_nested_secret(section: str, key: str):
@@ -50,22 +52,37 @@ def get_supabase_client() -> Client:
 @st.cache_data(ttl=600)
 def fetch_view_data(view_name: str, page_size: int = 1000):
     supabase = get_supabase_client()
+    rows: list[dict] = []
+    offset = 0
+    total_count = None
+    max_retries = 3
+    retry_delay = 2 # seconds
+
     try:
-        rows: list[dict] = []
-        offset = 0
-        total_count = None
-
         while True:
-            res = (
-                supabase.table(view_name)
-                .select("*", count="exact")
-                .range(offset, offset + page_size - 1)
-                .execute()
-            )
-            if total_count is None:
-                total_count = getattr(res, "count", None)
+            batch = None
+            for attempt in range(max_retries):
+                try:
+                    res = (
+                        supabase.table(view_name)
+                        .select("*", count="exact")
+                        .range(offset, offset + page_size - 1)
+                        .execute()
+                    )
+                    if total_count is None:
+                        total_count = getattr(res, "count", None)
+                    batch = res.data or []
+                    break # Success, exit retry loop
+                except (httpx.ConnectError, httpx.RemoteProtocolError, Exception) as e:
+                    if attempt < max_retries - 1:
+                        time.sleep(retry_delay * (attempt + 1)) # Exponential-ish backoff
+                        continue
+                    else:
+                        raise e
 
-            batch = res.data or []
+            if batch is None: # Should not happen if max_retries > 0
+                break
+                
             rows.extend(batch)
 
             if len(batch) < page_size:
