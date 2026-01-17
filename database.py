@@ -99,3 +99,68 @@ def fetch_view_data(view_name: str, page_size: int = 1000):
     except Exception as e:
         st.error(f"Error fetching {view_name}: {e}")
         return pd.DataFrame()
+
+
+def normalize_calls_df(df: pd.DataFrame) -> pd.DataFrame:
+    if df is None or df.empty:
+        return pd.DataFrame() if df is None else df
+
+    out = df.copy()
+    if "call_datetime" in out.columns:
+        out["call_datetime"] = pd.to_datetime(out["call_datetime"], errors="coerce", utc=True)
+        out["call_date"] = out["call_datetime"].dt.date
+    elif "call_date" not in out.columns:
+        out["call_date"] = pd.NaT
+
+    if "Average_quality" in out.columns:
+        out["Average_quality"] = pd.to_numeric(out["Average_quality"], errors="coerce")
+
+    if "call_duration_sec" in out.columns:
+        out["call_duration_sec"] = pd.to_numeric(out["call_duration_sec"], errors="coerce").fillna(0)
+
+    return out
+
+
+def add_outcome_category(df: pd.DataFrame) -> pd.DataFrame:
+    if df is None or df.empty:
+        return pd.DataFrame() if df is None else df
+
+    out = df.copy()
+    if "next_step_type" not in out.columns:
+        out["outcome_category"] = "Other"
+        return out
+
+    ns = out["next_step_type"].astype(str).str.lower()
+    out["outcome_category"] = "Defined Next Step"
+    out.loc[ns.str.contains("vague", na=False), "outcome_category"] = "Vague"
+    return out
+
+
+def compute_friction_index(
+    df: pd.DataFrame,
+    group_cols: list[str],
+    primary_types: list[str],
+    followup_types: list[str],
+) -> pd.DataFrame:
+    if df is None or df.empty:
+        return pd.DataFrame(columns=[*group_cols, "primaries", "followups", "friction_index"])
+
+    if "call_type" not in df.columns:
+        base = df[group_cols].drop_duplicates().copy()
+        base["primaries"] = 0
+        base["followups"] = 0
+        base["friction_index"] = 0.0
+        return base
+
+    g = (
+        df.groupby(group_cols, dropna=False)
+        .agg(
+            primaries=("call_type", lambda s: int(s.isin(primary_types).sum())),
+            followups=("call_type", lambda s: int(s.isin(followup_types).sum())),
+        )
+        .reset_index()
+    )
+    g["friction_index"] = 0.0
+    mask = g["primaries"] > 0
+    g.loc[mask, "friction_index"] = (g.loc[mask, "followups"] / g.loc[mask, "primaries"]).astype(float)
+    return g

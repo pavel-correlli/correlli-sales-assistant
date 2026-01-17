@@ -61,6 +61,11 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     merged["intro_friction_index"] = merged["intro_friction_index"].fillna(0).round(2)
 
     st.subheader("Traffic Viscosity vs Intro Friction")
+    st.caption(
+        "❓ Viscosity means how many calls are required to process one lead (Calls / Leads). "
+        "Higher viscosity usually indicates wasted touches, poor lead quality, or weak routing. "
+        "Intro Friction shows follow-up load on intro calls (Intro Flups / Intro Calls)."
+    )
     long_df = merged.melt(
         id_vars=["mkt_manager", "total_calls", "total_leads", "intro_primaries", "intro_followups"],
         value_vars=["viscosity_index", "intro_friction_index"],
@@ -81,9 +86,10 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         labels={"mkt_manager": "mkt_manager", "value": "Index"},
         hover_data=["total_calls", "total_leads", "intro_primaries", "intro_followups"],
     )
+    fig_bar.update_layout(xaxis_title="Traffic Manager")
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    st.subheader("Heatmap: Market vs Manager (Intro Friction)")
+    st.subheader("Heatmap: Market vs Traffic Manager (Intro Friction)")
     by_mm = df.groupby(["mkt_market", "mkt_manager"]).apply(
         lambda g: (
             (g["call_type"].eq("intro_followup").sum())
@@ -97,6 +103,6 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         pivot,
         aspect="auto",
         color_continuous_scale="Reds",
-        labels={"x": "mkt_manager", "y": "mkt_market", "color": "Intro Friction"},
+        labels={"x": "Traffic Manager", "y": "Market", "color": "Intro Friction"},
     )
     st.plotly_chart(fig_hm, use_container_width=True)

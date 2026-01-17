@@ -7,7 +7,7 @@ from views.cmo_view import render_cmo_analytics
 from views.cso_view import render_cso_dashboard
 from views.lab_view import render_data_lab
 
-BUILD_ID = "2026-01-17-deploy-01"
+BUILD_ID = "2026-01-17-deploy-02"
 
 
 def _get_prev_ops_day(today: date) -> date:
@@ -48,6 +48,17 @@ def _get_this_month(today: date) -> tuple[date, date]:
     end_d = _get_ops_today(today)
     start_d = date(today.year, today.month, 1)
     return start_d, end_d
+
+
+def _determine_market(pipeline):
+    p = str(pipeline).upper()
+    if p.startswith("CZ"):
+        return "CZ"
+    if p.startswith("SK"):
+        return "SK"
+    if p.startswith("RUK"):
+        return "RUK"
+    return "Others"
 
 # --- 1. CONFIG & STYLE ---
 st.set_page_config(page_title="Executive Analytics Radar", layout="wide", page_icon="🦅")
@@ -169,23 +180,27 @@ def render_sidebar():
             key="date_range_v2",
         )
     
-    # Fetch common filter data
-    df_pulse = fetch_view_data("v_ceo_daily_pulse")
+    df_raw_filters = fetch_view_data("Algonova_Calls_Raw")
     
     all_markets = []
     market_pipelines_map = {}
     all_managers = []
     
-    if not df_pulse.empty:
-        all_markets = sorted(df_pulse['market'].unique().tolist())
-        for m in all_markets:
-             market_pipelines_map[m] = sorted(df_pulse[df_pulse['market'] == m]['pipeline_name'].unique().tolist())
-        
-        # Fetch managers from raw data or dedicated view to ensure completeness
-        # Using raw table to get ALL managers regardless of recent activity
-        df_raw_managers = fetch_view_data("Algonova_Calls_Raw")
-        if not df_raw_managers.empty and 'manager' in df_raw_managers.columns:
-            all_managers = sorted(df_raw_managers['manager'].dropna().unique().tolist())
+    if not df_raw_filters.empty:
+        if "market" not in df_raw_filters.columns and "pipeline_name" in df_raw_filters.columns:
+            df_raw_filters = df_raw_filters.copy()
+            df_raw_filters["market"] = df_raw_filters["pipeline_name"].apply(_determine_market)
+
+        if "market" in df_raw_filters.columns:
+            all_markets = sorted(df_raw_filters["market"].dropna().unique().tolist())
+            if "pipeline_name" in df_raw_filters.columns:
+                for m in all_markets:
+                    market_pipelines_map[m] = sorted(
+                        df_raw_filters[df_raw_filters["market"] == m]["pipeline_name"].dropna().unique().tolist()
+                    )
+
+        if "manager" in df_raw_filters.columns:
+            all_managers = sorted(df_raw_filters["manager"].dropna().unique().tolist())
 
     # --- Cascading Checkbox Logic ---
     st.sidebar.markdown("### Markets & Pipelines")

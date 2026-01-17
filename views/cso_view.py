@@ -438,8 +438,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             ifu = int(intro_fu.get(p, 0))
             sp = int(sales_prim.get(p, 0))
             sfu = int(sales_fu.get(p, 0))
-            i_fric = ip / ifu if ifu > 0 else 0
-            s_fric = sp / sfu if sfu > 0 else 0
+            i_fric = ifu / ip if ip > 0 else 0
+            s_fric = sfu / sp if sp > 0 else 0
             friction_data.append({"Pipeline": p, "Type": "Intro Friction", "Value": round(i_fric, 2), "Total Calls": ip + ifu})
             friction_data.append({"Pipeline": p, "Type": "Sales Friction", "Value": round(s_fric, 2), "Total Calls": sp + sfu})
 
@@ -457,23 +457,23 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     color_discrete_map={"Intro Friction": "#3498db", "Sales Friction": "#e67e22"},
                     hover_data=["Total Calls"],
                 )
-                fig_friction.update_layout(yaxis_title="Friction Index (Calls / Flup)", xaxis_title="")
+                fig_friction.update_layout(yaxis_title="Friction Index (Flup / Primary)", xaxis_title="")
                 st.plotly_chart(fig_friction, use_container_width=True)
 
             with col2:
                 st.metric(
                     "Avg Intro Friction",
                     f"{df_fric[df_fric['Type'] == 'Intro Friction']['Value'].mean():.2f}",
-                    help=r"$Intro\ Friction=\frac{Intro\ Calls}{Intro\ Flups}$",
+                    help=r"$Intro\ Friction=\frac{Intro\ Flups}{Intro\ Calls}$",
                 )
                 st.metric(
                     "Avg Sales Friction",
                     f"{df_fric[df_fric['Type'] == 'Sales Friction']['Value'].mean():.2f}",
-                    help=r"$Sales\ Friction=\frac{Sales\ Calls}{Sales\ Flups}$",
+                    help=r"$Sales\ Friction=\frac{Sales\ Flups}{Sales\ Calls}$",
                 )
 
         st.markdown("<h3 style='text-align:center;'>Friction vs. Defined Rate</h3>", unsafe_allow_html=True)
-        st.caption("❓ Each bubble is a manager+pipeline segment. X = Defined Rate on primaries, Y = Calls/Flup pressure.")
+        st.caption("❓ Each bubble is a manager+pipeline segment. X = Defined Rate on primaries, Y = Flups/Primary (friction).")
         df_wtd["is_primary"] = df_wtd["call_type"].isin(["intro_call", "sales_call"])
         df_wtd["is_followup"] = df_wtd["call_type"].isin(["intro_followup", "sales_followup"])
         df_wtd["is_defined_primary"] = df_wtd["is_primary"] & (df_wtd["outcome_category"] != "Vague")
@@ -494,9 +494,9 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             (bubble_stats["defined_primaries"] / bubble_stats["primaries"]) * 100
         ).fillna(0).round(2)
         bubble_stats["friction_index"] = 0.0
-        mask_f = bubble_stats["followups"] > 0
-        bubble_stats.loc[mask_f, "friction_index"] = (
-            bubble_stats.loc[mask_f, "primaries"] / bubble_stats.loc[mask_f, "followups"]
+        mask_p = bubble_stats["primaries"] > 0
+        bubble_stats.loc[mask_p, "friction_index"] = (
+            bubble_stats.loc[mask_p, "followups"] / bubble_stats.loc[mask_p, "primaries"]
         ).round(2)
 
         if not bubble_stats.empty:
@@ -518,7 +518,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 color_discrete_map=market_color_map,
                 labels={
                     "defined_rate_pct": "Defined Rate (%)",
-                    "friction_index": "Friction Index (Calls / Flup)",
+                    "friction_index": "Friction Index (Flup / Primary)",
                     "total_calls": "Calls",
                     "computed_market": "Market",
                 },
@@ -630,11 +630,11 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         mgr_silence["sales_flups"] = mgr_silence["manager"].map(sales_flup_mgr).fillna(0).astype(int)
 
         mgr_silence["intro_friction"] = mgr_silence.apply(
-            lambda r: (r["intro_calls"] / r["intro_flups"]) if r["intro_flups"] > 0 else 0.0,
+            lambda r: (r["intro_flups"] / r["intro_calls"]) if r["intro_calls"] > 0 else 0.0,
             axis=1,
         )
         mgr_silence["sales_friction"] = mgr_silence.apply(
-            lambda r: (r["sales_calls"] / r["sales_flups"]) if r["sales_flups"] > 0 else 0.0,
+            lambda r: (r["sales_flups"] / r["sales_calls"]) if r["sales_calls"] > 0 else 0.0,
             axis=1,
         )
 
