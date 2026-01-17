@@ -40,7 +40,57 @@ def _resolve_supabase_config():
     return url, key
 
 @st.cache_resource
+def _derive_pooler_config(cfg: dict) -> dict | None:
+    host = str(cfg.get("host", "")).strip()
+    if host.startswith("db.") and host.endswith(".supabase.co"):
+        parts = host.split(".")
+        if len(parts) >= 3:
+            project_ref = parts[1]
+            user = str(cfg.get("user", "")).strip()
+            if user and "." not in user:
+                user = f"{user}.{project_ref}"
+            return {
+                "host": "aws-1-eu-west-1.pooler.supabase.com",
+                "port": int(cfg.get("pooler_port", 6543)),
+                "name": str(cfg.get("name", "postgres")),
+                "user": user,
+                "pass": str(cfg.get("pass", "")),
+            }
+    return None
+
+
+def _connect_postgres(cfg: dict):
+    def _connect(host: str, port: int, user: str):
+        return psycopg2.connect(
+            host=host,
+            port=int(port),
+            database=cfg["name"],
+            user=user,
+            password=cfg["pass"],
+            sslmode="require",
+        )
+
+    host = str(cfg.get("host", "")).strip()
+    port = int(cfg.get("port", 5432))
+    user = str(cfg.get("user", "")).strip()
+    try:
+        return _connect(host, port, user)
+    except Exception:
+        pooler = _derive_pooler_config(cfg)
+        if not pooler or not pooler.get("user"):
+            raise
+        return psycopg2.connect(
+            host=pooler["host"],
+            port=pooler["port"],
+            database=pooler["name"],
+            user=pooler["user"],
+            password=pooler["pass"],
+            sslmode="require",
+        )
+
+
 def get_supabase_client() -> Client:
+    url, key = _resolve_supabase_config()
     url, key = _resolve_supabase_config()
     if not url or not key:
         st.error(
@@ -180,13 +230,7 @@ def ensure_chart_views():
     try:
         with open(sql_path, "r", encoding="utf-8") as f:
             sql = f.read()
-        conn = psycopg2.connect(
-            host=cfg["host"],
-            database=cfg["name"],
-            user=cfg["user"],
-            password=cfg["pass"],
-            port=cfg["port"],
-        )
+        conn = _connect_postgres(cfg)
         try:
             conn.autocommit = True
             with conn.cursor() as cur:
@@ -205,13 +249,7 @@ def query_postgres(sql: str, params: tuple | None = None) -> pd.DataFrame:
         return pd.DataFrame()
 
     try:
-        conn = psycopg2.connect(
-            host=cfg["host"],
-            database=cfg["name"],
-            user=cfg["user"],
-            password=cfg["pass"],
-            port=cfg["port"],
-        )
+        conn = _connect_postgres(cfg)
         try:
             with conn.cursor() as cur:
                 cur.execute(sql, params or ())

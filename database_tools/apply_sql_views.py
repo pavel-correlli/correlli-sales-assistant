@@ -1,5 +1,4 @@
 import os
-import subprocess
 import toml
 import psycopg2
 
@@ -35,27 +34,31 @@ def apply_views(sql_path: str):
             sslmode="require",
         )
 
-    def _resolve_ip(host: str) -> str | None:
-        cmd = [
-            "powershell",
-            "-Command",
-            f"Resolve-DnsName {host} -Server 8.8.8.8 -Type A | Select-Object -First 1 -ExpandProperty IPAddress",
-        ]
-        try:
-            out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL, text=True).strip()
-            return out if out else None
-        except Exception:
+    def _connect_pooler():
+        host = str(cfg.get("host", "")).strip()
+        if not (host.startswith("db.") and host.endswith(".supabase.co")):
             return None
+        project_ref = host.split(".")[1]
+        user = str(cfg.get("user", "")).strip()
+        if user and "." not in user:
+            user = f"{user}.{project_ref}"
+        return psycopg2.connect(
+            host="aws-1-eu-west-1.pooler.supabase.com",
+            port=6543,
+            database=str(cfg.get("name", "postgres")),
+            user=user,
+            password=cfg["pass"],
+            sslmode="require",
+        )
 
     conn = None
     try:
         try:
             conn = _connect(cfg["host"])
         except Exception:
-            ip = _resolve_ip(cfg["host"])
-            if not ip:
+            conn = _connect_pooler()
+            if conn is None:
                 raise
-            conn = _connect(ip)
 
         conn.autocommit = True
         with conn.cursor() as cur:
