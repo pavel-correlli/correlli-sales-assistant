@@ -17,27 +17,6 @@ def _determine_market(pipeline):
     return "Others"
 
 
-def _get_prev_ops_day(today: date) -> date:
-    d = today - timedelta(days=1)
-    while d.weekday() > 4:
-        d = d - timedelta(days=1)
-    return d
-
-
-def _get_prev_ops_week(today: date) -> tuple[date, date]:
-    current_monday = today - timedelta(days=today.weekday())
-    prev_monday = current_monday - timedelta(days=7)
-    prev_friday = prev_monday + timedelta(days=4)
-    return prev_monday, prev_friday
-
-
-def _get_prev_ops_month(today: date) -> tuple[date, date]:
-    first_this_month = date(today.year, today.month, 1)
-    prev_month_last_day = first_this_month - timedelta(days=1)
-    prev_month_first_day = date(prev_month_last_day.year, prev_month_last_day.month, 1)
-    return prev_month_first_day, prev_month_last_day
-
-
 def _existing_columns(df: pd.DataFrame, cols: list[str]) -> list[str]:
     return [c for c in cols if c in df.columns]
 
@@ -122,63 +101,25 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         st.warning(f"No data found for the current selection (Filtered from {total_raw_rows} raw records).")
         return
 
-    with st.expander("📊 Data Health & Volume", expanded=False):
+    summary_cols = st.columns([1, 1])
+    with summary_cols[0]:
+        denom = total_raw_exact if total_raw_exact is not None else total_raw_rows
+        st.markdown(f"**Showing {len(df_global)} / {denom} calls**")
+    with summary_cols[1]:
         dates = df_global["call_date"].dropna()
+        if len(dates) > 0:
+            st.markdown(f"**Date Range in Result:** {dates.min()} → {dates.max()}")
+        else:
+            st.markdown("**Date Range in Result:** —")
+
+    with st.expander("📊 Data Health & Volume", expanded=False):
         st.write(f"**Total Records Loaded from DB:** {total_raw_rows}")
         if total_raw_exact is not None:
             st.write(f"**Supabase Exact Count (server):** {total_raw_exact}")
         st.write(f"**Records Shown (after filters):** {len(df_global)}")
-        if len(dates) > 0:
-            st.write(f"**Date Range in Result:** {dates.min()} → {dates.max()}")
 
-        rows_after_date = int(mask_date.sum())
-        rows_after_market = int((mask_date & mask_market).sum())
-        rows_after_pipeline = int((mask_date & mask_market & mask_pipeline).sum())
-        rows_after_manager = int((mask_date & mask_market & mask_pipeline & mask_manager).sum())
-
-        st.write(f"**Rows After Date Filter:** {rows_after_date}")
-        st.write(f"**Rows After Market Filter:** {rows_after_market}")
-        st.write(f"**Rows After Pipeline Filter:** {rows_after_pipeline}")
-        st.write(f"**Rows After Manager Filter:** {rows_after_manager}")
-
-        if total_raw_rows > 0:
-            st.progress(len(df_global) / total_raw_rows, text=f"Showing {len(df_global)} / {total_raw_rows} calls")
-
-    st.markdown("<h2 style='text-align:center;'>Sales Operations Feed</h2>", unsafe_allow_html=True)
-
-    preset_cols = st.columns(3)
-    current_preset = st.session_state.get("cso_date_preset", "day")
-    today = date.today()
-
-    with preset_cols[0]:
-        btn_day = st.button(
-            "Prev Ops. Day",
-            type="primary" if current_preset == "day" else "secondary",
-        )
-        if btn_day:
-            st.session_state["cso_date_preset"] = "day"
-            st.session_state["cso_date_preset_request"] = "day"
-            st.rerun()
-
-    with preset_cols[1]:
-        btn_week = st.button(
-            "Prev Ops. Week",
-            type="primary" if current_preset == "week" else "secondary",
-        )
-        if btn_week:
-            st.session_state["cso_date_preset"] = "week"
-            st.session_state["cso_date_preset_request"] = "week"
-            st.rerun()
-
-    with preset_cols[2]:
-        btn_month = st.button(
-            "Prev Ops. Month",
-            type="primary" if current_preset == "month" else "secondary",
-        )
-        if btn_month:
-            st.session_state["cso_date_preset"] = "month"
-            st.session_state["cso_date_preset_request"] = "month"
-            st.rerun()
+    st.markdown("<div id='operations-feed'></div>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>Operations Feed</h2>", unsafe_allow_html=True)
 
     df_feed = df_global.copy()
 
@@ -361,7 +302,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
     st.markdown("---")
 
-    st.header("2. Manager Productivity Timeline")
+    st.markdown("<div id='manager-productivity-timeline'></div>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>Manager Productivity Timeline</h2>", unsafe_allow_html=True)
     if "call_duration_sec" not in df_global.columns or "manager" not in df_global.columns:
         st.warning("Not enough data for timeline (need manager and call_duration_sec).")
     else:
@@ -425,7 +367,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
     st.markdown("---")
 
-    st.header("3. Call Control")
+    st.markdown("<div id='call-control'></div>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>Call Control</h2>", unsafe_allow_html=True)
     st.info(
         "Call Control shows how well managers keep initiative and close each conversation "
         "with a specific next step instead of vague promises. Defined outcomes mean the manager "
@@ -472,7 +415,9 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
     st.markdown("---")
 
-    st.header("4. Friction & Resistance")
+    st.markdown("<div id='friction-and-resistance'></div>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>Friction & Resistance</h2>", unsafe_allow_html=True)
+    st.caption("❓ Friction & Resistance: A compact view of workload and follow-up pressure by segment.")
     wtd_start = date.today() - timedelta(days=date.today().weekday())
     df_wtd = df_no_date[(df_no_date["call_date"] >= wtd_start) & (df_no_date["call_date"] <= date.today())].copy()
 
@@ -508,7 +453,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     y="Value",
                     color="Type",
                     barmode="group",
-                    title="Friction Index by Pipeline (WTD)",
+                    title="Friction Index by Pipeline",
                     color_discrete_map={"Intro Friction": "#3498db", "Sales Friction": "#e67e22"},
                     hover_data=["Total Calls"],
                 )
@@ -517,17 +462,18 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
             with col2:
                 st.metric(
-                    "Avg Intro Friction (WTD)",
+                    "Avg Intro Friction",
                     f"{df_fric[df_fric['Type'] == 'Intro Friction']['Value'].mean():.2f}",
                     help=r"$Intro\ Friction=\frac{Intro\ Calls}{Intro\ Flups}$",
                 )
                 st.metric(
-                    "Avg Sales Friction (WTD)",
+                    "Avg Sales Friction",
                     f"{df_fric[df_fric['Type'] == 'Sales Friction']['Value'].mean():.2f}",
                     help=r"$Sales\ Friction=\frac{Sales\ Calls}{Sales\ Flups}$",
                 )
 
-        st.subheader("Friction vs. Defined Rate (WTD)")
+        st.markdown("<h3 style='text-align:center;'>Friction vs. Defined Rate</h3>", unsafe_allow_html=True)
+        st.caption("❓ Each bubble is a manager+pipeline segment. X = Defined Rate on primaries, Y = Calls/Flup pressure.")
         df_wtd["is_primary"] = df_wtd["call_type"].isin(["intro_call", "sales_call"])
         df_wtd["is_followup"] = df_wtd["call_type"].isin(["intro_followup", "sales_followup"])
         df_wtd["is_defined_primary"] = df_wtd["is_primary"] & (df_wtd["outcome_category"] != "Vague")
@@ -584,7 +530,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
     st.markdown("---")
 
-    st.header("5. Discovery Depth Index")
+    st.markdown("<div id='discovery-depth-index'></div>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>Discovery Depth Index</h2>", unsafe_allow_html=True)
     st.caption(
         "❓ Discovery Depth Index: Calls with no objections are not a success, they usually "
         "mean the manager failed to surface real barriers. If the lead has no objections, "
@@ -626,6 +573,9 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     "value": row["is_sterile"],
                     "market": row["market"],
                     "avg_quality": row["avg_quality"],
+                    "no_objections_calls": row["is_sterile"],
+                    "with_objections_calls": row["with_objections"],
+                    "total_calls": row["call_id"],
                 }
             )
             chart_rows.append(
@@ -635,6 +585,9 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     "value": row["with_objections"],
                     "market": row["market"],
                     "avg_quality": row["avg_quality"],
+                    "no_objections_calls": row["is_sterile"],
+                    "with_objections_calls": row["with_objections"],
+                    "total_calls": row["call_id"],
                 }
             )
         chart_df = pd.DataFrame(chart_rows)
@@ -647,7 +600,19 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             template="plotly_white",
             barmode="relative",
             labels={"value": "Share (%)"},
-            hover_data=["market", "avg_quality"],
+            custom_data=["no_objections_calls", "with_objections_calls", "total_calls", "market", "avg_quality"],
+        )
+        fig_dd.update_traces(
+            hovertemplate=(
+                "Manager: %{x}<br>"
+                "Bucket: %{fullData.name}<br>"
+                "Share: %{y:.1f}%<br>"
+                "No Objections: %{customdata[0]}<br>"
+                "With Objections: %{customdata[1]}<br>"
+                "Total Calls: %{customdata[2]}<br>"
+                "Market: %{customdata[3]}<br>"
+                "Avg Quality: %{customdata[4]:.2f}<extra></extra>"
+            )
         )
         fig_dd.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="", legend_title="")
         st.plotly_chart(fig_dd, use_container_width=True)
@@ -701,51 +666,6 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             "Sales Friction",
         ]
         st.dataframe(lb, hide_index=True, use_container_width=True)
-
-    st.markdown("---")
-
-    with st.expander("🧰 Operational Details", expanded=False):
-        tab1, tab2 = st.tabs(["⚠️ Operational Waste", "🔎 Call Inspector"])
-
-        with tab1:
-            if "call_duration_sec" in df_global.columns:
-                anomalies = df_global[(df_global["call_duration_sec"] > 900) & (df_global["outcome_category"] == "Vague")].copy()
-                if not anomalies.empty:
-                    anomalies["duration_min"] = (anomalies["call_duration_sec"] / 60).round(1)
-                    show_cols = _existing_columns(
-                        anomalies,
-                        ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "kommo_link"],
-                    )
-                    st.error(f"Found {len(anomalies)} calls > 15m with Vague outcome.")
-                    st.dataframe(
-                        anomalies.sort_values("call_duration_sec", ascending=False)[show_cols],
-                        use_container_width=True,
-                        hide_index=True,
-                    )
-                else:
-                    st.success("No operational waste detected.")
-            else:
-                st.warning("call_duration_sec is missing, Operational Waste block is unavailable.")
-
-        with tab2:
-            cols = _existing_columns(df_global, ["call_id", "manager", "call_date", "next_step_type"])
-            if cols:
-                call_options = df_global.sort_values("call_datetime", ascending=False).head(50)[cols].copy()
-                call_options["label"] = call_options.apply(
-                    lambda x: f"{x.get('call_date')} | {x.get('manager')} | {x.get('next_step_type')}",
-                    axis=1,
-                )
-                selected_label = st.selectbox("Select a call:", options=call_options["label"].tolist())
-                if selected_label:
-                    idx = call_options[call_options["label"] == selected_label].index[0]
-                    cid = call_options.loc[idx, "call_id"]
-                    row = df_global[df_global["call_id"] == cid].iloc[0]
-                    st.write(f"**Manager:** {row.get('manager')}")
-                    st.write(f"**Outcome:** {row.get('next_step_type')}")
-                    if row.get("kommo_link"):
-                        st.markdown(f"[🔗 Open in Kommo]({row.get('kommo_link')})")
-                    st.info(f"**Mistakes:** {row.get('mistakes_summary')}")
-                    st.success(f"**Best Phrases:** {row.get('best_phrases')}")
 
 if __name__ == "__main__":
     pass

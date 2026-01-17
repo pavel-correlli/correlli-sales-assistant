@@ -30,6 +30,25 @@ def _get_prev_ops_month(today: date) -> tuple[date, date]:
     prev_month_first_day = date(prev_month_last_day.year, prev_month_last_day.month, 1)
     return prev_month_first_day, prev_month_last_day
 
+
+def _get_ops_today(today: date) -> date:
+    d = today
+    while d.weekday() > 4:
+        d = d - timedelta(days=1)
+    return d
+
+
+def _get_this_week(today: date) -> tuple[date, date]:
+    end_d = _get_ops_today(today)
+    start_d = today - timedelta(days=today.weekday())
+    return start_d, end_d
+
+
+def _get_this_month(today: date) -> tuple[date, date]:
+    end_d = _get_ops_today(today)
+    start_d = date(today.year, today.month, 1)
+    return start_d, end_d
+
 # --- 1. CONFIG & STYLE ---
 st.set_page_config(page_title="Executive Analytics Radar", layout="wide", page_icon="🦅")
 st.markdown(get_css(), unsafe_allow_html=True)
@@ -56,6 +75,14 @@ def render_sidebar():
         set_page("CSO")
     if st.sidebar.button("Data Lab", type="primary" if st.session_state.page == "LAB" else "secondary"):
         set_page("LAB")
+
+    if st.session_state.page == "CSO":
+        st.sidebar.markdown("### CSO Sections")
+        st.sidebar.markdown("- [Operations Feed](#operations-feed)")
+        st.sidebar.markdown("- [Manager Productivity Timeline](#manager-productivity-timeline)")
+        st.sidebar.markdown("- [Call Control](#call-control)")
+        st.sidebar.markdown("- [Friction & Resistance](#friction-and-resistance)")
+        st.sidebar.markdown("- [Discovery Depth Index](#discovery-depth-index)")
     
     st.sidebar.markdown("---")
     st.sidebar.subheader("Global Filters")
@@ -72,8 +99,7 @@ def render_sidebar():
                     "date_range_v2",
                     "all_time_v1",
                     "selected_managers_v1",
-                    "cso_date_preset",
-                    "cso_date_preset_request",
+                    "date_preset_v1",
                 }
             ):
                 st.session_state.pop(k, None)
@@ -83,25 +109,55 @@ def render_sidebar():
     today = date.today()
     start_of_year = date(2025, 1, 1)
 
-    if st.session_state.get("page") == "CSO" and "cso_date_preset" not in st.session_state:
+    if st.session_state.get("page") == "CSO" and "date_preset_v1" not in st.session_state:
         prev_day = _get_prev_ops_day(today)
         st.session_state["date_range_v2"] = [prev_day, prev_day]
         st.session_state["all_time_v1"] = False
-        st.session_state["cso_date_preset"] = "day"
+        st.session_state["date_preset_v1"] = "prev_day"
 
-    preset_request = st.session_state.pop("cso_date_preset_request", None)
-    if st.session_state.get("page") == "CSO" and preset_request in {"day", "week", "month"}:
-        if preset_request == "day":
+    st.sidebar.markdown("### Quick Date Presets")
+    left_col, right_col = st.sidebar.columns(2)
+    current_preset = st.session_state.get("date_preset_v1", None)
+
+    with left_col:
+        if st.button("Prev Day", use_container_width=True, type="primary" if current_preset == "prev_day" else "secondary"):
             prev_day = _get_prev_ops_day(today)
             st.session_state["date_range_v2"] = [prev_day, prev_day]
-        elif preset_request == "week":
+            st.session_state["all_time_v1"] = False
+            st.session_state["date_preset_v1"] = "prev_day"
+            st.rerun()
+        if st.button("Prev Week", use_container_width=True, type="primary" if current_preset == "prev_week" else "secondary"):
             start_w, end_w = _get_prev_ops_week(today)
             st.session_state["date_range_v2"] = [start_w, end_w]
-        else:
+            st.session_state["all_time_v1"] = False
+            st.session_state["date_preset_v1"] = "prev_week"
+            st.rerun()
+        if st.button("Prev Month", use_container_width=True, type="primary" if current_preset == "prev_month" else "secondary"):
             start_m, end_m = _get_prev_ops_month(today)
             st.session_state["date_range_v2"] = [start_m, end_m]
-        st.session_state["all_time_v1"] = False
-        st.session_state["cso_date_preset"] = preset_request
+            st.session_state["all_time_v1"] = False
+            st.session_state["date_preset_v1"] = "prev_month"
+            st.rerun()
+
+    with right_col:
+        if st.button("Today", use_container_width=True, type="primary" if current_preset == "today" else "secondary"):
+            d = _get_ops_today(today)
+            st.session_state["date_range_v2"] = [d, d]
+            st.session_state["all_time_v1"] = False
+            st.session_state["date_preset_v1"] = "today"
+            st.rerun()
+        if st.button("This Week", use_container_width=True, type="primary" if current_preset == "this_week" else "secondary"):
+            start_d, end_d = _get_this_week(today)
+            st.session_state["date_range_v2"] = [start_d, end_d]
+            st.session_state["all_time_v1"] = False
+            st.session_state["date_preset_v1"] = "this_week"
+            st.rerun()
+        if st.button("This Month", use_container_width=True, type="primary" if current_preset == "this_month" else "secondary"):
+            start_d, end_d = _get_this_month(today)
+            st.session_state["date_range_v2"] = [start_d, end_d]
+            st.session_state["all_time_v1"] = False
+            st.session_state["date_preset_v1"] = "this_month"
+            st.rerun()
 
     all_time = st.sidebar.checkbox("All time", value=False, key="all_time_v1")
     if all_time:
