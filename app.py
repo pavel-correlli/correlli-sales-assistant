@@ -7,6 +7,8 @@ from views.cmo_view import render_cmo_analytics
 from views.cso_view import render_cso_dashboard
 from views.lab_view import render_data_lab
 
+BUILD_ID = "2026-01-17-deploy-01"
+
 # --- 1. CONFIG & STYLE ---
 st.set_page_config(page_title="Executive Analytics Radar", layout="wide", page_icon="🦅")
 st.markdown(get_css(), unsafe_allow_html=True)
@@ -20,6 +22,7 @@ def set_page(page_name):
 
 def render_sidebar():
     st.sidebar.title("Algonova Calls Control")
+    st.sidebar.caption(f"Build: {BUILD_ID}")
     
     # Volumetric Buttons Navigation
     st.sidebar.markdown("### Navigation")

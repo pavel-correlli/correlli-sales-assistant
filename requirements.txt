@@ -6,3 +6,4 @@ pygwalker
 psycopg2-binary
 requests
 toml
+httpx
