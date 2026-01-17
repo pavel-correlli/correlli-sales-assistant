@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from database import fetch_view_data, normalize_calls_df, add_outcome_category, compute_friction_index
+from database import fetch_view_data, normalize_calls_df, add_outcome_category, query_postgres
 
 
 def _determine_market(pipeline):
@@ -64,13 +64,11 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
             help="Share of calls with a vague outcome (no clear next step).",
         )
     with top_cols[2]:
-        fr_all = compute_friction_index(
-            df,
-            group_cols=["market"],
-            primary_types=["intro_call", "sales_call"],
-            followup_types=["intro_followup", "sales_followup"],
-        )
-        avg_market_friction = float(fr_all["friction_index"].mean()) if not fr_all.empty else 0.0
+        avg_market_friction = 0.0
+        if "call_type" in df.columns and "market" in df.columns:
+            followups = df["call_type"].isin(["intro_followup", "sales_followup"]).sum()
+            primaries = df["call_type"].isin(["intro_call", "sales_call"]).sum()
+            avg_market_friction = (followups / primaries) if primaries > 0 else 0.0
         st.metric(
             "Total Market Friction",
             f"{avg_market_friction:.2f}",
@@ -79,32 +77,100 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
 
     st.markdown("---")
 
-    st.subheader("Total Market Friction by Market")
+    st.subheader("Total Friction")
     st.caption("❓ Friction Index = Flups / Primary Calls. Higher values mean more follow-ups per processed lead.")
 
-    fr_intro = compute_friction_index(
-        df,
-        group_cols=["market"],
-        primary_types=["intro_call"],
-        followup_types=["intro_followup"],
-    ).rename(columns={"friction_index": "intro_friction"})
-    fr_sales = compute_friction_index(
-        df,
-        group_cols=["market"],
-        primary_types=["sales_call"],
-        followup_types=["sales_followup"],
-    ).rename(columns={"friction_index": "sales_friction"})
-    fr_m = fr_intro.merge(fr_sales[["market", "sales_friction"]], on="market", how="outer").fillna(0)
-    fr_long = fr_m.melt(id_vars=["market"], value_vars=["intro_friction", "sales_friction"], var_name="type", value_name="value")
-    fr_long["type"] = fr_long["type"].map({"intro_friction": "Intro Friction", "sales_friction": "Sales Friction"})
+    def _build_where(date_range, selected_markets, selected_pipelines, date_col="call_date", market_col="market", pipeline_col="pipeline_name"):
+        clauses = []
+        params = []
+        if len(date_range) == 2:
+            clauses.append(f"{date_col} BETWEEN %s AND %s")
+            params.extend([date_range[0], date_range[1]])
+        if selected_markets:
+            clauses.append(f"{market_col} = ANY(%s)")
+            params.append(selected_markets)
+        if selected_pipelines:
+            clauses.append(f"{pipeline_col} = ANY(%s)")
+            params.append(selected_pipelines)
+        where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+        return where, tuple(params)
+
+    where_sql, where_params = _build_where(date_range, selected_markets, selected_pipelines)
+    fr_sql = query_postgres(
+        f"""
+        WITH base AS (
+          SELECT *
+          FROM v_ceo_total_friction
+          {where_sql}
+        )
+        SELECT
+          market,
+          'Intro Friction' AS type,
+          SUM(CASE WHEN call_type = 'intro_call' THEN 1 ELSE 0 END)::int AS primaries,
+          SUM(CASE WHEN call_type = 'intro_followup' THEN 1 ELSE 0 END)::int AS followups,
+          SUM(CASE WHEN call_type IN ('intro_call','intro_followup') THEN 1 ELSE 0 END)::int AS calls_in_calc,
+          ROUND(
+            (SUM(CASE WHEN call_type = 'intro_followup' THEN 1 ELSE 0 END))::numeric
+            / NULLIF(SUM(CASE WHEN call_type = 'intro_call' THEN 1 ELSE 0 END), 0),
+            2
+          ) AS friction_index
+        FROM base
+        GROUP BY market
+        UNION ALL
+        SELECT
+          market,
+          'Sales Friction' AS type,
+          SUM(CASE WHEN call_type = 'sales_call' THEN 1 ELSE 0 END)::int AS primaries,
+          SUM(CASE WHEN call_type = 'sales_followup' THEN 1 ELSE 0 END)::int AS followups,
+          SUM(CASE WHEN call_type IN ('sales_call','sales_followup') THEN 1 ELSE 0 END)::int AS calls_in_calc,
+          ROUND(
+            (SUM(CASE WHEN call_type = 'sales_followup' THEN 1 ELSE 0 END))::numeric
+            / NULLIF(SUM(CASE WHEN call_type = 'sales_call' THEN 1 ELSE 0 END), 0),
+            2
+          ) AS friction_index
+        FROM base
+        GROUP BY market
+        """,
+        where_params,
+    )
+
+    if fr_sql.empty:
+        if "call_type" in df.columns and "market" in df.columns:
+            fr_fallback = []
+            for m, g in df.groupby("market", dropna=False):
+                intro_p = int(g["call_type"].eq("intro_call").sum())
+                intro_f = int(g["call_type"].eq("intro_followup").sum())
+                sales_p = int(g["call_type"].eq("sales_call").sum())
+                sales_f = int(g["call_type"].eq("sales_followup").sum())
+                fr_fallback.append(
+                    {"market": m, "type": "Intro Friction", "primaries": intro_p, "followups": intro_f, "calls_in_calc": intro_p + intro_f,
+                     "friction_index": round((intro_f / intro_p) if intro_p > 0 else 0.0, 2)}
+                )
+                fr_fallback.append(
+                    {"market": m, "type": "Sales Friction", "primaries": sales_p, "followups": sales_f, "calls_in_calc": sales_p + sales_f,
+                     "friction_index": round((sales_f / sales_p) if sales_p > 0 else 0.0, 2)}
+                )
+            fr_sql = pd.DataFrame(fr_fallback)
+
     fig_fr = px.bar(
-        fr_long,
+        fr_sql,
         x="market",
-        y="value",
+        y="friction_index",
         color="type",
         barmode="group",
         template="plotly_white",
-        labels={"value": "Friction Index (Flup / Primary)", "market": "Market"},
+        custom_data=["primaries", "followups", "calls_in_calc"],
+        labels={"friction_index": "Friction Index (Flup / Primary)", "market": "Market"},
+    )
+    fig_fr.update_traces(
+        hovertemplate=(
+            "Market: %{x}<br>"
+            "Type: %{fullData.name}<br>"
+            "Friction Index: %{y:.2f}<br>"
+            "Primaries: %{customdata[0]}<br>"
+            "Flups: %{customdata[1]}<br>"
+            "Calls in Calc: %{customdata[2]}<extra></extra>"
+        )
     )
     st.plotly_chart(fig_fr, use_container_width=True)
 
@@ -168,87 +234,137 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         st.plotly_chart(fig_occ, use_container_width=True)
 
     st.subheader("Talk Time per Lead by Pipeline")
-    st.caption("❓ 100% split by call type. Hover shows leads, calls, and minutes.")
-    if lead_key is None or "pipeline_name" not in df.columns or "call_type" not in df.columns or "call_duration_sec" not in df.columns:
-        st.warning("Not enough data for pipeline time charts (need lead_id, pipeline_name, call_type, call_duration_sec).")
-        return
+    st.caption("❓ 100% split of total pipeline minutes by call type. Hover shows averages, leads, calls, and minutes.")
 
-    df["minutes"] = df["call_duration_sec"] / 60.0
-    type_map = {
-        "intro_call": "Intro Call",
-        "intro_followup": "Intro Flup",
-        "sales_call": "Sales Call",
-        "sales_followup": "Sales Flup",
-    }
-    df["call_type_group"] = df["call_type"].map(type_map).fillna("Other")
-
-    pipe_type = (
-        df[df["call_type"].isin(list(type_map.keys()))]
-        .groupby(["pipeline_name", "call_type_group"], dropna=False)
-        .agg(
-            total_minutes=("minutes", "sum"),
-            calls=("call_id", "count"),
-            leads=(lead_key, "nunique"),
+    where_tt, params_tt = _build_where(date_range, selected_markets, selected_pipelines)
+    tt_sql = query_postgres(
+        f"""
+        WITH base AS (
+          SELECT *
+          FROM v_ceo_talk_time_per_lead_by_pipeline
+          {where_tt}
+          AND minutes IS NOT NULL
+          AND lead_id IS NOT NULL
+          AND lead_id <> ''
+        ),
+        leads AS (
+          SELECT pipeline_name, COUNT(DISTINCT lead_id)::int AS leads_total
+          FROM base
+          GROUP BY pipeline_name
+        ),
+        agg AS (
+          SELECT
+            pipeline_name,
+            call_type_group,
+            COUNT(*)::int AS calls_type,
+            SUM(minutes)::float8 AS total_minutes_type
+          FROM base
+          GROUP BY pipeline_name, call_type_group
+        ),
+        totals AS (
+          SELECT pipeline_name, SUM(total_minutes_type)::float8 AS total_minutes_pipeline
+          FROM agg
+          GROUP BY pipeline_name
         )
-        .reset_index()
+        SELECT
+          a.pipeline_name,
+          a.call_type_group,
+          l.leads_total,
+          a.calls_type,
+          a.total_minutes_type,
+          t.total_minutes_pipeline,
+          ROUND((a.total_minutes_type / NULLIF(a.calls_type, 0))::numeric, 2) AS avg_minutes_per_call_type,
+          ROUND((a.total_minutes_type / NULLIF(l.leads_total, 0))::numeric, 2) AS avg_minutes_per_lead_type,
+          ROUND((a.total_minutes_type / NULLIF(t.total_minutes_pipeline, 0) * 100)::numeric, 2) AS share_pct
+        FROM agg a
+        JOIN leads l ON l.pipeline_name = a.pipeline_name
+        JOIN totals t ON t.pipeline_name = a.pipeline_name
+        ORDER BY a.pipeline_name, a.call_type_group
+        """,
+        params_tt,
     )
-    pipe_totals = (
-        pipe_type.groupby("pipeline_name")
-        .agg(
-            total_minutes_all=("total_minutes", "sum"),
-            calls_all=("calls", "sum"),
-            leads_all=("leads", "max"),
-        )
-        .reset_index()
-    )
-    pipe_type = pipe_type.merge(pipe_totals, on="pipeline_name", how="left")
-    pipe_type["avg_min_per_lead"] = (pipe_type["total_minutes"] / pipe_type["leads"].replace(0, pd.NA)).fillna(0)
-    pipe_type["avg_min_per_lead_all"] = (pipe_type["total_minutes_all"] / pipe_type["leads_all"].replace(0, pd.NA)).fillna(0)
 
-    fig_avg = px.bar(
-        pipe_type,
+    if tt_sql.empty:
+        if lead_key is None or "pipeline_name" not in df.columns or "call_type" not in df.columns or "call_duration_sec" not in df.columns:
+            st.warning("Not enough data for pipeline time charts.")
+            return
+
+        df["minutes"] = df["call_duration_sec"] / 60.0
+        type_map = {
+            "intro_call": "Intro Call",
+            "intro_followup": "Intro Flup",
+            "sales_call": "Sales Call",
+            "sales_followup": "Sales Flup",
+        }
+        df["call_type_group"] = df["call_type"].map(type_map).fillna("Other")
+        base = df[df["call_type"].isin(list(type_map.keys())) & df[lead_key].notna() & (df[lead_key].astype(str) != "")]
+        leads_total = base.groupby("pipeline_name")[lead_key].nunique().reset_index(name="leads_total")
+        agg = (
+            base.groupby(["pipeline_name", "call_type_group"], dropna=False)
+            .agg(total_minutes_type=("minutes", "sum"), calls_type=("call_id", "count"))
+            .reset_index()
+        )
+        totals = agg.groupby("pipeline_name")["total_minutes_type"].sum().reset_index(name="total_minutes_pipeline")
+        tt_sql = agg.merge(leads_total, on="pipeline_name", how="left").merge(totals, on="pipeline_name", how="left")
+        tt_sql["avg_minutes_per_call_type"] = (tt_sql["total_minutes_type"] / tt_sql["calls_type"].replace(0, pd.NA)).fillna(0).round(2)
+        tt_sql["avg_minutes_per_lead_type"] = (tt_sql["total_minutes_type"] / tt_sql["leads_total"].replace(0, pd.NA)).fillna(0).round(2)
+        tt_sql["share_pct"] = (tt_sql["total_minutes_type"] / tt_sql["total_minutes_pipeline"].replace(0, pd.NA) * 100).fillna(0).round(2)
+
+    fig_share = px.bar(
+        tt_sql,
         x="pipeline_name",
-        y="avg_min_per_lead",
+        y="share_pct",
         color="call_type_group",
         barmode="relative",
         template="plotly_white",
-        custom_data=["leads_all", "calls_all", "total_minutes_all", "avg_min_per_lead_all"],
-        labels={"pipeline_name": "Pipeline", "avg_min_per_lead": "Avg Minutes per Lead"},
+        custom_data=[
+            "leads_total",
+            "calls_type",
+            "total_minutes_type",
+            "avg_minutes_per_call_type",
+            "avg_minutes_per_lead_type",
+            "total_minutes_pipeline",
+        ],
+        labels={"pipeline_name": "Pipeline", "share_pct": "Share (%)"},
     )
-    fig_avg.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="Pipeline", legend_title="")
-    fig_avg.update_traces(
+    fig_share.update_layout(yaxis_title="Share (%)", xaxis_title="Pipeline", legend_title="")
+    fig_share.update_traces(
         hovertemplate=(
             "Pipeline: %{x}<br>"
             "Type: %{fullData.name}<br>"
-            "Avg Minutes/Lead (type): %{y:.2f}<br>"
+            "Share of Minutes: %{y:.2f}%<br>"
+            "Avg Minutes/Call: %{customdata[3]:.2f}<br>"
+            "Avg Minutes/Lead: %{customdata[4]:.2f}<br>"
             "Leads: %{customdata[0]}<br>"
-            "Calls: %{customdata[1]}<br>"
-            "Total Minutes: %{customdata[2]:.1f}<br>"
-            "Avg Minutes/Lead (total): %{customdata[3]:.2f}<extra></extra>"
+            "Calls (type): %{customdata[1]}<br>"
+            "Minutes (type): %{customdata[2]:.1f}<br>"
+            "Total Minutes (pipeline): %{customdata[5]:.1f}<extra></extra>"
         )
     )
-    st.plotly_chart(fig_avg, use_container_width=True)
+    st.plotly_chart(fig_share, use_container_width=True)
 
     st.subheader("Total Talk Time by Pipeline")
+    st.caption("❓ 100% split of total pipeline minutes by call type. Hover shows leads, calls, and minutes.")
     fig_tot = px.bar(
-        pipe_type,
+        tt_sql,
         x="pipeline_name",
-        y="total_minutes",
+        y="share_pct",
         color="call_type_group",
         barmode="relative",
         template="plotly_white",
-        custom_data=["leads_all", "calls_all", "total_minutes_all"],
-        labels={"pipeline_name": "Pipeline", "total_minutes": "Total Minutes"},
+        custom_data=["leads_total", "calls_type", "total_minutes_type", "total_minutes_pipeline"],
+        labels={"pipeline_name": "Pipeline", "share_pct": "Share (%)"},
     )
-    fig_tot.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="Pipeline", legend_title="")
+    fig_tot.update_layout(yaxis_title="Share (%)", xaxis_title="Pipeline", legend_title="")
     fig_tot.update_traces(
         hovertemplate=(
             "Pipeline: %{x}<br>"
             "Type: %{fullData.name}<br>"
-            "Minutes (type): %{y:.1f}<br>"
+            "Share of Minutes: %{y:.2f}%<br>"
             "Leads: %{customdata[0]}<br>"
-            "Calls: %{customdata[1]}<br>"
-            "Total Minutes: %{customdata[2]:.1f}<extra></extra>"
+            "Calls (type): %{customdata[1]}<br>"
+            "Minutes (type): %{customdata[2]:.1f}<br>"
+            "Total Minutes (pipeline): %{customdata[3]:.1f}<extra></extra>"
         )
     )
     st.plotly_chart(fig_tot, use_container_width=True)

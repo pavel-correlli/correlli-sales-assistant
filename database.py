@@ -4,6 +4,7 @@ from supabase import create_client, Client
 import os
 import time
 import httpx
+import psycopg2
 
 
 def _get_nested_secret(section: str, key: str):
@@ -164,3 +165,60 @@ def compute_friction_index(
     mask = g["primaries"] > 0
     g.loc[mask, "friction_index"] = (g.loc[mask, "followups"] / g.loc[mask, "primaries"]).astype(float)
     return g
+
+
+@st.cache_resource
+def ensure_chart_views():
+    cfg = _get_secret("database")
+    if not cfg:
+        return False
+
+    sql_path = os.path.join(os.getcwd(), "supabase", "migrations", "20260117_ceo_cmo_chart_views.sql")
+    if not os.path.exists(sql_path):
+        return False
+
+    try:
+        with open(sql_path, "r", encoding="utf-8") as f:
+            sql = f.read()
+        conn = psycopg2.connect(
+            host=cfg["host"],
+            database=cfg["name"],
+            user=cfg["user"],
+            password=cfg["pass"],
+            port=cfg["port"],
+        )
+        try:
+            conn.autocommit = True
+            with conn.cursor() as cur:
+                cur.execute(sql)
+        finally:
+            conn.close()
+        return True
+    except Exception:
+        return False
+
+
+@st.cache_data(ttl=300)
+def query_postgres(sql: str, params: tuple | None = None) -> pd.DataFrame:
+    cfg = _get_secret("database")
+    if not cfg:
+        return pd.DataFrame()
+
+    try:
+        conn = psycopg2.connect(
+            host=cfg["host"],
+            database=cfg["name"],
+            user=cfg["user"],
+            password=cfg["pass"],
+            port=cfg["port"],
+        )
+        try:
+            with conn.cursor() as cur:
+                cur.execute(sql, params or ())
+                cols = [d[0] for d in cur.description] if cur.description else []
+                rows = cur.fetchall() if cur.description else []
+            return pd.DataFrame(rows, columns=cols)
+        finally:
+            conn.close()
+    except Exception:
+        return pd.DataFrame()

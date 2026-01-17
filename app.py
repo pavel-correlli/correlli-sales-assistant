@@ -1,6 +1,6 @@
 import streamlit as st
 from datetime import datetime, date, timedelta
-from database import fetch_view_data
+from database import fetch_view_data, ensure_chart_views
 from styles import get_css
 from views.ceo_view import render_ceo_dashboard
 from views.cmo_view import render_cmo_analytics
@@ -238,6 +238,7 @@ def render_sidebar():
 
 # --- 3. MAIN ROUTER ---
 def main():
+    ensure_chart_views()
     date_range, selected_markets, selected_pipelines, selected_managers = render_sidebar()
     
     page = st.session_state.page
