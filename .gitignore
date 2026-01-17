@@ -1,5 +1,6 @@
 # Streamlit
 .streamlit/
+static/
 
 # Python
 __pycache__/
@@ -7,8 +8,19 @@ __pycache__/
 *$py.class
 venv/
 .venv/
+env/
 .env
+*.pyc
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Project specific
+*.log

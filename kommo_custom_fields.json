@@ -1,0 +1,8173 @@
+[
+  {
+    "id": 938391,
+    "name": "utm_content",
+    "type": "tracking_data",
+    "account_id": 29652292,
+    "code": "UTM_CONTENT",
+    "sort": 725,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "statistic",
+    "required_statuses": [],
+    "is_deletable": false,
+    "is_predefined": true,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938391?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938393,
+    "name": "utm_medium",
+    "type": "tracking_data",
+    "account_id": 29652292,
+    "code": "UTM_MEDIUM",
+    "sort": 726,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "statistic",
+    "required_statuses": [],
+    "is_deletable": false,
+    "is_predefined": true,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938393?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938395,
+    "name": "utm_campaign",
+    "type": "tracking_data",
+    "account_id": 29652292,
+    "code": "UTM_CAMPAIGN",
+    "sort": 727,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "statistic",
+    "required_statuses": [],
+    "is_deletable": false,
+    "is_predefined": true,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938395?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938397,
+    "name": "utm_source",
+    "type": "tracking_data",
+    "account_id": 29652292,
+    "code": "UTM_SOURCE",
+    "sort": 723,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "statistic",
+    "required_statuses": [],
+    "is_deletable": false,
+    "is_predefined": true,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938397?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938399,
+    "name": "utm_term",
+    "type": "tracking_data",
+    "account_id": 29652292,
+    "code": "UTM_TERM",
+    "sort": 728,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "statistic",
+    "required_statuses": [],
+    "is_deletable": false,
+    "is_predefined": true,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938399?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938401,
+    "name": "utm_referrer",
+    "type": "tracking_data",
+    "account_id": 29652292,
+    "code": "UTM_REFERRER",
+    "sort": 722,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "statistic",
+    "required_statuses": [],
+    "is_deletable": false,
+    "is_predefined": true,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938401?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938405,
+    "name": "gclientid",
+    "type": "tracking_data",
+    "account_id": 29652292,
+    "code": "GCLIENTID",
+    "sort": 729,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "statistic",
+    "required_statuses": [],
+    "is_deletable": false,
+    "is_predefined": true,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938405?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938407,
+    "name": "gclid",
+    "type": "tracking_data",
+    "account_id": 29652292,
+    "code": "GCLID",
+    "sort": 730,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "statistic",
+    "required_statuses": [],
+    "is_deletable": false,
+    "is_predefined": true,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938407?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938409,
+    "name": "fbclid",
+    "type": "tracking_data",
+    "account_id": 29652292,
+    "code": "FBCLID",
+    "sort": 731,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "statistic",
+    "required_statuses": [],
+    "is_deletable": false,
+    "is_predefined": true,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938409?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938777,
+    "name": "lead_id",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 574,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938777?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938779,
+    "name": "Course",
+    "type": "multiselect",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 517,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 566667,
+        "value": "Mars Academy",
+        "sort": 500
+      },
+      {
+        "id": 566669,
+        "value": "Python Start",
+        "sort": 2
+      },
+      {
+        "id": 566671,
+        "value": "Summer Camp: Junior",
+        "sort": 17
+      },
+      {
+        "id": 566673,
+        "value": "Summer Camp: Senior",
+        "sort": 18
+      },
+      {
+        "id": 567683,
+        "value": "Game Design",
+        "sort": 1
+      },
+      {
+        "id": 567685,
+        "value": "Web Design",
+        "sort": 14
+      },
+      {
+        "id": 567687,
+        "value": "Python Pro",
+        "sort": 4
+      },
+      {
+        "id": 601437,
+        "value": "Unity",
+        "sort": 16
+      },
+      {
+        "id": 601841,
+        "value": "Graphic Design",
+        "sort": 3
+      },
+      {
+        "id": 601843,
+        "value": "Summer Camp: Python Start",
+        "sort": 19
+      },
+      {
+        "id": 601845,
+        "value": "Summer Camp: Python Bootcamp",
+        "sort": 12
+      },
+      {
+        "id": 601847,
+        "value": "Summer Camp: Web Design",
+        "sort": 20
+      },
+      {
+        "id": 601849,
+        "value": "Summer Camp: Game Design",
+        "sort": 21
+      },
+      {
+        "id": 603957,
+        "value": "Digital Literacy",
+        "sort": 15
+      },
+      {
+        "id": 604997,
+        "value": "Workshop: Safe Internet",
+        "sort": 22
+      },
+      {
+        "id": 604999,
+        "value": "Workshop: Interactive Videos",
+        "sort": 23
+      },
+      {
+        "id": 605003,
+        "value": "Workshop: Python and AI",
+        "sort": 24
+      },
+      {
+        "id": 607109,
+        "value": "Summer Camp: Ranč 2024",
+        "sort": 25
+      },
+      {
+        "id": 607193,
+        "value": "Summer Camp: Unity",
+        "sort": 10
+      },
+      {
+        "id": 608253,
+        "value": "Frontend Continued",
+        "sort": 13
+      },
+      {
+        "id": 611635,
+        "value": "Summer Camp: Virtual Adventure",
+        "sort": 7
+      },
+      {
+        "id": 611637,
+        "value": "Summer Camp: Artificial Intelligence",
+        "sort": 8
+      },
+      {
+        "id": 611639,
+        "value": "Summer Camp: FrontEnd Web Development",
+        "sort": 11
+      },
+      {
+        "id": 611641,
+        "value": "Summer Camp: Startup Lab: from idea to success",
+        "sort": 9
+      },
+      {
+        "id": 612908,
+        "value": "Artificial Intelligence",
+        "sort": 5
+      },
+      {
+        "id": 612910,
+        "value": "Front End Development",
+        "sort": 6
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 4571155,
+        "status_id": 42101374
+      },
+      {
+        "pipeline_id": 4578397,
+        "status_id": 42150760
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172224
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 66083172
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 68792252
+      },
+      {
+        "pipeline_id": 7195696,
+        "status_id": 68792376
+      },
+      {
+        "pipeline_id": 9233204,
+        "status_id": 71676128
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045308
+      },
+      {
+        "pipeline_id": 9303952,
+        "status_id": 72133060
+      },
+      {
+        "pipeline_id": 10294312,
+        "status_id": 78942420
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503516
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566723
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938779?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938783,
+    "name": "Where did you hear about us (source)?",
+    "type": "multiselect",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 537,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 566675,
+        "value": "Internet",
+        "sort": 500
+      },
+      {
+        "id": 566677,
+        "value": "Facebook",
+        "sort": 1
+      },
+      {
+        "id": 566679,
+        "value": "Instagram",
+        "sort": 2
+      },
+      {
+        "id": 566681,
+        "value": "Seznam",
+        "sort": 3
+      },
+      {
+        "id": 566683,
+        "value": "Google",
+        "sort": 4
+      },
+      {
+        "id": 566685,
+        "value": "From friends",
+        "sort": 5
+      },
+      {
+        "id": 566687,
+        "value": "Media",
+        "sort": 6
+      },
+      {
+        "id": 566689,
+        "value": "E-mail newsletters",
+        "sort": 7
+      },
+      {
+        "id": 607829,
+        "value": "Other (please write in Comments)",
+        "sort": 500
+      }
+    ],
+    "group_id": "leads_19421629537831",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938783?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938785,
+    "name": "Promocode",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 514,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938785?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938787,
+    "name": "Registered for the IL Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 646,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938787?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938789,
+    "name": "Visited the IL Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 647,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938789?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938791,
+    "name": "Course Registration Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 650,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938791?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938793,
+    "name": "Paid Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 651,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [
+      {
+        "pipeline_id": 4565782,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 4578397,
+        "status_id": 142
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938793?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938797,
+    "name": "Handling with objections",
+    "type": "multiselect",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 521,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 566691,
+        "value": "None",
+        "sort": 500
+      },
+      {
+        "id": 566693,
+        "value": "Expensive",
+        "sort": 1
+      },
+      {
+        "id": 566695,
+        "value": "Inconvenient location",
+        "sort": 2
+      },
+      {
+        "id": 566697,
+        "value": "Unsuitable equipment",
+        "sort": 3
+      },
+      {
+        "id": 566699,
+        "value": "Consider competitors",
+        "sort": 4
+      },
+      {
+        "id": 566701,
+        "value": "Unsatisfied teacher",
+        "sort": 5
+      },
+      {
+        "id": 566703,
+        "value": "Uncomfortable schedule",
+        "sort": 6
+      },
+      {
+        "id": 566705,
+        "value": "Difficulties with computers",
+        "sort": 7
+      },
+      {
+        "id": 566707,
+        "value": "Easy level",
+        "sort": 8
+      },
+      {
+        "id": 566709,
+        "value": "Other (please note)",
+        "sort": 9
+      },
+      {
+        "id": 607831,
+        "value": "Course Date doesn't fit",
+        "sort": 10
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 4565782,
+        "status_id": 42063007
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42067993
+      },
+      {
+        "pipeline_id": 4578397,
+        "status_id": 42150763
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263428
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 66083184
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938797?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938803,
+    "name": "Students_Age",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 520,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 7195696,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 4565782,
+        "status_id": 42063007
+      },
+      {
+        "pipeline_id": 4571155,
+        "status_id": 42101374
+      },
+      {
+        "pipeline_id": 4578397,
+        "status_id": 42150760
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172224
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 66083172
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045308
+      },
+      {
+        "pipeline_id": 9303952,
+        "status_id": 72133060
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503516
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566723
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938803?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938805,
+    "name": "utm_source",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 579,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938805?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938807,
+    "name": "utm_medium",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 575,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938807?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938809,
+    "name": "utm_campaign",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 578,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938809?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938811,
+    "name": "utm_term",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 576,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938811?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938815,
+    "name": "backoffice_id",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 607,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938815?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938843,
+    "name": "utm_content",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 577,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938843?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938845,
+    "name": "Group",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 522,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 7195696,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 142
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938845?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938847,
+    "name": "Fertile Lead",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 644,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 566797,
+        "value": "Yes",
+        "sort": 500
+      },
+      {
+        "id": 566799,
+        "value": "No",
+        "sort": 1
+      }
+    ],
+    "group_id": "leads_84481720879201",
+    "required_statuses": [
+      {
+        "pipeline_id": 4565782,
+        "status_id": 42063007
+      },
+      {
+        "pipeline_id": 4571155,
+        "status_id": 42101374
+      },
+      {
+        "pipeline_id": 4578397,
+        "status_id": 42150760
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938847?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938871,
+    "name": "Student's First Name",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 592,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [
+      {
+        "pipeline_id": 7195696,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 4565782,
+        "status_id": 42063007
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172224
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045308
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503516
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566723
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938871?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938873,
+    "name": "tran_id",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 580,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938873?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938875,
+    "name": "form_id",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 571,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938875?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938877,
+    "name": "Cookies",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 617,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938877?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 938879,
+    "name": "Referer",
+    "type": "url",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 581,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/938879?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1025767,
+    "name": "referrer",
+    "type": "tracking_data",
+    "account_id": 29652292,
+    "code": "REFERRER",
+    "sort": 724,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "statistic",
+    "required_statuses": [],
+    "is_deletable": false,
+    "is_predefined": true,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1025767?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1027721,
+    "name": "CHECKBOX",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "CHECKBOX",
+    "sort": 618,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1027721?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1027723,
+    "name": "TRANID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "TRANID",
+    "sort": 620,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1027723?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1027725,
+    "name": "FORMID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "FORMID",
+    "sort": 616,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1027725?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1032857,
+    "name": "IL Date&Time",
+    "type": "date_time",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 597,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [
+      {
+        "pipeline_id": 4571155,
+        "status_id": 42101389
+      },
+      {
+        "pipeline_id": 4578397,
+        "status_id": 42150760
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503516
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566723
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [
+      24263680,
+      26434503,
+      27676003,
+      27676005,
+      29379471,
+      29380871,
+      29381557,
+      29382353,
+      29382355,
+      29382361,
+      29382363,
+      29391201,
+      30724461,
+      30724467,
+      30747993,
+      32363559,
+      32501493,
+      32501495,
+      32501613,
+      32529767,
+      32650025,
+      32650027,
+      32650099,
+      32650253,
+      32650821,
+      26808757,
+      24263678,
+      34414234,
+      34414236,
+      34414238,
+      34414240,
+      34414280
+    ],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1032857?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1032873,
+    "name": "Course Start Date and Time",
+    "type": "date_time",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 523,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 7195696,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42142645
+      },
+      {
+        "pipeline_id": 4578397,
+        "status_id": 42163189
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263432
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721156
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1032873?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1036976,
+    "name": "DATUM_NAROZENÍ_DÍTĚTE",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "DATUM_NAROZEN_DTTE",
+    "sort": 622,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1036976?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1037414,
+    "name": "Student's login",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 594,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [
+      {
+        "pipeline_id": 7195696,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 4571155,
+        "status_id": 42101374
+      },
+      {
+        "pipeline_id": 4578397,
+        "status_id": 42150766
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172224
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045308
+      },
+      {
+        "pipeline_id": 9303952,
+        "status_id": 72133064
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503516
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566723
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1037414?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1037416,
+    "name": "Student's password",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 595,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [
+      {
+        "pipeline_id": 7195696,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 4571155,
+        "status_id": 42101374
+      },
+      {
+        "pipeline_id": 4578397,
+        "status_id": 42150766
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172224
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045308
+      },
+      {
+        "pipeline_id": 9303952,
+        "status_id": 72133064
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503516
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566723
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1037416?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1037592,
+    "name": "Lessons sold",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 511,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 8306448,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42142645
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172176
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263432
+      },
+      {
+        "pipeline_id": 7195696,
+        "status_id": 59610248
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 68796532
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045332
+      },
+      {
+        "pipeline_id": 9303952,
+        "status_id": 72133060
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721156
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503536
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566739
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1037592?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1037710,
+    "name": "Student's Last Name",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 593,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [
+      {
+        "pipeline_id": 7195696,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172224
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045308
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503516
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566723
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1037710?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1037712,
+    "name": "Course type",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 600,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566723
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1037712?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1037720,
+    "name": "IL name",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 596,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1037720?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1037722,
+    "name": "First group lesson date and time",
+    "type": "date_time",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 602,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [
+      26625855
+    ],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1037722?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1039933,
+    "name": "DÁTUM_NARODENIA_DIEŤAŤA",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "DTUM_NARODENIA_DIEAA",
+    "sort": 623,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1039933?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1040699,
+    "name": "Missed call Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 642,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1040699?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1040701,
+    "name": "Call back Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 643,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1040701?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1040703,
+    "name": "Selects IL Date Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 645,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1040703?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1040705,
+    "name": "Handling with objections Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 649,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1040705?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1040907,
+    "name": "Call back in",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 536,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 604151,
+        "value": "1 month",
+        "sort": 1
+      },
+      {
+        "id": 604153,
+        "value": "2 months",
+        "sort": 2
+      },
+      {
+        "id": 604161,
+        "value": "never",
+        "sort": 500
+      },
+      {
+        "id": 604163,
+        "value": "3 months",
+        "sort": 3
+      },
+      {
+        "id": 604165,
+        "value": "4 months",
+        "sort": 4
+      },
+      {
+        "id": 604167,
+        "value": "5 months",
+        "sort": 5
+      },
+      {
+        "id": 604169,
+        "value": "6 months",
+        "sort": 6
+      },
+      {
+        "id": 604171,
+        "value": "7 months",
+        "sort": 7
+      },
+      {
+        "id": 604173,
+        "value": "8 months",
+        "sort": 8
+      },
+      {
+        "id": 604175,
+        "value": "9 months",
+        "sort": 9
+      },
+      {
+        "id": 604177,
+        "value": "10 months",
+        "sort": 10
+      },
+      {
+        "id": 604179,
+        "value": "11 months",
+        "sort": 11
+      },
+      {
+        "id": 604181,
+        "value": "12 months",
+        "sort": 12
+      }
+    ],
+    "group_id": "leads_19421629537831",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1040907?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1041573,
+    "name": "Sale value in CZK",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 505,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42142645
+      },
+      {
+        "pipeline_id": 7195696,
+        "status_id": 59610248
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721156
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1041573?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1041575,
+    "name": "Payment type",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 515,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 604781,
+        "value": "Stripe",
+        "sort": 1
+      },
+      {
+        "id": 604783,
+        "value": "Fakturoid",
+        "sort": 2
+      },
+      {
+        "id": 604785,
+        "value": "Superfaktura",
+        "sort": 3
+      },
+      {
+        "id": 606677,
+        "value": "Wise",
+        "sort": 4
+      },
+      {
+        "id": 607969,
+        "value": "Card",
+        "sort": 5
+      },
+      {
+        "id": 607971,
+        "value": "PayPal",
+        "sort": 6
+      },
+      {
+        "id": 610277,
+        "value": "GoCardless",
+        "sort": 7
+      },
+      {
+        "id": 614845,
+        "value": "Comgate",
+        "sort": 500
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 7195696,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 4566448,
+        "status_id": 42068131
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42142645
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263432
+      },
+      {
+        "pipeline_id": 6653236,
+        "status_id": 56264428
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 71105196
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045332
+      },
+      {
+        "pipeline_id": 9303952,
+        "status_id": 72133060
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721156
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503536
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566739
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1041575?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1041877,
+    "name": "Payment link",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 546,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1041877?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1041883,
+    "name": "Invoice Due Date",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 548,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42142645
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263432
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [
+      34322837
+    ],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1041883?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1042767,
+    "name": "First Payment Date",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 667,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1042767?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043347,
+    "name": "Reason for closing the deal",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 524,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 606883,
+        "value": "Younger than 6 years",
+        "sort": 500
+      },
+      {
+        "id": 606885,
+        "value": "Never Replied to Call or Message",
+        "sort": 1
+      },
+      {
+        "id": 606887,
+        "value": "Contact established but then disappeared",
+        "sort": 2
+      },
+      {
+        "id": 606889,
+        "value": "Disappeared after IL Sign-Up / Attendance",
+        "sort": 3
+      },
+      {
+        "id": 606891,
+        "value": "Contact is the Child not the Parent",
+        "sort": 4
+      },
+      {
+        "id": 606893,
+        "value": "No children",
+        "sort": 5
+      },
+      {
+        "id": 606895,
+        "value": "Claims not having filled contact form",
+        "sort": 6
+      },
+      {
+        "id": 606897,
+        "value": "Expensive",
+        "sort": 7
+      },
+      {
+        "id": 606899,
+        "value": "Too easy",
+        "sort": 8
+      },
+      {
+        "id": 606901,
+        "value": "Too difficult",
+        "sort": 9
+      },
+      {
+        "id": 606905,
+        "value": "Didn't like teacher at IL",
+        "sort": 10
+      },
+      {
+        "id": 606907,
+        "value": "Doesn't like Online format",
+        "sort": 11
+      },
+      {
+        "id": 606911,
+        "value": "Engages in too many activities",
+        "sort": 12
+      },
+      {
+        "id": 606913,
+        "value": "Schedule is not convenient",
+        "sort": 13
+      },
+      {
+        "id": 606917,
+        "value": "Bought from competitor",
+        "sort": 14
+      },
+      {
+        "id": 606919,
+        "value": "Technical difficulties on Client side",
+        "sort": 16
+      },
+      {
+        "id": 606923,
+        "value": "Older than 18 years",
+        "sort": 17
+      },
+      {
+        "id": 606927,
+        "value": "Duplicate",
+        "sort": 18
+      },
+      {
+        "id": 606929,
+        "value": "Other (write details)",
+        "sort": 19
+      },
+      {
+        "id": 607615,
+        "value": "No Telephone Number / Wrong Format Number",
+        "sort": 20
+      },
+      {
+        "id": 607617,
+        "value": "Child is not interested in learning",
+        "sort": 21
+      },
+      {
+        "id": 607619,
+        "value": "Group Launch Waiting time too long",
+        "sort": 22
+      },
+      {
+        "id": 607845,
+        "value": "Language of instruction is not appropriate",
+        "sort": 23
+      },
+      {
+        "id": 611129,
+        "value": "Interested in studying other IT courses",
+        "sort": 24
+      },
+      {
+        "id": 614081,
+        "value": "Current Client",
+        "sort": 25
+      },
+      {
+        "id": 614409,
+        "value": "Inclusive student",
+        "sort": 26
+      },
+      {
+        "id": 614515,
+        "value": "Difficulties with computers",
+        "sort": 15
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 7419224,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 4571155,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 4578397,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 7195696,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 9303952,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 143
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 143
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043347?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043393,
+    "name": "Form ID",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 570,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043393?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043395,
+    "name": "Form name",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 572,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043395?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043397,
+    "name": "Lead ID",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 573,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043397?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043401,
+    "name": "AD ID",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 568,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043401?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043403,
+    "name": "AD name",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 569,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043403?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043405,
+    "name": "Campaign ID",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 564,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043405?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043407,
+    "name": "Campaign name",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 565,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043407?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043409,
+    "name": "AD group ID",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 566,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043409?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043411,
+    "name": "AD group name",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 567,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043411?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043509,
+    "name": "IL Sign-up Date",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 662,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043509?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043513,
+    "name": "Course Registration Date",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 665,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043513?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043535,
+    "name": "Date created",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 660,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043535?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1043603,
+    "name": "UTM_ID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "UTM_ID",
+    "sort": 619,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1043603?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044083,
+    "name": "Unsubscribe_Email",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 590,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_93581720616017",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044083?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044223,
+    "name": "Sale value in PLN",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 506,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044223?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044247,
+    "name": "DATE_OF_BIRTH_OF_THE_CHILD",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "DATE_OF_BIRTH_OF_THE_CHILD",
+    "sort": 621,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044247?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044249,
+    "name": "_YM_UID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "_YM_UID",
+    "sort": 615,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044249?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044257,
+    "name": "Gift",
+    "type": "multiselect",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 551,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 607653,
+        "value": "None",
+        "sort": 500
+      },
+      {
+        "id": 607655,
+        "value": "Cybersecurity",
+        "sort": 1
+      },
+      {
+        "id": 607657,
+        "value": "OSVS",
+        "sort": 2
+      }
+    ],
+    "group_id": "leads_19751702631593",
+    "required_statuses": [
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172176
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045332
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503536
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044257?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044259,
+    "name": "Prepayment Date",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 666,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044259?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044275,
+    "name": "Students_name",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 519,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172224
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 7195696,
+        "status_id": 59610248
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 66083172
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 68792252
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045308
+      },
+      {
+        "pipeline_id": 9303952,
+        "status_id": 72133060
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503516
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566723
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044275?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044277,
+    "name": "Prepayment Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 652,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044277?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044279,
+    "name": "Venue address",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 606,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044279?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044281,
+    "name": "Teacher's name",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 604,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044281?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044283,
+    "name": "Marketing course title",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 601,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044283?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044285,
+    "name": "Group title",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 603,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172224
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045308
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566723
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044285?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044287,
+    "name": "Venue title",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 605,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044287?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044299,
+    "name": "Attended IL date",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 663,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044299?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044457,
+    "name": "Old Kommo lead ID",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 608,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044457?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044469,
+    "name": "Course RUK",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 679,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 607783,
+        "value": "Visual Programming",
+        "sort": 500
+      },
+      {
+        "id": 607785,
+        "value": "Python Start",
+        "sort": 1
+      },
+      {
+        "id": 607787,
+        "value": "Game Design",
+        "sort": 2
+      },
+      {
+        "id": 607789,
+        "value": "Цифрові проєкти",
+        "sort": 3
+      },
+      {
+        "id": 607791,
+        "value": "Нейрозміна",
+        "sort": 4
+      },
+      {
+        "id": 607793,
+        "value": "Frontend-розробка",
+        "sort": 5
+      },
+      {
+        "id": 607795,
+        "value": "The Coding Knight",
+        "sort": 6
+      },
+      {
+        "id": 607797,
+        "value": "Graphic Design",
+        "sort": 7
+      },
+      {
+        "id": 607799,
+        "value": "Digital literacy",
+        "sort": 8
+      },
+      {
+        "id": 607801,
+        "value": "Python Pro",
+        "sort": 9
+      },
+      {
+        "id": 607803,
+        "value": "Summer Camp Offline",
+        "sort": 10
+      },
+      {
+        "id": 607805,
+        "value": "Summer Camp Online",
+        "sort": 11
+      },
+      {
+        "id": 607807,
+        "value": "Web Design",
+        "sort": 12
+      },
+      {
+        "id": 607809,
+        "value": "Unity",
+        "sort": 13
+      },
+      {
+        "id": 607811,
+        "value": "Курс програмування Python Start 1й рік - УКР 2023",
+        "sort": 500
+      },
+      {
+        "id": 607813,
+        "value": "Візуальне програмування УКР 2023",
+        "sort": 500
+      },
+      {
+        "id": 607815,
+        "value": "Геймдизайн УКР 2023",
+        "sort": 500
+      },
+      {
+        "id": 607817,
+        "value": "Курс програмування Python Start 2й рік УКР 2023",
+        "sort": 500
+      },
+      {
+        "id": 607819,
+        "value": "Python Start 1-й год",
+        "sort": 500
+      },
+      {
+        "id": 607821,
+        "value": "Графічний дизайн УКР 2023",
+        "sort": 500
+      },
+      {
+        "id": 607823,
+        "value": "Python Pro 2й рік Укр 2023",
+        "sort": 500
+      },
+      {
+        "id": 607825,
+        "value": "Геймдизайн УКР (курс 707)",
+        "sort": 500
+      },
+      {
+        "id": 607827,
+        "value": "Python Start 2021/2022 - 2й год",
+        "sort": 500
+      }
+    ],
+    "group_id": "leads_30121722342011",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044469?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044485,
+    "name": "Date and time Lesson 1",
+    "type": "date_time",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 672,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_36041720886675",
+    "required_statuses": [
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172224
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045308
+      },
+      {
+        "pipeline_id": 10294312,
+        "status_id": 78941980
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503516
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566723
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [
+      29382367,
+      29381551
+    ],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044485?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044487,
+    "name": "Attended Day 1",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 675,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_36041720886675",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044487?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044489,
+    "name": "Date and time Lesson 2",
+    "type": "date_time",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 673,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_36041720886675",
+    "required_statuses": [
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172224
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [
+      29382369,
+      29381553,
+      31731217,
+      32363643,
+      32621979,
+      33305663
+    ],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044489?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044491,
+    "name": "Attended Day 2",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 676,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_36041720886675",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044491?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044493,
+    "name": "Date and time Lesson 3",
+    "type": "date_time",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 674,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_36041720886675",
+    "required_statuses": [
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172224
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [
+      29381555,
+      29382371,
+      31731465,
+      32363645,
+      32622045,
+      33305651,
+      33305679
+    ],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044493?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044495,
+    "name": "Attended Day 3",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 677,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_36041720886675",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044495?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044579,
+    "name": "DATUM_NAROZENÍ",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "DATUM_NAROZEN",
+    "sort": 624,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044579?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044581,
+    "name": "POZICE_KTERÁ_VÁS_ZAJÍMÁ",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "POZICE_KTER_VS_ZAJM",
+    "sort": 625,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044581?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044583,
+    "name": "CV_VLOŽTE_PROSÍM_LINK",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "CV_VLOTE_PROSM_LINK",
+    "sort": 626,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044583?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044659,
+    "name": "Installment",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 516,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 608005,
+        "value": "No",
+        "sort": 500
+      },
+      {
+        "id": 608007,
+        "value": "2 payments",
+        "sort": 1
+      },
+      {
+        "id": 608009,
+        "value": "3 payments",
+        "sort": 2
+      },
+      {
+        "id": 608363,
+        "value": "Special",
+        "sort": 3
+      },
+      {
+        "id": 615023,
+        "value": "Subscription",
+        "sort": 4
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 9303952,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721156
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566739
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044659?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044869,
+    "name": "Do not change the person in charge",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 503,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044869?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044879,
+    "name": "Voice AI 1",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 681,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044879?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044909,
+    "name": "DÁTUM_NARODENIA",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "DTUM_NARODENIA",
+    "sort": 659,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044909?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044911,
+    "name": "POZÍCIA_KTORÁ_ŤA_ZAUJALA",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "POZCIA_KTOR_A_ZAUJALA",
+    "sort": 535,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19421629537831",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044911?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044923,
+    "name": "Voice AI 2",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 682,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044923?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044957,
+    "name": "Call duration",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 683,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044957?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044959,
+    "name": "Minutes",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 684,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044959?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044961,
+    "name": "Seconds",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 685,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044961?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1044963,
+    "name": "Date of call",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 686,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1044963?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045061,
+    "name": "Payment 2",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 553,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045061?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045063,
+    "name": "Payment 3",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 556,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045063?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045079,
+    "name": "Date_Payment 2",
+    "type": "date_time",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 554,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [
+      34200969,
+      34201191,
+      34202831
+    ],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045079?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045081,
+    "name": "Date_Payment 3",
+    "type": "date_time",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 557,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045081?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045113,
+    "name": "Payment_2_paid",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 555,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045113?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045117,
+    "name": "Payment_3_paid",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 558,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045117?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045119,
+    "name": "Responsible for the installments",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 552,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045119?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045171,
+    "name": "ДАТА_НАРОДЖЕННЯ_ДИТИНИ",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "DATA_NARODZHENNYA_DITINI",
+    "sort": 540,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19421629537831",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045171?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045173,
+    "name": "HIDDEN",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "HIDDEN",
+    "sort": 539,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19421629537831",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045173?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045175,
+    "name": "HIDDEN_2",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "HIDDEN_2",
+    "sort": 538,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19421629537831",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045175?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045327,
+    "name": "Time for the first call AI",
+    "type": "date_time",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 687,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045327?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045329,
+    "name": "First IL Sign-up Date",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 661,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045329?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045509,
+    "name": "Teacher evaluation",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 525,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 608669,
+        "value": "empty",
+        "sort": 500
+      },
+      {
+        "id": 608671,
+        "value": "5",
+        "sort": 1
+      },
+      {
+        "id": 608673,
+        "value": "4",
+        "sort": 2
+      },
+      {
+        "id": 608675,
+        "value": "3",
+        "sort": 3
+      },
+      {
+        "id": 608677,
+        "value": "2",
+        "sort": 4
+      },
+      {
+        "id": 608679,
+        "value": "1",
+        "sort": 5
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172293
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045328
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503532
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045509?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045545,
+    "name": "DATA_URODZENIA_DZIECKA",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "DATA_URODZENIA_DZIECKA",
+    "sort": 613,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045545?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045577,
+    "name": "Installment_toggle2",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 688,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045577?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045623,
+    "name": "Guarantee",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 526,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 608767,
+        "value": "Yes",
+        "sort": 500
+      },
+      {
+        "id": 608769,
+        "value": "No",
+        "sort": 1
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 12773587,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172293
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045328
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503532
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045623?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1045783,
+    "name": "VLOŽIŤ_SÚBOR",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "VLOI_SBOR",
+    "sort": 614,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1045783?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046053,
+    "name": "Roblox IL Installation Required",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 518,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 610271,
+        "value": "Yes",
+        "sort": 500
+      },
+      {
+        "id": 610273,
+        "value": "No",
+        "sort": 1
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 66083172
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046053?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046245,
+    "name": "EUR",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 694,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046245?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046247,
+    "name": "Sale value in EUR",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 504,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263432
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046247?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046249,
+    "name": "Sale value in CHF",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 507,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046249?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046251,
+    "name": "Price Item Code",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 509,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 610445,
+        "value": "CZ2425G4ALLCZK",
+        "sort": 500
+      },
+      {
+        "id": 610447,
+        "value": "CZ2425G9ALLCZK",
+        "sort": 1
+      },
+      {
+        "id": 610449,
+        "value": "CZ2425G18ALLCZK",
+        "sort": 2
+      },
+      {
+        "id": 610451,
+        "value": "CZ2425G36ALLCZK",
+        "sort": 3
+      },
+      {
+        "id": 610453,
+        "value": "CZ2425G72ALLCZK",
+        "sort": 5
+      },
+      {
+        "id": 610455,
+        "value": "CZ2425I4ALLCZK",
+        "sort": 6
+      },
+      {
+        "id": 610457,
+        "value": "CZ2425I9ALLCZK",
+        "sort": 7
+      },
+      {
+        "id": 610459,
+        "value": "CZ2425I18ALLCZK",
+        "sort": 8
+      },
+      {
+        "id": 610461,
+        "value": "CZ2425I36ALLCZK",
+        "sort": 10
+      },
+      {
+        "id": 610463,
+        "value": "CZ2425I72ALLCZK",
+        "sort": 11
+      },
+      {
+        "id": 610465,
+        "value": "SK2425G4ALLEUR",
+        "sort": 12
+      },
+      {
+        "id": 610467,
+        "value": "SK2425G9ALLEUR",
+        "sort": 13
+      },
+      {
+        "id": 610469,
+        "value": "SK2425G18ALLEUR",
+        "sort": 14
+      },
+      {
+        "id": 610471,
+        "value": "SK2425G36ALLEUR",
+        "sort": 16
+      },
+      {
+        "id": 610473,
+        "value": "SK2425G72ALLEUR",
+        "sort": 17
+      },
+      {
+        "id": 610475,
+        "value": "SK2425I4ALLEUR",
+        "sort": 18
+      },
+      {
+        "id": 610477,
+        "value": "SK2425I9ALLEUR",
+        "sort": 19
+      },
+      {
+        "id": 610479,
+        "value": "SK2425I18ALLEUR",
+        "sort": 20
+      },
+      {
+        "id": 610481,
+        "value": "SK2425I36ALLEUR",
+        "sort": 21
+      },
+      {
+        "id": 610483,
+        "value": "SK2425I72ALLEUR",
+        "sort": 23
+      },
+      {
+        "id": 610505,
+        "value": "UA2425G4ALLEUR",
+        "sort": 25
+      },
+      {
+        "id": 610507,
+        "value": "UA2425G9ALLEUR",
+        "sort": 26
+      },
+      {
+        "id": 610509,
+        "value": "UA2425G18ALLEUR",
+        "sort": 27
+      },
+      {
+        "id": 610511,
+        "value": "UA2425G36ALLEUR",
+        "sort": 29
+      },
+      {
+        "id": 610513,
+        "value": "UA2425G72ALLEUR",
+        "sort": 30
+      },
+      {
+        "id": 610515,
+        "value": "UA2425I4ALLEUR",
+        "sort": 31
+      },
+      {
+        "id": 610517,
+        "value": "UA2425I9ALLEUR",
+        "sort": 32
+      },
+      {
+        "id": 610519,
+        "value": "UA2425I18ALLEUR",
+        "sort": 33
+      },
+      {
+        "id": 610521,
+        "value": "UA2425I36ALLEUR",
+        "sort": 35
+      },
+      {
+        "id": 610523,
+        "value": "UA2425I72ALLEUR",
+        "sort": 36
+      },
+      {
+        "id": 610565,
+        "value": "SW2425G4ALLCHF",
+        "sort": 37
+      },
+      {
+        "id": 610567,
+        "value": "SW2425G9ALLCHF",
+        "sort": 38
+      },
+      {
+        "id": 610569,
+        "value": "SW2425G18ALLCHF",
+        "sort": 39
+      },
+      {
+        "id": 610571,
+        "value": "SW2425G36ALLCHF",
+        "sort": 41
+      },
+      {
+        "id": 610573,
+        "value": "SW2425G72ALLCHF",
+        "sort": 42
+      },
+      {
+        "id": 610575,
+        "value": "SW2425I4ALLCHF",
+        "sort": 43
+      },
+      {
+        "id": 610577,
+        "value": "SW2425I9ALLCHF",
+        "sort": 44
+      },
+      {
+        "id": 610579,
+        "value": "SW2425I18ALLCHF",
+        "sort": 45
+      },
+      {
+        "id": 610581,
+        "value": "SW2425I36ALLCHF",
+        "sort": 47
+      },
+      {
+        "id": 610583,
+        "value": "SW2425I72ALLCHF",
+        "sort": 48
+      },
+      {
+        "id": 610585,
+        "value": "SW2425G4VPRCHF",
+        "sort": 49
+      },
+      {
+        "id": 610587,
+        "value": "SW2425G9VPRCHF",
+        "sort": 50
+      },
+      {
+        "id": 610589,
+        "value": "SW2425G18VPRCHF",
+        "sort": 51
+      },
+      {
+        "id": 610591,
+        "value": "SW2425G36VPRCHF",
+        "sort": 53
+      },
+      {
+        "id": 610593,
+        "value": "SW2425I4VPRCHF",
+        "sort": 54
+      },
+      {
+        "id": 610595,
+        "value": "SW2425I9VPRCHF",
+        "sort": 55
+      },
+      {
+        "id": 610597,
+        "value": "SW2425I18VPRCHF",
+        "sort": 56
+      },
+      {
+        "id": 610599,
+        "value": "SW2425I36VPRCHF",
+        "sort": 58
+      },
+      {
+        "id": 611477,
+        "value": "SK2425GSUBEUR",
+        "sort": 24
+      },
+      {
+        "id": 611553,
+        "value": "SK2425G33ALLEUR",
+        "sort": 15
+      },
+      {
+        "id": 611555,
+        "value": "SK2425I33ALLEUR",
+        "sort": 22
+      },
+      {
+        "id": 611557,
+        "value": "CZ2425G33ALLCZK",
+        "sort": 4
+      },
+      {
+        "id": 611559,
+        "value": "CZ2425I33ALLCZK",
+        "sort": 9
+      },
+      {
+        "id": 611561,
+        "value": "UA2425G33ALLEUR",
+        "sort": 28
+      },
+      {
+        "id": 611563,
+        "value": "UA2425I33ALLEUR",
+        "sort": 34
+      },
+      {
+        "id": 611565,
+        "value": "SW2425G33ALLCHF",
+        "sort": 40
+      },
+      {
+        "id": 611567,
+        "value": "SW2425I33ALLCHF",
+        "sort": 46
+      },
+      {
+        "id": 611569,
+        "value": "SW2425G33VPRCHF",
+        "sort": 52
+      },
+      {
+        "id": 611571,
+        "value": "SW2425I33VPRCHF",
+        "sort": 57
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046251?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046285,
+    "name": "Bonus lessons",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 512,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 9290160,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42142645
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172176
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263432
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721156
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503536
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566739
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046285?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046291,
+    "name": "Tech sale",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 695,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046291?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046293,
+    "name": "ФИО менеджера",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 690,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046293?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046313,
+    "name": "Sale value in UAH",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 508,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046313?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046437,
+    "name": "Bonus Item Code",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 510,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 610909,
+        "value": "2502_9+1",
+        "sort": 1
+      },
+      {
+        "id": 610911,
+        "value": "2502_18+2",
+        "sort": 2
+      },
+      {
+        "id": 611463,
+        "value": "2502_33+3",
+        "sort": 3
+      },
+      {
+        "id": 611467,
+        "value": "No Bonus+0",
+        "sort": 500
+      },
+      {
+        "id": 611469,
+        "value": "2501_9+1",
+        "sort": 4
+      },
+      {
+        "id": 611471,
+        "value": "2501_18+2",
+        "sort": 5
+      },
+      {
+        "id": 611473,
+        "value": "2501_33+3",
+        "sort": 6
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046437?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046439,
+    "name": "Discount",
+    "type": "multiselect",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 513,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 611007,
+        "value": "No",
+        "sort": 500
+      },
+      {
+        "id": 611009,
+        "value": "Personal",
+        "sort": 1
+      },
+      {
+        "id": 611011,
+        "value": "Siblings",
+        "sort": 2
+      },
+      {
+        "id": 611013,
+        "value": "Returning Customer",
+        "sort": 3
+      },
+      {
+        "id": 611015,
+        "value": "Special",
+        "sort": 4
+      },
+      {
+        "id": 611017,
+        "value": "Children with Handicaps",
+        "sort": 5
+      },
+      {
+        "id": 611019,
+        "value": "Mothers with Many Children",
+        "sort": 6
+      },
+      {
+        "id": 611021,
+        "value": "Single Parent",
+        "sort": 7
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 7195696,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8306448,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42142645
+      },
+      {
+        "pipeline_id": 5707418,
+        "status_id": 50172176
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263432
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 72045332
+      },
+      {
+        "pipeline_id": 9303952,
+        "status_id": 72133060
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721156
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 90503536
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 98566739
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046439?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046549,
+    "name": "ÂGE_DE_LENFANT",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "GE_DE_LENFANT",
+    "sort": 541,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19421629537831",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046549?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046641,
+    "name": "Interested in a summer camp",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 543,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 611229,
+        "value": "Yes",
+        "sort": 500
+      },
+      {
+        "id": 611231,
+        "value": "No",
+        "sort": 1
+      }
+    ],
+    "group_id": "leads_19421629537831",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046641?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046671,
+    "name": "Summer camp created Lead",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 691,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046671?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046703,
+    "name": "Price on 1st Invoice",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 550,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046703?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046705,
+    "name": "Commitment value, EUR",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 501,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046705?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046707,
+    "name": "Invoice number",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 547,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046707?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046791,
+    "name": "Voucher",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 544,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19421629537831",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046791?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046823,
+    "name": "Price of Lesson Sold, EUR",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 502,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046823?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "remind": "never",
+    "id": 1046855,
+    "name": "Birthday (archive)",
+    "type": "birthday",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 692,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046855?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046887,
+    "name": "Birthday year",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 527,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 10294312,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 142
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046887?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1046895,
+    "name": "AGE_OF_THE_CHILD",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "AGE_OF_THE_CHILD",
+    "sort": 542,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19421629537831",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1046895?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1047361,
+    "name": "Confirmation of Payment",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 549,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [
+      {
+        "pipeline_id": 7195696,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 4566430,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 142
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1047361?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1047711,
+    "name": "Time for the first call",
+    "type": "date_time",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 668,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1047711?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1047719,
+    "name": "IL Teacher's name",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 598,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1047719?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1047845,
+    "name": "Form",
+    "type": "url",
+    "account_id": 29652292,
+    "code": "FORM_CARD",
+    "sort": 640,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": false,
+    "is_predefined": true,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1047845?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048001,
+    "name": "SMS Whats app",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 528,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048001?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048203,
+    "name": "Summer Camp Session",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 609,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 612917,
+        "value": "1",
+        "sort": 500
+      },
+      {
+        "id": 612919,
+        "value": "2",
+        "sort": 1
+      },
+      {
+        "id": 612921,
+        "value": "3",
+        "sort": 2
+      },
+      {
+        "id": 612923,
+        "value": "4",
+        "sort": 3
+      },
+      {
+        "id": 612925,
+        "value": "Undecided",
+        "sort": 4
+      }
+    ],
+    "group_id": "leads_16901720871008",
+    "required_statuses": [
+      {
+        "pipeline_id": 9303952,
+        "status_id": 72133056
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048203?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048327,
+    "name": "Upsell",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 529,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 613037,
+        "value": "Yes",
+        "sort": 500
+      },
+      {
+        "id": 613039,
+        "value": "No",
+        "sort": 1
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048327?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048329,
+    "name": "Upsell_toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 693,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048329?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048355,
+    "name": "Student phone",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 610,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048355?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048417,
+    "name": "UTM_[&HELLIP;]",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "UTM_HELLIP",
+    "sort": 585,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048417?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048419,
+    "name": "Q_Student's name",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 706,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_5971749812748",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048419?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048421,
+    "name": "Q_Student's Age",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 707,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_5971749812748",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048421?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048423,
+    "name": "Prior Experience with IT Courses",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 709,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 613133,
+        "value": "Yes, online",
+        "sort": 1
+      },
+      {
+        "id": 613135,
+        "value": "Yes, offline",
+        "sort": 2
+      },
+      {
+        "id": 613137,
+        "value": "No",
+        "sort": 3
+      },
+      {
+        "id": 613219,
+        "value": "Old lead",
+        "sort": 500
+      }
+    ],
+    "group_id": "leads_5971749812748",
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 68792252
+      },
+      {
+        "pipeline_id": 7195696,
+        "status_id": 68792376
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048423?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048425,
+    "name": "Has Computer at Home",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 711,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 613139,
+        "value": "Yes",
+        "sort": 1
+      },
+      {
+        "id": 613141,
+        "value": "No",
+        "sort": 2
+      },
+      {
+        "id": 613143,
+        "value": "Planning to buy before the course starts",
+        "sort": 3
+      },
+      {
+        "id": 613145,
+        "value": "Will have access before course",
+        "sort": 4
+      },
+      {
+        "id": 613221,
+        "value": "Old lead",
+        "sort": 500
+      }
+    ],
+    "group_id": "leads_5971749812748",
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 68792252
+      },
+      {
+        "pipeline_id": 7195696,
+        "status_id": 68792376
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048425?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048429,
+    "name": "Expectations from the Course",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 716,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 613153,
+        "value": "Develop logical and structured thinking",
+        "sort": 1
+      },
+      {
+        "id": 613155,
+        "value": "Build useful IT skills for future career",
+        "sort": 2
+      },
+      {
+        "id": 613157,
+        "value": "Child is interested, wants to grow",
+        "sort": 3
+      },
+      {
+        "id": 613159,
+        "value": "Continue learning after previous course",
+        "sort": 4
+      },
+      {
+        "id": 613161,
+        "value": "Try something new and interesting",
+        "sort": 5
+      },
+      {
+        "id": 613163,
+        "value": "Redirect gaming habits into learning and creation",
+        "sort": 6
+      },
+      {
+        "id": 613165,
+        "value": "Useful addition to school or future studies",
+        "sort": 7
+      },
+      {
+        "id": 613173,
+        "value": "IT is promising — want growth",
+        "sort": 8
+      },
+      {
+        "id": 613225,
+        "value": "Old lead",
+        "sort": 500
+      }
+    ],
+    "group_id": "leads_5971749812748",
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 68792252
+      },
+      {
+        "pipeline_id": 7195696,
+        "status_id": 68792376
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048429?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048431,
+    "name": "Who Initiated the Learning",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 714,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 613167,
+        "value": "Parent",
+        "sort": 1
+      },
+      {
+        "id": 613169,
+        "value": "Child",
+        "sort": 2
+      },
+      {
+        "id": 613171,
+        "value": "Together",
+        "sort": 3
+      },
+      {
+        "id": 613223,
+        "value": "Old lead",
+        "sort": 500
+      }
+    ],
+    "group_id": "leads_5971749812748",
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 8775196,
+        "status_id": 68792252
+      },
+      {
+        "pipeline_id": 7195696,
+        "status_id": 68792376
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048431?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048433,
+    "name": "Experience Note",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 710,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_5971749812748",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048433?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048439,
+    "name": "Initiated Note",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 715,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_5971749812748",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048439?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048441,
+    "name": "Has Computer Note",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 712,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_5971749812748",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048441?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048445,
+    "name": "Expectations Note",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 717,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_5971749812748",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048445?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048611,
+    "name": "Assigned TCM",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 530,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 613313,
+        "value": "Štěpán Kobližka",
+        "sort": 500
+      },
+      {
+        "id": 613315,
+        "value": "Michal Ročňák",
+        "sort": 1
+      },
+      {
+        "id": 613317,
+        "value": "Welcome Manager",
+        "sort": 8
+      },
+      {
+        "id": 613319,
+        "value": "Smaïl Saïdani",
+        "sort": 5
+      },
+      {
+        "id": 613899,
+        "value": "Enrollment Advisor",
+        "sort": 7
+      },
+      {
+        "id": 614133,
+        "value": "Eva Klisova",
+        "sort": 2
+      },
+      {
+        "id": 614297,
+        "value": "Client Manager",
+        "sort": 6
+      },
+      {
+        "id": 614899,
+        "value": "Adrián Gonda SK",
+        "sort": 3
+      },
+      {
+        "id": 614901,
+        "value": "Jakub Hulín SK",
+        "sort": 4
+      },
+      {
+        "id": 615236,
+        "value": "Michal Soukup",
+        "sort": 9
+      },
+      {
+        "id": 615274,
+        "value": "Ратовська Ганна",
+        "sort": 10
+      },
+      {
+        "id": 615276,
+        "value": "Коляденко Анастасія",
+        "sort": 11
+      },
+      {
+        "id": 615278,
+        "value": "Близнюк Олеся",
+        "sort": 12
+      }
+    ],
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721136
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048611?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048641,
+    "name": "group_id",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 584,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048641?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1048651,
+    "name": "Telegram Client",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 611,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_16901720871008",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1048651?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049069,
+    "name": "Total score",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 719,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_5971749812748",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049069?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049161,
+    "name": "TCM Registered Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 653,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049161?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049163,
+    "name": "TCM Visited Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 654,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049163?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049165,
+    "name": "TCM No reaction Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 655,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049165?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049167,
+    "name": "No reaction after IL Toggle",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 648,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049167?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049169,
+    "name": "TCM's Sale",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 656,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049169?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049231,
+    "name": "Can the child read and write?",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 708,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 613793,
+        "value": "Yes",
+        "sort": 500
+      },
+      {
+        "id": 613795,
+        "value": "No",
+        "sort": 1
+      },
+      {
+        "id": 613797,
+        "value": "Yes, but not well",
+        "sort": 2
+      }
+    ],
+    "group_id": "leads_5971749812748",
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049231?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049233,
+    "name": "Can dedicate 1.5 hrs weekly?",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 713,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 613799,
+        "value": "Yes",
+        "sort": 500
+      },
+      {
+        "id": 613801,
+        "value": "No",
+        "sort": 1
+      }
+    ],
+    "group_id": "leads_5971749812748",
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049233?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049235,
+    "name": "Preferred start date",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 718,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 613803,
+        "value": "As soon as possible",
+        "sort": 500
+      },
+      {
+        "id": 613805,
+        "value": "This week",
+        "sort": 1
+      },
+      {
+        "id": 613807,
+        "value": "Next week",
+        "sort": 2
+      },
+      {
+        "id": 613809,
+        "value": "Within 30 days / This month",
+        "sort": 3
+      },
+      {
+        "id": 613811,
+        "value": "In more than 30 days / Next month",
+        "sort": 4
+      },
+      {
+        "id": 613813,
+        "value": "Not sure yet",
+        "sort": 5
+      }
+    ],
+    "group_id": "leads_5971749812748",
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947917
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263416
+      },
+      {
+        "pipeline_id": 11674156,
+        "status_id": 89721120
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049235?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049267,
+    "name": "Welcome Manager ID",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 531,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42067993
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263428
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049267?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049305,
+    "name": "FORMNAME",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "FORMNAME",
+    "sort": 583,
+    "is_api_only": true,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049305?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049307,
+    "name": "INPUT",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "INPUT",
+    "sort": 582,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049307?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049309,
+    "name": "TCM Failed",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 657,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_84481720879201",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049309?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049319,
+    "name": "Date of transition",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 669,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049319?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049617,
+    "name": "Learning type",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 599,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 614077,
+        "value": "Group",
+        "sort": 500
+      },
+      {
+        "id": 614079,
+        "value": "Individual",
+        "sort": 1
+      }
+    ],
+    "group_id": "leads_16901720871008",
+    "required_statuses": [
+      {
+        "pipeline_id": 5707418,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 9290160,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 11763628,
+        "status_id": 142
+      },
+      {
+        "pipeline_id": 12773587,
+        "status_id": 142
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049617?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049625,
+    "name": "Offer_After_SC_2025",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 696,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049625?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049695,
+    "name": "ORDERID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "ORDERID",
+    "sort": 629,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049695?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049697,
+    "name": "ORDERID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "ORDERID",
+    "sort": 630,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049697?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049699,
+    "name": "ORDERID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "ORDERID",
+    "sort": 631,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049699?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049701,
+    "name": "PAYMENTID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "PAYMENTID",
+    "sort": 632,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049701?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049703,
+    "name": "PAYMENTID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "PAYMENTID",
+    "sort": 633,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049703?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049705,
+    "name": "PAYMENTID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "PAYMENTID",
+    "sort": 634,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049705?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049707,
+    "name": "PRODUCTS",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "PRODUCTS",
+    "sort": 635,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049707?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049709,
+    "name": "PRODUCTS",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "PRODUCTS",
+    "sort": 636,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049709?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049711,
+    "name": "PRODUCTS",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "PRODUCTS",
+    "sort": 637,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049711?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049713,
+    "name": "PRICE",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "PRICE",
+    "sort": 638,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049713?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049715,
+    "name": "PRICE",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "PRICE",
+    "sort": 639,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049715?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049717,
+    "name": "Assigned TCM Installment",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 559,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 614193,
+        "value": "Eva Klisova",
+        "sort": 500
+      },
+      {
+        "id": 614195,
+        "value": "Michal Ročňák",
+        "sort": 1
+      },
+      {
+        "id": 614197,
+        "value": "Štěpán Kobližka",
+        "sort": 2
+      }
+    ],
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049717?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049939,
+    "name": "CLIENT_IP",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "CLIENT_IP",
+    "sort": 627,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049939?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049941,
+    "name": "USER_AGENT",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "USER_AGENT",
+    "sort": 628,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_28241720875003",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049941?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049943,
+    "name": "WM Signed-up",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 532,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049943?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049945,
+    "name": "WM Attended",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 533,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": null,
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049945?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049947,
+    "name": "Signup Attempt Owner",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 697,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049947?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049949,
+    "name": "Number of Reg #",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 699,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049949?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049951,
+    "name": "Number of visits #",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 700,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049951?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049953,
+    "name": "Date of action",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 701,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049953?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1049955,
+    "name": "Handling Date",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 664,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1049955?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1050561,
+    "name": "google_client_id",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 586,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1050561?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1050665,
+    "name": "Note",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 720,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_5971749812748",
+    "required_statuses": [
+      {
+        "pipeline_id": 4566430,
+        "status_id": 42947914
+      },
+      {
+        "pipeline_id": 6653232,
+        "status_id": 56263412
+      }
+    ],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1050665?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1050763,
+    "name": "CLIENT_ID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "CLIENT_ID",
+    "sort": 587,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1050763?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1050765,
+    "name": "Ticket Count",
+    "type": "numeric",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 560,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1050765?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1050767,
+    "name": "Ticket Codes",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 562,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1050767?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1050769,
+    "name": "Contest Info",
+    "type": "select",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 561,
+    "is_api_only": false,
+    "enums": [
+      {
+        "id": 614711,
+        "value": "Yes",
+        "sort": 500
+      },
+      {
+        "id": 614713,
+        "value": "No",
+        "sort": 1
+      }
+    ],
+    "group_id": "leads_19751702631593",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1050769?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1050779,
+    "name": "DATE",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "DATE",
+    "sort": 588,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_99681715971335",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1050779?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1050951,
+    "name": "Remaind invoice due date",
+    "type": "date",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 670,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_23081720885577",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1050951?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1051037,
+    "name": "I've made a first call to a client?",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 702,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1051037?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1051043,
+    "name": "admitad_uid",
+    "type": "text",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 703,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1051043?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1051045,
+    "name": "Installment_toggle3",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 689,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1051045?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1051081,
+    "name": "admitad?",
+    "type": "checkbox",
+    "account_id": 29652292,
+    "code": null,
+    "sort": 704,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1051081?page=1&limit=250"
+      }
+    }
+  },
+  {
+    "id": 1051159,
+    "name": "ADMITAD_UID",
+    "type": "textarea",
+    "account_id": 29652292,
+    "code": "ADMITAD_UID",
+    "sort": 698,
+    "is_api_only": false,
+    "enums": null,
+    "group_id": "leads_42791725028057",
+    "required_statuses": [],
+    "is_deletable": true,
+    "is_predefined": false,
+    "entity_type": "leads",
+    "tracking_callback": null,
+    "remind": null,
+    "triggers": [],
+    "currency": null,
+    "hidden_statuses": [],
+    "chained_lists": null,
+    "_links": {
+      "self": {
+        "href": "https://algocz.kommo.com/api/v4/leads/custom_fields/1051159?page=1&limit=250"
+      }
+    }
+  }
+]
