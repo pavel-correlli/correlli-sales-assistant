@@ -122,11 +122,13 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
     with col_v1:
         st.subheader("Manager Commitment Discipline")
         if not outcome_counts.empty:
-            data_chart = outcome_counts[outcome_counts['outcome_category'].isin(['Defined', 'Vague'])]
+            data_chart = outcome_counts[outcome_counts["outcome_category"].isin(["Defined", "Vague"])].copy()
             
             # Add total calls per manager for tooltip
             mgr_totals = df.groupby('manager')['call_id'].count().to_dict()
-            data_chart['total_calls'] = data_chart['manager'].map(mgr_totals)
+            data_chart["total_calls"] = (
+                data_chart["manager"].map(mgr_totals).fillna(0).astype("int64")
+            )
             
             fig_vague = px.bar(
                 data_chart,

@@ -1,10 +1,51 @@
 import streamlit as st
 import pandas as pd
 from supabase import create_client, Client
+import os
+
+
+def _get_nested_secret(section: str, key: str):
+    try:
+        return st.secrets[section][key]
+    except Exception:
+        return None
+
+
+def _get_secret(key: str):
+    try:
+        return st.secrets[key]
+    except Exception:
+        return None
+
+
+def _resolve_supabase_config():
+    url = (
+        _get_nested_secret("supabase", "url")
+        or _get_secret("SUPABASE_URL")
+        or _get_secret("supabase_url")
+        or os.getenv("SUPABASE_URL")
+    )
+    key = (
+        _get_nested_secret("supabase", "key")
+        or _get_secret("SUPABASE_KEY")
+        or _get_secret("SUPABASE_ANON_KEY")
+        or _get_secret("supabase_key")
+        or _get_secret("supabase_anon_key")
+        or os.getenv("SUPABASE_KEY")
+        or os.getenv("SUPABASE_ANON_KEY")
+    )
+    return url, key
 
 @st.cache_resource
 def get_supabase_client() -> Client:
-    return create_client(st.secrets["supabase"]["url"], st.secrets["supabase"]["key"])
+    url, key = _resolve_supabase_config()
+    if not url or not key:
+        st.error(
+            "Supabase secrets не найдены. Добавь в Streamlit Secrets либо блок "
+            "[supabase] с url/key, либо ключи SUPABASE_URL и SUPABASE_KEY."
+        )
+        st.stop()
+    return create_client(url, key)
 
 @st.cache_data(ttl=600)
 def fetch_view_data(view_name: str, page_size: int = 1000):
