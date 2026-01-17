@@ -3,3 +3,6 @@ pandas
 plotly
 supabase
 pygwalker
+psycopg2-binary
+requests
+toml
