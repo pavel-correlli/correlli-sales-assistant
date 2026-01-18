@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from database import fetch_view_data, normalize_calls_df, add_outcome_category, query_postgres
+from views.shared_ui import render_data_health_volume, render_hint
 
 
 def _plotly_template():
@@ -22,9 +23,11 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     st.title("CEO Strategic Radar")
 
     with st.spinner("Loading executive view..."):
-        df = fetch_view_data("Algonova_Calls_Raw")
+        df_raw = fetch_view_data("Algonova_Calls_Raw")
 
-    df = normalize_calls_df(df)
+    total_raw_rows = int(df_raw.attrs.get("supabase_rows_loaded", len(df_raw)))
+
+    df = normalize_calls_df(df_raw)
     df = add_outcome_category(df)
 
     if df.empty:
@@ -51,6 +54,12 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     if df.empty:
         st.warning("No data matches current filters.")
         return
+
+    dates = df["call_date"].dropna() if "call_date" in df.columns else []
+    date_range_in_result = None
+    if hasattr(dates, "__len__") and len(dates) > 0:
+        date_range_in_result = (dates.min(), dates.max())
+    render_data_health_volume(total_raw_rows, len(df), date_range_in_result=date_range_in_result, expanded=False)
 
     top_cols = st.columns(3)
     avg_quality = float(df["Average_quality"].mean()) if "Average_quality" in df.columns else float("nan")
@@ -82,7 +91,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     st.markdown("---")
 
     st.subheader("Total Friction")
-    st.caption("❓ Friction Index = Flups / Primary Calls. Higher values mean more follow-ups per processed lead.")
+    render_hint("Friction Index = Flups / Primary Calls. Higher values mean more follow-ups per processed lead.")
 
     def _build_where(date_range, selected_markets, selected_pipelines, date_col="call_date", market_col="market", pipeline_col="pipeline_name"):
         clauses = []
@@ -179,7 +188,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     st.plotly_chart(fig_fr, use_container_width=True)
 
     st.subheader("Vague Index by Market")
-    st.caption("❓ Vague is the only negative outcome. Everything else is treated as Defined Next Step.")
+    render_hint("Vague is the only negative outcome. Everything else is treated as Defined Next Step.")
     vi = df.groupby(["market", "outcome_category"]).size().reset_index(name="count")
     vi = vi[vi["outcome_category"].isin(["Defined Next Step", "Vague"])].copy()
     fig_vi = px.bar(
@@ -204,7 +213,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         lead_key = None
 
     st.subheader("One-Call-Close Rate by Pipeline")
-    st.caption("❓ Leads with exactly 1 Intro Call and 1 Sales Call, and no Flups.")
+    render_hint("Leads with exactly 1 Intro Call and 1 Sales Call, and no Flups.")
     if lead_key is None or "pipeline_name" not in df.columns or "call_type" not in df.columns:
         st.warning("Not enough data for One-Call-Close Rate (need lead_id, pipeline_name, call_type).")
     else:
@@ -238,7 +247,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         st.plotly_chart(fig_occ, use_container_width=True)
 
     st.subheader("Talk Time per Lead by Pipeline")
-    st.caption("❓ 100% split of total pipeline minutes by call type. Hover shows averages, leads, calls, and minutes.")
+    render_hint("100% split of total pipeline minutes by call type. Hover shows averages, leads, calls, and minutes.")
 
     where_tt, params_tt = _build_where(date_range, selected_markets, selected_pipelines)
     tt_sql = query_postgres(
@@ -348,7 +357,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     st.plotly_chart(fig_share, use_container_width=True)
 
     st.subheader("Total Talk Time by Pipeline")
-    st.caption("❓ 100% split of total pipeline minutes by call type. Hover shows leads, calls, and minutes.")
+    render_hint("100% split of total pipeline minutes by call type. Hover shows leads, calls, and minutes.")
     fig_tot = px.bar(
         tt_sql,
         x="pipeline_name",

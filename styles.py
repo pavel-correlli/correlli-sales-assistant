@@ -150,5 +150,24 @@ def get_css(theme: str = "dark"):
     a {{
       color: var(--primary);
     }}
+
+    [data-testid="stSidebarContent"] {{
+      height: 100vh;
+      overflow-y: auto;
+      padding-bottom: 120px;
+    }}
+
+    [data-testid="stAppViewContainer"] {{
+      overflow-y: auto;
+    }}
+
+    div[data-baseweb="menu"] {{
+      max-height: 60vh !important;
+      overflow: auto !important;
+    }}
+
+    div[data-baseweb="popover"] {{
+      z-index: 999999 !important;
+    }}
     </style>
     """

@@ -102,13 +102,21 @@ def render_sidebar():
     st.sidebar.markdown("### Navigation")
     
     if st.sidebar.button("CEO", type="primary" if st.session_state.page == "CEO" else "secondary"):
-        set_page("CEO")
+        if st.session_state.page != "CEO":
+            set_page("CEO")
+            st.rerun()
     if st.sidebar.button("CMO", type="primary" if st.session_state.page == "CMO" else "secondary"):
-        set_page("CMO")
+        if st.session_state.page != "CMO":
+            set_page("CMO")
+            st.rerun()
     if st.sidebar.button("CSO", type="primary" if st.session_state.page == "CSO" else "secondary"):
-        set_page("CSO")
+        if st.session_state.page != "CSO":
+            set_page("CSO")
+            st.rerun()
     if st.sidebar.button("Data Lab", type="primary" if st.session_state.page == "LAB" else "secondary"):
-        set_page("LAB")
+        if st.session_state.page != "LAB":
+            set_page("LAB")
+            st.rerun()
 
     if st.session_state.page == "CSO":
         st.sidebar.markdown("### CSO Sections")
@@ -144,8 +152,6 @@ def render_sidebar():
     start_of_year = date(2025, 1, 1)
 
     if st.session_state.get("page") == "CSO" and "date_preset_v1" not in st.session_state:
-        prev_day = _get_prev_ops_day(today)
-        st.session_state["date_range_v2"] = [prev_day, prev_day]
         st.session_state["all_time_v1"] = False
         st.session_state["date_preset_v1"] = "prev_day"
 
@@ -197,9 +203,17 @@ def render_sidebar():
     if all_time:
         date_range = []
     else:
+        if "date_range_v2" in st.session_state:
+            initial_date_range = st.session_state["date_range_v2"]
+        elif st.session_state.get("page") == "CSO" and st.session_state.get("date_preset_v1") == "prev_day":
+            prev_day = _get_prev_ops_day(today)
+            initial_date_range = [prev_day, prev_day]
+        else:
+            initial_date_range = [start_of_year, today]
+
         date_range = st.sidebar.date_input(
             "Date Range",
-            [start_of_year, today],
+            initial_date_range,
             key="date_range_v2",
         )
     

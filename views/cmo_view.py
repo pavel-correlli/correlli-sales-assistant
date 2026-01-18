@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from database import fetch_view_data, query_postgres
+from views.shared_ui import render_data_health_volume, render_hint
 
 
 def _plotly_template():
@@ -13,12 +14,15 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     st.title("CMO Traffic Quality & Viscosity")
 
     with st.spinner("Loading traffic data..."):
-        df = fetch_view_data("Algonova_Calls_Raw")
+        df_raw = fetch_view_data("Algonova_Calls_Raw")
 
-    if df.empty:
+    if df_raw.empty:
         st.warning("No data available.")
         return
 
+    total_raw_rows = int(df_raw.attrs.get("supabase_rows_loaded", len(df_raw)))
+
+    df = df_raw.copy()
     if "call_datetime" in df.columns:
         df["call_datetime"] = pd.to_datetime(df["call_datetime"], errors="coerce", utc=True)
     else:
@@ -42,6 +46,12 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     if df.empty:
         st.warning("No data matches current filters.")
         return
+
+    dates = df["call_date"].dropna() if "call_date" in df.columns else []
+    date_range_in_result = None
+    if hasattr(dates, "__len__") and len(dates) > 0:
+        date_range_in_result = (dates.min(), dates.max())
+    render_data_health_volume(total_raw_rows, len(df), date_range_in_result=date_range_in_result, expanded=False)
 
     if "mkt_manager" not in df.columns:
         st.warning("Missing column: mkt_manager")
@@ -67,8 +77,8 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     merged["intro_friction_index"] = merged["intro_friction_index"].fillna(0).round(2)
 
     st.subheader("Traffic Viscosity vs Intro Friction")
-    st.caption(
-        "❓ Viscosity means how many calls are required to process one lead (Calls / Leads). "
+    render_hint(
+        "Viscosity means how many calls are required to process one lead (Calls / Leads). "
         "Higher viscosity usually indicates wasted touches, poor lead quality, or weak routing."
     )
     def _build_where(
@@ -139,11 +149,12 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         labels={"mkt_manager": "Traffic Manager", "value": "Index"},
         hover_data=["total_calls", "total_leads", "intro_primaries", "intro_followups"],
     )
-    fig_bar.update_layout(xaxis_title="Traffic Manager")
+    fig_bar.update_layout(xaxis_title="Traffic Manager", margin=dict(l=10, r=10, t=10, b=80))
+    fig_bar.update_xaxes(tickangle=-35, automargin=True)
     st.plotly_chart(fig_bar, use_container_width=True)
 
     st.subheader("Intro Friction / Traffic Manager")
-    st.caption("❓ Intro Friction shows follow-up load on intro calls (Intro Flups / Intro Calls).")
+    render_hint("Intro Friction shows follow-up load on intro calls (Intro Flups / Intro Calls).")
     where_hm, params_hm = _build_where(
         date_range,
         selected_markets,
@@ -236,10 +247,13 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     )
     fig_hm.update_layout(
         template=_plotly_template(),
-        margin=dict(l=10, r=10, t=10, b=10),
+        margin=dict(l=10, r=10, t=10, b=90),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         xaxis_title="Traffic Manager",
         yaxis_title="Market",
+        height=max(480, 28 * len(friction.index) + 220),
     )
+    fig_hm.update_xaxes(tickangle=-35, automargin=True)
+    fig_hm.update_yaxes(automargin=True)
     st.plotly_chart(fig_hm, use_container_width=True)

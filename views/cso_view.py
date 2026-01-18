@@ -4,6 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from database import fetch_view_data
 from datetime import date, timedelta
+from views.shared_ui import render_data_health_volume, render_hint
 
 
 def _plotly_template():
@@ -53,8 +54,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         st.warning("No data available. Please check database connection.")
         return
 
-    total_raw_rows = len(df)
-    total_raw_exact = df.attrs.get("supabase_exact_count", None)
+    total_raw_rows = int(df.attrs.get("supabase_rows_loaded", len(df)))
 
     if "call_datetime" in df.columns:
         df["call_datetime"] = pd.to_datetime(df["call_datetime"], errors="coerce", utc=True)
@@ -107,20 +107,17 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
     summary_cols = st.columns([1, 1])
     with summary_cols[0]:
-        denom = total_raw_exact if total_raw_exact is not None else total_raw_rows
-        st.markdown(f"**Showing {len(df_global)} / {denom} calls**")
+        st.markdown(f"**Showing {len(df_global)} / {total_raw_rows} calls**")
     with summary_cols[1]:
         dates = df_global["call_date"].dropna()
+        date_range_in_result = None
         if len(dates) > 0:
+            date_range_in_result = (dates.min(), dates.max())
             st.markdown(f"**Date Range in Result:** {dates.min()} → {dates.max()}")
         else:
             st.markdown("**Date Range in Result:** —")
 
-    with st.expander("Data Health & Volume", expanded=False):
-        st.write(f"**Total Records Loaded from DB:** {total_raw_rows}")
-        if total_raw_exact is not None:
-            st.write(f"**Supabase Exact Count (server):** {total_raw_exact}")
-        st.write(f"**Records Shown (after filters):** {len(df_global)}")
+    render_data_health_volume(total_raw_rows, len(df_global), date_range_in_result=date_range_in_result, expanded=False)
 
     st.markdown("<div id='operations-feed'></div>", unsafe_allow_html=True)
     st.markdown("<h2 style='text-align:center;'>Operations Feed</h2>", unsafe_allow_html=True)
@@ -271,7 +268,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 anomalies["duration_min"] = (anomalies["call_duration_sec"] / 60).round(1)
                 show_cols = _existing_columns(
                     anomalies,
-                    ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "kommo_link"],
+                    ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "audio_url", "kommo_link"],
                 )
                 if anomalies.empty:
                     st.success("No anomalies for current filters.")
@@ -280,6 +277,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                         anomalies.sort_values("call_duration_sec", ascending=False)[show_cols],
                         use_container_width=True,
                         hide_index=True,
+                        column_config={"audio_url": st.column_config.LinkColumn("Audio URL")},
                     )
             elif "call_duration_sec" not in df_feed.columns:
                 st.warning("call_duration_sec is missing, duration-based anomalies are unavailable.")
@@ -291,7 +289,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 low_q = df_feed[df_feed["Average_quality"] < 4.0].copy()
                 show_cols = _existing_columns(
                     low_q,
-                    ["call_datetime", "manager", "pipeline_name", "Average_quality", "kommo_link"],
+                    ["call_datetime", "manager", "pipeline_name", "Average_quality", "audio_url", "kommo_link"],
                 )
                 if low_q.empty:
                     st.success("No low-quality calls for current filters.")
@@ -300,6 +298,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                         low_q.sort_values("Average_quality", ascending=True)[show_cols],
                         use_container_width=True,
                         hide_index=True,
+                        column_config={"audio_url": st.column_config.LinkColumn("Audio URL")},
                     )
             else:
                 st.warning("Average_quality is missing, quality filter is unavailable.")
@@ -373,12 +372,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
     st.markdown("<div id='call-control'></div>", unsafe_allow_html=True)
     st.markdown("<h2 style='text-align:center;'>Call Control</h2>", unsafe_allow_html=True)
-    st.info(
-        "Call Control shows how well managers keep initiative and close each conversation "
-        "with a specific next step instead of vague promises. Defined outcomes mean the manager "
-        "secured a clear follow-up action (for example: \"You said you want to discuss this "
-        "with your family, so let's talk on Wednesday to confirm if you join the trial lesson\"). "
-        "Vague outcomes leave the initiative with the lead and create confusion about what happens next."
+    render_hint(
+        "Tracks 'Next-Step Clarity'—the extent to which a manager dictates the rules of engagement and avoids dead-end conversations."
     )
     col_v1, col_v2 = st.columns([3, 2])
     mgr_stats = df_global.groupby("manager").agg(call_id=("call_id", "count"), Average_quality=("Average_quality", "mean")).reset_index()
@@ -421,7 +416,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
     st.markdown("<div id='friction-and-resistance'></div>", unsafe_allow_html=True)
     st.markdown("<h2 style='text-align:center;'>Friction & Resistance</h2>", unsafe_allow_html=True)
-    st.caption("❓ Friction & Resistance: A compact view of workload and follow-up pressure by segment.")
+    render_hint("Friction & Resistance: A compact view of workload and follow-up pressure by segment.")
     wtd_start = date.today() - timedelta(days=date.today().weekday())
     df_wtd = df_no_date[(df_no_date["call_date"] >= wtd_start) & (df_no_date["call_date"] <= date.today())].copy()
 
@@ -477,7 +472,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 )
 
         st.markdown("<h3 style='text-align:center;'>Friction vs. Defined Rate</h3>", unsafe_allow_html=True)
-        st.caption("❓ Each bubble is a manager+pipeline segment. X = Defined Rate on primaries, Y = Flups/Primary (friction).")
+        render_hint("Each bubble is a manager+pipeline segment. X = Defined Rate on primaries, Y = Flups/Primary (friction).")
         df_wtd["is_primary"] = df_wtd["call_type"].isin(["intro_call", "sales_call"])
         df_wtd["is_followup"] = df_wtd["call_type"].isin(["intro_followup", "sales_followup"])
         df_wtd["is_defined_primary"] = df_wtd["is_primary"] & (df_wtd["outcome_category"] != "Vague")
