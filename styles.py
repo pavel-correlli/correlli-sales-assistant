@@ -112,6 +112,31 @@ def get_css(theme: str = "dark"):
       margin: 0 auto 12px auto;
     }}
 
+    .sidebar-sections {{
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 6px 0 2px 0;
+    }}
+
+    .sidebar-section-link {{
+      display: block;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text) !important;
+      text-decoration: none !important;
+      font-size: 0.9rem;
+      line-height: 1.2;
+      text-align: left;
+    }}
+
+    .sidebar-section-link:hover {{
+      border-color: rgba(124, 92, 255, 0.5);
+      box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.18);
+    }}
+
     [data-testid="stMetric"], .stPlotlyChart {{
       background: var(--card-bg);
       border: 1px solid var(--card-border);

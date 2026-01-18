@@ -99,19 +99,39 @@ def render_sidebar():
         unsafe_allow_html=True,
     )
     
-    if st.sidebar.button("CEO", key="nav_btn_ceo", type="primary" if st.session_state.page == "CEO" else "secondary"):
+    if st.sidebar.button(
+        "CEO",
+        key="nav_btn_ceo",
+        type="primary" if st.session_state.page == "CEO" else "secondary",
+        use_container_width=True,
+    ):
         if st.session_state.page != "CEO":
             set_page("CEO")
             st.rerun()
-    if st.sidebar.button("CMO", key="nav_btn_cmo", type="primary" if st.session_state.page == "CMO" else "secondary"):
+    if st.sidebar.button(
+        "CMO",
+        key="nav_btn_cmo",
+        type="primary" if st.session_state.page == "CMO" else "secondary",
+        use_container_width=True,
+    ):
         if st.session_state.page != "CMO":
             set_page("CMO")
             st.rerun()
-    if st.sidebar.button("CSO", key="nav_btn_cso", type="primary" if st.session_state.page == "CSO" else "secondary"):
+    if st.sidebar.button(
+        "CSO",
+        key="nav_btn_cso",
+        type="primary" if st.session_state.page == "CSO" else "secondary",
+        use_container_width=True,
+    ):
         if st.session_state.page != "CSO":
             set_page("CSO")
             st.rerun()
-    if st.sidebar.button("Data Lab", key="nav_btn_lab", type="primary" if st.session_state.page == "LAB" else "secondary"):
+    if st.sidebar.button(
+        "Data Lab",
+        key="nav_btn_lab",
+        type="primary" if st.session_state.page == "LAB" else "secondary",
+        use_container_width=True,
+    ):
         if st.session_state.page != "LAB":
             set_page("LAB")
             st.rerun()
@@ -140,9 +160,11 @@ def render_sidebar():
         ]
 
     if sections:
-        with st.sidebar.expander(" ", expanded=False):
-            for label, anchor in sections:
-                st.sidebar.markdown(f"- [{label}](#{anchor})")
+        with st.sidebar.expander("Sections", expanded=False):
+            links_html = "\n".join(
+                [f'<a class="sidebar-section-link" href="#{anchor}">{label}</a>' for label, anchor in sections]
+            )
+            st.sidebar.markdown(f'<div class="sidebar-sections">{links_html}</div>', unsafe_allow_html=True)
     
     st.sidebar.markdown("---")
     summary_placeholder = st.sidebar.empty()
@@ -262,10 +284,18 @@ def render_sidebar():
     
     selected_markets = []
     selected_pipelines = []
+
+    default_markets = {"CZ", "RUK", "SK"}
     
     for market in all_markets:
         market_key = f"chk_market_{market}"
-        is_market_selected = st.sidebar.checkbox(f"Market: {market}", value=True, key=market_key)
+        if market_key not in st.session_state:
+            st.session_state[market_key] = market in default_markets
+        is_market_selected = st.sidebar.checkbox(
+            f"Market: {market}",
+            value=market in default_markets,
+            key=market_key,
+        )
         
         if is_market_selected:
             selected_markets.append(market)
@@ -274,7 +304,19 @@ def render_sidebar():
                 st.sidebar.markdown(f"**{market} Pipelines:**")
                 for pl in available_pipelines:
                     pl_key = f"chk_pl_{market}_{pl}"
-                    is_pl_selected = st.sidebar.checkbox(f"{pl}", value=True, key=pl_key)
+                    if pl_key not in st.session_state:
+                        st.session_state[pl_key] = (
+                            market in default_markets
+                            and pl in {market, f"{market} | Online", f"{market} | TCM"}
+                        )
+                    is_pl_selected = st.sidebar.checkbox(
+                        f"{pl}",
+                        value=(
+                            market in default_markets
+                            and pl in {market, f"{market} | Online", f"{market} | TCM"}
+                        ),
+                        key=pl_key,
+                    )
                     if is_pl_selected:
                         selected_pipelines.append(pl)
             st.sidebar.markdown("---")
