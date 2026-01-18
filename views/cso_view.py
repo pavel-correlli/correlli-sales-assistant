@@ -6,6 +6,10 @@ from database import fetch_view_data
 from datetime import date, timedelta
 
 
+def _plotly_template():
+    return "plotly_dark" if st.session_state.get("ui_theme_v1", "dark") == "dark" else "plotly_white"
+
+
 def _determine_market(pipeline):
     p = str(pipeline).upper()
     if p.startswith("CZ"):
@@ -38,7 +42,7 @@ def _compute_outcome_category(df: pd.DataFrame) -> pd.Series:
     return df.apply(get_outcome, axis=1)
 
 def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selected_managers=None):
-    st.title("🎯 CSO Operations Dashboard")
+    st.title("CSO Operations Dashboard")
 
     with st.spinner("Analyzing call metadata..."):
         df = fetch_view_data("Algonova_Calls_Raw")
@@ -112,7 +116,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         else:
             st.markdown("**Date Range in Result:** —")
 
-    with st.expander("📊 Data Health & Volume", expanded=False):
+    with st.expander("Data Health & Volume", expanded=False):
         st.write(f"**Total Records Loaded from DB:** {total_raw_rows}")
         if total_raw_exact is not None:
             st.write(f"**Supabase Exact Count (server):** {total_raw_exact}")
@@ -195,7 +199,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 x="minutes",
                 color="call_type_group",
                 orientation="h",
-                template="plotly_white",
+                template=_plotly_template(),
                 title="Talk Time by Manager",
                 hover_data=["calls", "call_type_group", "total_calls"],
                 text="label_calls",
@@ -245,7 +249,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 x="calls",
                 color="call_type_group",
                 orientation="h",
-                template="plotly_white",
+                template=_plotly_template(),
                 title="Total Calls by Pipeline",
                 hover_data=["minutes", "call_type_group", "total_minutes"],
                 text="label_minutes",
@@ -256,7 +260,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             fig_pipe.update_layout(yaxis_title="", xaxis_title="Calls", legend_title="Call Type")
             st.plotly_chart(fig_pipe, use_container_width=True)
 
-        tab_a, tab_b = st.tabs(["📎 Anomalies", "⚠️ Low Quality Calls"])
+        tab_a, tab_b = st.tabs(["Anomalies", "Low Quality Calls"])
 
         with tab_a:
             if "call_duration_sec" in df_feed.columns and "next_step_type" in df_feed.columns:
@@ -358,7 +362,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 )
             )
         fig.update_layout(
-            template="plotly_white",
+            template=_plotly_template(),
             yaxis_title="Total Minutes",
             xaxis_title="Date",
             legend_title="Manager",
@@ -513,7 +517,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 size="total_calls",
                 color="computed_market",
                 hover_name="manager",
-                template="plotly_white",
+                template=_plotly_template(),
                 size_max=60,
                 color_discrete_map=market_color_map,
                 labels={
@@ -597,7 +601,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             x="manager",
             y="value",
             color="Bucket",
-            template="plotly_white",
+            template=_plotly_template(),
             barmode="relative",
             labels={"value": "Share (%)"},
             custom_data=["no_objections_calls", "with_objections_calls", "total_calls", "market", "avg_quality"],

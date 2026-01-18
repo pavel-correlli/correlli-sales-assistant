@@ -84,3 +84,22 @@ SELECT
 FROM "Algonova_Calls_Raw"
 WHERE mkt_manager IS NOT NULL
   AND mkt_manager <> '';
+
+
+CREATE OR REPLACE VIEW v_cmo_intro_friction_traffic_manager_market_pipeline AS
+SELECT
+  (call_datetime::timestamptz)::date AS call_date,
+  COALESCE(NULLIF(mkt_market, ''), NULLIF(market, ''), 'Unknown') AS mkt_market,
+  mkt_manager,
+  pipeline_name,
+  SUM(CASE WHEN call_type = 'intro_call' THEN 1 ELSE 0 END)::int AS intro_calls,
+  SUM(CASE WHEN call_type = 'intro_followup' THEN 1 ELSE 0 END)::int AS intro_flups
+FROM "Algonova_Calls_Raw"
+WHERE call_type IN ('intro_call', 'intro_followup')
+  AND mkt_manager IS NOT NULL
+  AND mkt_manager <> ''
+GROUP BY
+  (call_datetime::timestamptz)::date,
+  COALESCE(NULLIF(mkt_market, ''), NULLIF(market, ''), 'Unknown'),
+  mkt_manager,
+  pipeline_name;

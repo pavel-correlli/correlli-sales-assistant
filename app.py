@@ -61,8 +61,11 @@ def _determine_market(pipeline):
     return "Others"
 
 # --- 1. CONFIG & STYLE ---
-st.set_page_config(page_title="Executive Analytics Radar", layout="wide", page_icon="🦅")
-st.markdown(get_css(), unsafe_allow_html=True)
+if "ui_theme_v1" not in st.session_state:
+    st.session_state["ui_theme_v1"] = "dark"
+
+st.set_page_config(page_title="Conversation Intelligence Analytics", layout="wide")
+st.markdown(get_css(st.session_state["ui_theme_v1"]), unsafe_allow_html=True)
 
 # --- 2. STATE & NAVIGATION ---
 if 'page' not in st.session_state:
@@ -72,8 +75,28 @@ def set_page(page_name):
     st.session_state.page = page_name
 
 def render_sidebar():
-    st.sidebar.title("Algonova Calls Control")
-    st.sidebar.caption(f"Build: {BUILD_ID}")
+    is_light = st.sidebar.toggle("Light Mode", value=st.session_state.get("ui_theme_v1") == "light")
+    next_theme = "light" if is_light else "dark"
+    if next_theme != st.session_state.get("ui_theme_v1"):
+        st.session_state["ui_theme_v1"] = next_theme
+        st.rerun()
+
+    st.sidebar.markdown(
+        f"""
+        <div class="sidebar-brand">
+          <div class="sidebar-brand-inner">
+            <img
+              class="sidebar-logo"
+              src="https://static.tildacdn.one/tild3465-3861-4835-b137-616235373932/Logo_de_Algonova_by_.svg"
+              alt="Algonova"
+            />
+            <div class="sidebar-title">Conversation Intelligence Analytics</div>
+            <div class="sidebar-subtitle">Build: {BUILD_ID}</div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     
     # Volumetric Buttons Navigation
     st.sidebar.markdown("### Navigation")
@@ -98,7 +121,7 @@ def render_sidebar():
     st.sidebar.markdown("---")
     st.sidebar.subheader("Global Filters")
 
-    if st.sidebar.button("Reset filters", use_container_width=True):
+    if st.sidebar.button("Reset Filters", use_container_width=True):
         st.cache_data.clear()
         st.cache_resource.clear()
         keys = list(st.session_state.keys())
@@ -170,7 +193,7 @@ def render_sidebar():
             st.session_state["date_preset_v1"] = "this_month"
             st.rerun()
 
-    all_time = st.sidebar.checkbox("All time", value=False, key="all_time_v1")
+    all_time = st.sidebar.checkbox("All Time", value=False, key="all_time_v1")
     if all_time:
         date_range = []
     else:

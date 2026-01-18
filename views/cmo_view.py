@@ -1,10 +1,16 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from database import fetch_view_data, query_postgres
 
+
+def _plotly_template():
+    return "plotly_dark" if st.session_state.get("ui_theme_v1", "dark") == "dark" else "plotly_white"
+
+
 def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
-    st.title("📈 CMO Traffic Quality & Viscosity")
+    st.title("CMO Traffic Quality & Viscosity")
 
     with st.spinner("Loading traffic data..."):
         df = fetch_view_data("Algonova_Calls_Raw")
@@ -63,8 +69,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     st.subheader("Traffic Viscosity vs Intro Friction")
     st.caption(
         "❓ Viscosity means how many calls are required to process one lead (Calls / Leads). "
-        "Higher viscosity usually indicates wasted touches, poor lead quality, or weak routing. "
-        "Intro Friction shows follow-up load on intro calls (Intro Flups / Intro Calls)."
+        "Higher viscosity usually indicates wasted touches, poor lead quality, or weak routing."
     )
     def _build_where(
         date_range,
@@ -130,20 +135,27 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         y="value",
         color="metric",
         barmode="group",
-        template="plotly_white",
-        labels={"mkt_manager": "mkt_manager", "value": "Index"},
+        template=_plotly_template(),
+        labels={"mkt_manager": "Traffic Manager", "value": "Index"},
         hover_data=["total_calls", "total_leads", "intro_primaries", "intro_followups"],
     )
     fig_bar.update_layout(xaxis_title="Traffic Manager")
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    st.subheader("Intro friction vs Traffic manager")
-    where_hm, params_hm = _build_where(date_range, selected_markets, selected_pipelines, market_col="mkt_market")
+    st.subheader("Intro Friction / Traffic Manager")
+    st.caption("❓ Intro Friction shows follow-up load on intro calls (Intro Flups / Intro Calls).")
+    where_hm, params_hm = _build_where(
+        date_range,
+        selected_markets,
+        selected_pipelines,
+        market_col="mkt_market",
+        pipeline_col="pipeline_name",
+    )
     by_mm_sql = query_postgres(
         f"""
         WITH base AS (
           SELECT *
-          FROM v_cmo_intro_friction_vs_traffic_manager
+          FROM v_cmo_intro_friction_traffic_manager_market_pipeline
           {where_hm}
           AND mkt_market IS NOT NULL
           AND mkt_manager IS NOT NULL
@@ -151,27 +163,83 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         SELECT
           mkt_market,
           mkt_manager,
-          SUM(CASE WHEN call_type = 'intro_call' THEN 1 ELSE 0 END)::int AS intro_calls,
-          SUM(CASE WHEN call_type = 'intro_followup' THEN 1 ELSE 0 END)::int AS intro_flups,
+          SUM(intro_calls)::int AS intro_calls,
+          SUM(intro_flups)::int AS intro_flups,
           ROUND(
-            (SUM(CASE WHEN call_type = 'intro_followup' THEN 1 ELSE 0 END)::numeric)
-            / NULLIF(SUM(CASE WHEN call_type = 'intro_call' THEN 1 ELSE 0 END), 0),
+            (SUM(intro_flups)::numeric) / NULLIF(SUM(intro_calls), 0),
             2
-          ) AS intro_friction_index
+          ) AS intro_friction_index,
+          (SUM(intro_calls) + SUM(intro_flups))::int AS calls_in_calc
         FROM base
         GROUP BY mkt_market, mkt_manager
         """,
         params_hm,
     )
-    by_mm = by_mm_sql if not by_mm_sql.empty else df.groupby(["mkt_market", "mkt_manager"]).apply(
-        lambda g: (g["call_type"].eq("intro_followup").sum()) / max(int(g["call_type"].eq("intro_call").sum()), 1)
-    ).reset_index(name="intro_friction_index")
 
-    pivot = by_mm.pivot(index="mkt_market", columns="mkt_manager", values="intro_friction_index").fillna(0)
-    fig_hm = px.imshow(
-        pivot,
-        aspect="auto",
-        color_continuous_scale="Reds",
-        labels={"x": "Traffic Manager", "y": "Market", "color": "Intro Friction"},
+    if not by_mm_sql.empty:
+        by_mm = by_mm_sql
+    else:
+        intro_calls = (
+            df[df["call_type"] == "intro_call"]
+            .groupby(["mkt_market", "mkt_manager"], dropna=False)
+            .size()
+            .reset_index(name="intro_calls")
+        )
+        intro_flups = (
+            df[df["call_type"] == "intro_followup"]
+            .groupby(["mkt_market", "mkt_manager"], dropna=False)
+            .size()
+            .reset_index(name="intro_flups")
+        )
+        by_mm = intro_calls.merge(intro_flups, on=["mkt_market", "mkt_manager"], how="outer").fillna(0)
+        by_mm["intro_friction_index"] = (
+            by_mm["intro_flups"] / by_mm["intro_calls"].replace(0, pd.NA)
+        ).fillna(0).round(2)
+        by_mm["calls_in_calc"] = (by_mm["intro_calls"] + by_mm["intro_flups"]).astype(int)
+
+    friction = by_mm.pivot(index="mkt_market", columns="mkt_manager", values="intro_friction_index").fillna(0)
+    calls = by_mm.pivot(index="mkt_market", columns="mkt_manager", values="intro_calls").fillna(0).astype(int)
+    flups = by_mm.pivot(index="mkt_market", columns="mkt_manager", values="intro_flups").fillna(0).astype(int)
+    calls_in_calc = by_mm.pivot(index="mkt_market", columns="mkt_manager", values="calls_in_calc").fillna(0).astype(int)
+
+    calls = calls.reindex(index=friction.index, columns=friction.columns, fill_value=0)
+    flups = flups.reindex(index=friction.index, columns=friction.columns, fill_value=0)
+    calls_in_calc = calls_in_calc.reindex(index=friction.index, columns=friction.columns, fill_value=0)
+
+    custom = []
+    for y in friction.index:
+        row = []
+        for x in friction.columns:
+            row.append([int(calls.loc[y, x]), int(flups.loc[y, x]), int(calls_in_calc.loc[y, x])])
+        custom.append(row)
+
+    fig_hm = go.Figure(
+        data=[
+            go.Heatmap(
+                z=friction.values,
+                x=list(friction.columns),
+                y=list(friction.index),
+                customdata=custom,
+                colorscale="Reds",
+                zmin=0,
+                hovertemplate=(
+                    "Market: %{y}<br>"
+                    "Traffic Manager: %{x}<br>"
+                    "Intro Calls: %{customdata[0]}<br>"
+                    "Intro Flups: %{customdata[1]}<br>"
+                    "Calls In Calc: %{customdata[2]}<br>"
+                    "Intro Friction: %{z:.2f}<br>"
+                    "Formula: Intro Flups / Intro Calls<extra></extra>"
+                ),
+            )
+        ]
+    )
+    fig_hm.update_layout(
+        template=_plotly_template(),
+        margin=dict(l=10, r=10, t=10, b=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        xaxis_title="Traffic Manager",
+        yaxis_title="Market",
     )
     st.plotly_chart(fig_hm, use_container_width=True)

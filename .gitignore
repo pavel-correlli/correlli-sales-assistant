@@ -1,5 +1,5 @@
 # Streamlit
-.streamlit/
+.streamlit/secrets.toml
 static/
 
 # Python
@@ -17,6 +17,7 @@ env/
 .idea/
 *.swp
 *.swo
+.trae/
 
 # OS
 .DS_Store

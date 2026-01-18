@@ -4,6 +4,10 @@ import plotly.express as px
 from database import fetch_view_data, normalize_calls_df, add_outcome_category, query_postgres
 
 
+def _plotly_template():
+    return "plotly_dark" if st.session_state.get("ui_theme_v1", "dark") == "dark" else "plotly_white"
+
+
 def _determine_market(pipeline):
     p = str(pipeline).upper()
     if p.startswith("CZ"):
@@ -15,7 +19,7 @@ def _determine_market(pipeline):
     return "Others"
 
 def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
-    st.title("🧭 CEO Strategic Radar")
+    st.title("CEO Strategic Radar")
 
     with st.spinner("Loading executive view..."):
         df = fetch_view_data("Algonova_Calls_Raw")
@@ -158,7 +162,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         y="friction_index",
         color="type",
         barmode="group",
-        template="plotly_white",
+        template=_plotly_template(),
         custom_data=["primaries", "followups", "calls_in_calc"],
         labels={"friction_index": "Friction Index (Flup / Primary)", "market": "Market"},
     )
@@ -184,7 +188,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         y="count",
         color="outcome_category",
         barmode="relative",
-        template="plotly_white",
+        template=_plotly_template(),
         color_discrete_map={"Defined Next Step": "#7d3cff", "Vague": "#e74c3c"},
     )
     fig_vi.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="Market", legend_title="")
@@ -227,7 +231,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
             occ.sort_values("occ_rate_pct", ascending=False),
             x="pipeline_name",
             y="occ_rate_pct",
-            template="plotly_white",
+            template=_plotly_template(),
             hover_data=["occ_leads", "total_leads"],
             labels={"pipeline_name": "Pipeline", "occ_rate_pct": "OCC Rate (%)"},
         )
@@ -316,7 +320,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         y="share_pct",
         color="call_type_group",
         barmode="relative",
-        template="plotly_white",
+        template=_plotly_template(),
         custom_data=[
             "leads_total",
             "calls_type",
@@ -351,7 +355,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         y="share_pct",
         color="call_type_group",
         barmode="relative",
-        template="plotly_white",
+        template=_plotly_template(),
         custom_data=["leads_total", "calls_type", "total_minutes_type", "total_minutes_pipeline"],
         labels={"pipeline_name": "Pipeline", "share_pct": "Share (%)"},
     )
