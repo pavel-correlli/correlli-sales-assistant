@@ -95,7 +95,21 @@ def get_css(theme: str = "dark"):
       text-align: center;
       color: var(--subtle);
       margin: 0;
-      font-size: 0.8rem;
+      font-size: 0.68rem;
+    }}
+
+    .st-key-nav_btn_ceo button,
+    .st-key-nav_btn_cmo button,
+    .st-key-nav_btn_cso button,
+    .st-key-nav_btn_lab button {{
+      width: 180px !important;
+      display: block !important;
+      margin: 0 auto 10px auto !important;
+    }}
+
+    [data-testid="stSidebar"] [data-testid="stExpander"] {{
+      max-width: 180px;
+      margin: 0 auto 12px auto;
     }}
 
     [data-testid="stMetric"], .stPlotlyChart {{

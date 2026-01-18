@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from database import fetch_view_data, normalize_calls_df, add_outcome_category, query_postgres
-from views.shared_ui import render_data_health_volume, render_hint
+from views.shared_ui import render_hint
 
 
 def _plotly_template():
@@ -20,12 +20,10 @@ def _determine_market(pipeline):
     return "Others"
 
 def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
-    st.title("CEO Strategic Radar")
+    st.markdown("<h1 style='text-align:center;'>Strategic Radar</h1>", unsafe_allow_html=True)
 
     with st.spinner("Loading executive view..."):
         df_raw = fetch_view_data("Algonova_Calls_Raw")
-
-    total_raw_rows = int(df_raw.attrs.get("supabase_rows_loaded", len(df_raw)))
 
     df = normalize_calls_df(df_raw)
     df = add_outcome_category(df)
@@ -54,12 +52,6 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     if df.empty:
         st.warning("No data matches current filters.")
         return
-
-    dates = df["call_date"].dropna() if "call_date" in df.columns else []
-    date_range_in_result = None
-    if hasattr(dates, "__len__") and len(dates) > 0:
-        date_range_in_result = (dates.min(), dates.max())
-    render_data_health_volume(total_raw_rows, len(df), date_range_in_result=date_range_in_result, expanded=False)
 
     top_cols = st.columns(3)
     avg_quality = float(df["Average_quality"].mean()) if "Average_quality" in df.columns else float("nan")
@@ -90,6 +82,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
 
     st.markdown("---")
 
+    st.markdown("<div id='total-friction'></div>", unsafe_allow_html=True)
     st.subheader("Total Friction")
     render_hint("Friction Index = Flups / Primary Calls. Higher values mean more follow-ups per processed lead.")
 
@@ -187,6 +180,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     )
     st.plotly_chart(fig_fr, use_container_width=True)
 
+    st.markdown("<div id='vague-index-by-market'></div>", unsafe_allow_html=True)
     st.subheader("Vague Index by Market")
     render_hint("Vague is the only negative outcome. Everything else is treated as Defined Next Step.")
     vi = df.groupby(["market", "outcome_category"]).size().reset_index(name="count")
@@ -212,6 +206,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     else:
         lead_key = None
 
+    st.markdown("<div id='one-call-close-rate-by-pipeline'></div>", unsafe_allow_html=True)
     st.subheader("One-Call-Close Rate by Pipeline")
     render_hint("Leads with exactly 1 Intro Call and 1 Sales Call, and no Flups.")
     if lead_key is None or "pipeline_name" not in df.columns or "call_type" not in df.columns:
@@ -246,6 +241,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         )
         st.plotly_chart(fig_occ, use_container_width=True)
 
+    st.markdown("<div id='talk-time-per-lead-by-pipeline'></div>", unsafe_allow_html=True)
     st.subheader("Talk Time per Lead by Pipeline")
     render_hint("100% split of total pipeline minutes by call type. Hover shows averages, leads, calls, and minutes.")
 
@@ -356,6 +352,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     )
     st.plotly_chart(fig_share, use_container_width=True)
 
+    st.markdown("<div id='total-talk-time-by-pipeline'></div>", unsafe_allow_html=True)
     st.subheader("Total Talk Time by Pipeline")
     render_hint("100% split of total pipeline minutes by call type. Hover shows leads, calls, and minutes.")
     fig_tot = px.bar(

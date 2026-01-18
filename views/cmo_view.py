@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from database import fetch_view_data, query_postgres
-from views.shared_ui import render_data_health_volume, render_hint
+from views.shared_ui import render_hint
 
 
 def _plotly_template():
@@ -11,7 +11,7 @@ def _plotly_template():
 
 
 def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
-    st.title("CMO Traffic Quality & Viscosity")
+    st.markdown("<h1 style='text-align:center;'>Traffic Quality & Viscosity</h1>", unsafe_allow_html=True)
 
     with st.spinner("Loading traffic data..."):
         df_raw = fetch_view_data("Algonova_Calls_Raw")
@@ -19,8 +19,6 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     if df_raw.empty:
         st.warning("No data available.")
         return
-
-    total_raw_rows = int(df_raw.attrs.get("supabase_rows_loaded", len(df_raw)))
 
     df = df_raw.copy()
     if "call_datetime" in df.columns:
@@ -47,12 +45,6 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         st.warning("No data matches current filters.")
         return
 
-    dates = df["call_date"].dropna() if "call_date" in df.columns else []
-    date_range_in_result = None
-    if hasattr(dates, "__len__") and len(dates) > 0:
-        date_range_in_result = (dates.min(), dates.max())
-    render_data_health_volume(total_raw_rows, len(df), date_range_in_result=date_range_in_result, expanded=False)
-
     if "mkt_manager" not in df.columns:
         st.warning("Missing column: mkt_manager")
         return
@@ -76,6 +68,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     merged["viscosity_index"] = merged["viscosity_index"].fillna(0).round(2)
     merged["intro_friction_index"] = merged["intro_friction_index"].fillna(0).round(2)
 
+    st.markdown("<div id='traffic-viscosity-vs-intro-friction'></div>", unsafe_allow_html=True)
     st.subheader("Traffic Viscosity vs Intro Friction")
     render_hint(
         "Viscosity means how many calls are required to process one lead (Calls / Leads). "
@@ -153,6 +146,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     fig_bar.update_xaxes(tickangle=-35, automargin=True)
     st.plotly_chart(fig_bar, use_container_width=True)
 
+    st.markdown("<div id='intro-friction-traffic-manager'></div>", unsafe_allow_html=True)
     st.subheader("Intro Friction / Traffic Manager")
     render_hint("Intro Friction shows follow-up load on intro calls (Intro Flups / Intro Calls).")
     where_hm, params_hm = _build_where(
@@ -233,6 +227,8 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
                 customdata=custom,
                 colorscale="Reds",
                 zmin=0,
+                showscale=True,
+                colorbar=dict(title="Intro Friction", tickformat=".2f"),
                 hovertemplate=(
                     "Market: %{y}<br>"
                     "Traffic Manager: %{x}<br>"

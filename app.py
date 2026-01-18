@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from datetime import datetime, date, timedelta
 from database import fetch_view_data, ensure_chart_views
 from styles import get_css
@@ -90,44 +91,61 @@ def render_sidebar():
               src="https://static.tildacdn.one/tild3465-3861-4835-b137-616235373932/Logo_de_Algonova_by_.svg"
               alt="Algonova"
             />
-            <div class="sidebar-title">Conversation Intelligence Analytics</div>
-            <div class="sidebar-subtitle">Build: {BUILD_ID}</div>
+            <div class="sidebar-title">Conversation Intelligence</div>
+            <div class="sidebar-subtitle">Build: {BUILD_ID} by Correlli Engineering</div>
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
     
-    # Volumetric Buttons Navigation
-    st.sidebar.markdown("### Navigation")
-    
-    if st.sidebar.button("CEO", type="primary" if st.session_state.page == "CEO" else "secondary"):
+    if st.sidebar.button("CEO", key="nav_btn_ceo", type="primary" if st.session_state.page == "CEO" else "secondary"):
         if st.session_state.page != "CEO":
             set_page("CEO")
             st.rerun()
-    if st.sidebar.button("CMO", type="primary" if st.session_state.page == "CMO" else "secondary"):
+    if st.sidebar.button("CMO", key="nav_btn_cmo", type="primary" if st.session_state.page == "CMO" else "secondary"):
         if st.session_state.page != "CMO":
             set_page("CMO")
             st.rerun()
-    if st.sidebar.button("CSO", type="primary" if st.session_state.page == "CSO" else "secondary"):
+    if st.sidebar.button("CSO", key="nav_btn_cso", type="primary" if st.session_state.page == "CSO" else "secondary"):
         if st.session_state.page != "CSO":
             set_page("CSO")
             st.rerun()
-    if st.sidebar.button("Data Lab", type="primary" if st.session_state.page == "LAB" else "secondary"):
+    if st.sidebar.button("Data Lab", key="nav_btn_lab", type="primary" if st.session_state.page == "LAB" else "secondary"):
         if st.session_state.page != "LAB":
             set_page("LAB")
             st.rerun()
 
+    sections = []
     if st.session_state.page == "CSO":
-        st.sidebar.markdown("### CSO Sections")
-        st.sidebar.markdown("- [Operations Feed](#operations-feed)")
-        st.sidebar.markdown("- [Manager Productivity Timeline](#manager-productivity-timeline)")
-        st.sidebar.markdown("- [Call Control](#call-control)")
-        st.sidebar.markdown("- [Friction & Resistance](#friction-and-resistance)")
-        st.sidebar.markdown("- [Discovery Depth Index](#discovery-depth-index)")
+        sections = [
+            ("Operations Feed", "operations-feed"),
+            ("Manager Productivity Timeline", "manager-productivity-timeline"),
+            ("Call Control", "call-control"),
+            ("Friction & Resistance", "friction-and-resistance"),
+            ("Discovery Depth Index", "discovery-depth-index"),
+        ]
+    elif st.session_state.page == "CEO":
+        sections = [
+            ("Total Friction", "total-friction"),
+            ("Vague Index by Market", "vague-index-by-market"),
+            ("One-Call-Close Rate by Pipeline", "one-call-close-rate-by-pipeline"),
+            ("Talk Time per Lead by Pipeline", "talk-time-per-lead-by-pipeline"),
+            ("Total Talk Time by Pipeline", "total-talk-time-by-pipeline"),
+        ]
+    elif st.session_state.page == "CMO":
+        sections = [
+            ("Traffic Viscosity vs Intro Friction", "traffic-viscosity-vs-intro-friction"),
+            ("Intro Friction / Traffic Manager", "intro-friction-traffic-manager"),
+        ]
+
+    if sections:
+        with st.sidebar.expander(" ", expanded=False):
+            for label, anchor in sections:
+                st.sidebar.markdown(f"- [{label}](#{anchor})")
     
     st.sidebar.markdown("---")
-    st.sidebar.subheader("Global Filters")
+    summary_placeholder = st.sidebar.empty()
 
     if st.sidebar.button("Reset Filters", use_container_width=True):
         st.cache_data.clear()
@@ -269,6 +287,46 @@ def render_sidebar():
         default=all_managers,
         key="selected_managers_v1",
         help="Filter data by specific managers. Default is ALL."
+    )
+
+    if df_raw_filters.empty:
+        total_rows = 0
+        filtered_rows = 0
+        date_range_text = "—"
+    else:
+        total_rows = int(df_raw_filters.attrs.get("supabase_rows_loaded", len(df_raw_filters)))
+
+        df_stats = df_raw_filters.copy()
+        if "call_datetime" in df_stats.columns:
+            df_stats["call_datetime"] = pd.to_datetime(df_stats["call_datetime"], errors="coerce", utc=True)
+            df_stats["call_date"] = df_stats["call_datetime"].dt.date
+        elif "call_date" in df_stats.columns:
+            df_stats["call_date"] = pd.to_datetime(df_stats["call_date"], errors="coerce").dt.date
+
+        mask = pd.Series([True] * len(df_stats))
+        if len(date_range) == 2 and "call_date" in df_stats.columns:
+            mask = mask & (df_stats["call_date"] >= date_range[0]) & (df_stats["call_date"] <= date_range[1])
+        if selected_markets and "market" in df_stats.columns:
+            mask = mask & df_stats["market"].isin(selected_markets)
+        if selected_pipelines and "pipeline_name" in df_stats.columns:
+            mask = mask & df_stats["pipeline_name"].isin(selected_pipelines)
+        if selected_managers and "manager" in df_stats.columns:
+            mask = mask & df_stats["manager"].isin(selected_managers)
+
+        df_filtered = df_stats[mask].copy()
+        filtered_rows = int(len(df_filtered))
+
+        if "call_date" in df_filtered.columns:
+            dates = df_filtered["call_date"].dropna()
+            if len(dates) > 0:
+                date_range_text = f"{dates.min()} → {dates.max()}"
+            else:
+                date_range_text = "—"
+        else:
+            date_range_text = "—"
+
+    summary_placeholder.markdown(
+        f"**Showing Calls**\n\n{filtered_rows} / {total_rows}\n\n**Date Range in Result**\n\n{date_range_text}"
     )
             
     return date_range, selected_markets, selected_pipelines, selected_managers

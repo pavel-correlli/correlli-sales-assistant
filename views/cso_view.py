@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from database import fetch_view_data
 from datetime import date, timedelta
-from views.shared_ui import render_data_health_volume, render_hint
+from views.shared_ui import render_hint
 
 
 def _plotly_template():
@@ -43,7 +43,7 @@ def _compute_outcome_category(df: pd.DataFrame) -> pd.Series:
     return df.apply(get_outcome, axis=1)
 
 def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selected_managers=None):
-    st.title("CSO Operations Dashboard")
+    st.markdown("<h1 style='text-align:center;'>Operations Dashboard</h1>", unsafe_allow_html=True)
 
     with st.spinner("Analyzing call metadata..."):
         df = fetch_view_data("Algonova_Calls_Raw")
@@ -105,29 +105,14 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         st.warning(f"No data found for the current selection (Filtered from {total_raw_rows} raw records).")
         return
 
-    summary_cols = st.columns([1, 1])
-    with summary_cols[0]:
-        st.markdown(f"**Showing {len(df_global)} / {total_raw_rows} calls**")
-    with summary_cols[1]:
-        dates = df_global["call_date"].dropna()
-        date_range_in_result = None
-        if len(dates) > 0:
-            date_range_in_result = (dates.min(), dates.max())
-            st.markdown(f"**Date Range in Result:** {dates.min()} → {dates.max()}")
-        else:
-            st.markdown("**Date Range in Result:** —")
-
-    render_data_health_volume(total_raw_rows, len(df_global), date_range_in_result=date_range_in_result, expanded=False)
-
     st.markdown("<div id='operations-feed'></div>", unsafe_allow_html=True)
-    st.markdown("<h2 style='text-align:center;'>Operations Feed</h2>", unsafe_allow_html=True)
 
     df_feed = df_global.copy()
 
     if df_feed.empty:
         st.warning("No data for current filters.")
     else:
-        ops_cols = st.columns(5)
+        ops_cols = st.columns(6)
         total_calls = int(df_feed["call_id"].count()) if "call_id" in df_feed.columns else int(len(df_feed))
         intro_calls = 0
         intro_flup = 0
@@ -150,13 +135,57 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             st.metric("Sales Calls", f"{sales_calls}")
         with ops_cols[4]:
             st.metric("Sales Follow Up", f"{sales_flup}")
-
-        qual_col = st.columns(1)[0]
-        with qual_col:
+        with ops_cols[5]:
             if pd.isna(avg_quality):
                 st.metric("Avg Quality", "—")
             else:
                 st.metric("Avg Quality", f"{avg_quality:.2f}")
+
+        tab_a, tab_b = st.tabs(["Anomalies", "Low Quality Calls"])
+
+        with tab_a:
+            if "call_duration_sec" in df_feed.columns and "next_step_type" in df_feed.columns:
+                anomalies = df_feed[
+                    (df_feed["call_duration_sec"] > 600)
+                    & df_feed["next_step_type"].apply(_is_callback_vague)
+                ].copy()
+                anomalies["duration_min"] = (anomalies["call_duration_sec"] / 60).round(1)
+                show_cols = _existing_columns(
+                    anomalies,
+                    ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "audio_url", "kommo_link"],
+                )
+                if anomalies.empty:
+                    st.success("No anomalies for current filters.")
+                else:
+                    st.dataframe(
+                        anomalies.sort_values("call_duration_sec", ascending=False)[show_cols],
+                        use_container_width=True,
+                        hide_index=True,
+                        column_config={"audio_url": st.column_config.LinkColumn("Audio URL")},
+                    )
+            elif "call_duration_sec" not in df_feed.columns:
+                st.warning("call_duration_sec is missing, duration-based anomalies are unavailable.")
+            else:
+                st.warning("next_step_type is missing, vague callback anomalies are unavailable.")
+
+        with tab_b:
+            if "Average_quality" in df_feed.columns:
+                low_q = df_feed[df_feed["Average_quality"] < 4.0].copy()
+                show_cols = _existing_columns(
+                    low_q,
+                    ["call_datetime", "manager", "pipeline_name", "Average_quality", "audio_url", "kommo_link"],
+                )
+                if low_q.empty:
+                    st.success("No low-quality calls for current filters.")
+                else:
+                    st.dataframe(
+                        low_q.sort_values("Average_quality", ascending=True)[show_cols],
+                        use_container_width=True,
+                        hide_index=True,
+                        column_config={"audio_url": st.column_config.LinkColumn("Audio URL")},
+                    )
+            else:
+                st.warning("Average_quality is missing, quality filter is unavailable.")
 
         if "call_duration_sec" in df_feed.columns and "manager" in df_feed.columns and "call_type" in df_feed.columns:
             mgr_group = (
@@ -256,52 +285,6 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             )
             fig_pipe.update_layout(yaxis_title="", xaxis_title="Calls", legend_title="Call Type")
             st.plotly_chart(fig_pipe, use_container_width=True)
-
-        tab_a, tab_b = st.tabs(["Anomalies", "Low Quality Calls"])
-
-        with tab_a:
-            if "call_duration_sec" in df_feed.columns and "next_step_type" in df_feed.columns:
-                anomalies = df_feed[
-                    (df_feed["call_duration_sec"] > 600)
-                    & df_feed["next_step_type"].apply(_is_callback_vague)
-                ].copy()
-                anomalies["duration_min"] = (anomalies["call_duration_sec"] / 60).round(1)
-                show_cols = _existing_columns(
-                    anomalies,
-                    ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "audio_url", "kommo_link"],
-                )
-                if anomalies.empty:
-                    st.success("No anomalies for current filters.")
-                else:
-                    st.dataframe(
-                        anomalies.sort_values("call_duration_sec", ascending=False)[show_cols],
-                        use_container_width=True,
-                        hide_index=True,
-                        column_config={"audio_url": st.column_config.LinkColumn("Audio URL")},
-                    )
-            elif "call_duration_sec" not in df_feed.columns:
-                st.warning("call_duration_sec is missing, duration-based anomalies are unavailable.")
-            else:
-                st.warning("next_step_type is missing, vague callback anomalies are unavailable.")
-
-        with tab_b:
-            if "Average_quality" in df_feed.columns:
-                low_q = df_feed[df_feed["Average_quality"] < 4.0].copy()
-                show_cols = _existing_columns(
-                    low_q,
-                    ["call_datetime", "manager", "pipeline_name", "Average_quality", "audio_url", "kommo_link"],
-                )
-                if low_q.empty:
-                    st.success("No low-quality calls for current filters.")
-                else:
-                    st.dataframe(
-                        low_q.sort_values("Average_quality", ascending=True)[show_cols],
-                        use_container_width=True,
-                        hide_index=True,
-                        column_config={"audio_url": st.column_config.LinkColumn("Audio URL")},
-                    )
-            else:
-                st.warning("Average_quality is missing, quality filter is unavailable.")
 
     st.markdown("---")
 
