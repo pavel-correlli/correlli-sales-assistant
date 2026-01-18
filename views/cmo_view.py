@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from database import fetch_view_data, query_postgres
+from database import fetch_view_data
 from views.shared_ui import render_hint
 
 
@@ -13,114 +13,79 @@ def _plotly_template():
 def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     st.markdown("<h1 style='text-align:center;'>Traffic Quality & Viscosity</h1>", unsafe_allow_html=True)
 
-    with st.spinner("Loading traffic data..."):
-        df_raw = fetch_view_data("Algonova_Calls_Raw")
-
-    if df_raw.empty:
-        st.warning("No data available.")
-        return
-
-    df = df_raw.copy()
-    if "call_datetime" in df.columns:
-        df["call_datetime"] = pd.to_datetime(df["call_datetime"], errors="coerce", utc=True)
-    else:
-        df["call_datetime"] = pd.NaT
-
-    df["call_date"] = df["call_datetime"].dt.date
-
-    if "Average_quality" in df.columns:
-        df["Average_quality"] = pd.to_numeric(df["Average_quality"], errors="coerce")
-
-    mask = pd.Series([True] * len(df))
-    if len(date_range) == 2:
-        mask = mask & (df["call_date"] >= date_range[0]) & (df["call_date"] <= date_range[1])
-    if selected_markets:
-        mask = mask & df["market"].isin(selected_markets)
-    if selected_pipelines:
-        mask = mask & df["pipeline_name"].isin(selected_pipelines)
-
-    df = df[mask].copy()
-
-    if df.empty:
-        st.warning("No data matches current filters.")
-        return
-
-    if "mkt_manager" not in df.columns:
-        st.warning("Missing column: mkt_manager")
-        return
-
-    df["mkt_market"] = df.get("mkt_market", df.get("market", "Unknown"))
-
-    total_calls = df.groupby("mkt_manager").size().reset_index(name="total_calls")
-    total_leads = df.groupby("mkt_manager")["lead_id"].nunique().reset_index(name="total_leads")
-
-    intro_prim = df[df["call_type"] == "intro_call"].groupby("mkt_manager").size().reset_index(name="intro_primaries")
-    intro_fu = df[df["call_type"] == "intro_followup"].groupby("mkt_manager").size().reset_index(name="intro_followups")
-
-    merged = total_calls.merge(total_leads, on="mkt_manager", how="left")
-    merged = merged.merge(intro_prim, on="mkt_manager", how="left")
-    merged = merged.merge(intro_fu, on="mkt_manager", how="left")
-    merged = merged.fillna(0)
-
-    merged["viscosity_index"] = (merged["total_calls"] / merged["total_leads"].replace(0, pd.NA)).astype(float)
-    merged["intro_friction_index"] = (merged["intro_followups"] / merged["intro_primaries"].replace(0, pd.NA)).astype(float)
-
-    merged["viscosity_index"] = merged["viscosity_index"].fillna(0).round(2)
-    merged["intro_friction_index"] = merged["intro_friction_index"].fillna(0).round(2)
-
     st.markdown("<div id='traffic-viscosity-vs-intro-friction'></div>", unsafe_allow_html=True)
     st.subheader("Traffic Viscosity vs Intro Friction")
     render_hint(
         "Viscosity means how many calls are required to process one lead (Calls / Leads). "
         "Higher viscosity usually indicates wasted touches, poor lead quality, or weak routing."
     )
-    def _build_where(
-        date_range,
-        selected_markets,
-        selected_pipelines,
-        date_col="call_date",
-        market_col="market",
-        pipeline_col="pipeline_name",
-    ):
-        clauses = [f"{date_col} IS NOT NULL"]
-        params = []
-        if len(date_range) == 2:
-            clauses.append(f"{date_col} BETWEEN %s AND %s")
-            params.extend([date_range[0], date_range[1]])
-        if selected_markets:
-            clauses.append(f"{market_col} = ANY(%s)")
-            params.append(selected_markets)
-        if selected_pipelines:
-            clauses.append(f"{pipeline_col} = ANY(%s)")
-            params.append(selected_pipelines)
-        return f"WHERE {' AND '.join(clauses)}", tuple(params)
+    with st.spinner("Loading CMO chart view..."):
+        df_view = fetch_view_data("v_cmo_traffic_viscosity_vs_intro_friction")
 
-    where_sql, params = _build_where(date_range, selected_markets, selected_pipelines)
-    merged_sql = query_postgres(
-        f"""
-        WITH base AS (
-          SELECT *
-          FROM v_cmo_traffic_viscosity_vs_intro_friction
-          {where_sql}
-        )
-        SELECT
-          mkt_manager,
-          COUNT(*)::int AS total_calls,
-          COUNT(DISTINCT lead_id)::int AS total_leads,
-          SUM(CASE WHEN call_type = 'intro_call' THEN 1 ELSE 0 END)::int AS intro_primaries,
-          SUM(CASE WHEN call_type = 'intro_followup' THEN 1 ELSE 0 END)::int AS intro_followups,
-          ROUND((COUNT(*)::numeric / NULLIF(COUNT(DISTINCT lead_id), 0))::numeric, 2) AS viscosity_index,
-          ROUND(
-            (SUM(CASE WHEN call_type = 'intro_followup' THEN 1 ELSE 0 END)::numeric)
-            / NULLIF(SUM(CASE WHEN call_type = 'intro_call' THEN 1 ELSE 0 END), 0),
-            2
-          ) AS intro_friction_index
-        FROM base
-        GROUP BY mkt_manager
-        """,
-        params,
+    if df_view.empty:
+        st.warning("No data available from SQL view (v_cmo_traffic_viscosity_vs_intro_friction).")
+        return
+
+    df = df_view.copy()
+    if "call_date" in df.columns:
+        df["call_date"] = pd.to_datetime(df["call_date"], errors="coerce").dt.date
+    elif "call_datetime" in df.columns:
+        df["call_datetime"] = pd.to_datetime(df["call_datetime"], errors="coerce", utc=True)
+        df["call_date"] = df["call_datetime"].dt.date
+    else:
+        df["call_date"] = pd.NaT
+
+    def _determine_market(pipeline):
+        p = str(pipeline or "").upper()
+        if p.startswith("CZ"):
+            return "CZ"
+        if p.startswith("SK"):
+            return "SK"
+        if p.startswith("RUK"):
+            return "RUK"
+        return "Others"
+
+    df["computed_market"] = df["pipeline_name"].apply(_determine_market) if "pipeline_name" in df.columns else "Others"
+    df["market"] = df.get("market", "")
+    df["market"] = df["market"].astype(str)
+    df["mkt_market"] = df["market"].where(df["market"].str.strip() != "", df["computed_market"])
+
+    mask = pd.Series([True] * len(df))
+    if len(date_range) == 2 and "call_date" in df.columns:
+        mask = mask & (df["call_date"] >= date_range[0]) & (df["call_date"] <= date_range[1])
+    if selected_markets:
+        mask = mask & df["mkt_market"].isin(selected_markets)
+    if selected_pipelines and "pipeline_name" in df.columns:
+        mask = mask & df["pipeline_name"].isin(selected_pipelines)
+    if "mkt_manager" in df.columns:
+        mask = mask & df["mkt_manager"].notna() & (df["mkt_manager"].astype(str).str.strip() != "")
+
+    df = df[mask].copy()
+    if df.empty:
+        st.warning("No data matches current filters in SQL view.")
+        return
+
+    total_calls = df.groupby("mkt_manager").size().rename("total_calls")
+    if "lead_id" in df.columns:
+        total_leads = df.groupby("mkt_manager")["lead_id"].nunique(dropna=True).rename("total_leads")
+    else:
+        total_leads = (total_calls * 0).rename("total_leads")
+    intro_primaries = df["call_type"].eq("intro_call").groupby(df["mkt_manager"]).sum().rename("intro_primaries")
+    intro_followups = df["call_type"].eq("intro_followup").groupby(df["mkt_manager"]).sum().rename("intro_followups")
+
+    merged_for_chart = (
+        pd.concat([total_calls, total_leads, intro_primaries, intro_followups], axis=1)
+        .reset_index()
+        .rename(columns={"index": "mkt_manager"})
     )
-    merged_for_chart = merged_sql if not merged_sql.empty else merged
+    merged_for_chart["viscosity_index"] = pd.to_numeric(
+        merged_for_chart["total_calls"] / merged_for_chart["total_leads"].replace(0, pd.NA),
+        errors="coerce",
+    ).fillna(0).round(2)
+    merged_for_chart["intro_friction_index"] = pd.to_numeric(
+        merged_for_chart["intro_followups"] / merged_for_chart["intro_primaries"].replace(0, pd.NA),
+        errors="coerce",
+    ).fillna(0).round(2)
 
     long_df = merged_for_chart.melt(
         id_vars=["mkt_manager", "total_calls", "total_leads", "intro_primaries", "intro_followups"],
@@ -139,6 +104,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         color="metric",
         barmode="group",
         template=_plotly_template(),
+        pattern_shape_sequence=[""],
         labels={"mkt_manager": "Traffic Manager", "value": "Index"},
         hover_data=["total_calls", "total_leads", "intro_primaries", "intro_followups"],
     )
@@ -149,58 +115,51 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     st.markdown("<div id='intro-friction-traffic-manager'></div>", unsafe_allow_html=True)
     st.subheader("Intro Friction / Traffic Manager")
     render_hint("Intro Friction shows follow-up load on intro calls (Intro Flups / Intro Calls).")
-    where_hm, params_hm = _build_where(
-        date_range,
-        selected_markets,
-        selected_pipelines,
-        market_col="mkt_market",
-        pipeline_col="pipeline_name",
-    )
-    by_mm_sql = query_postgres(
-        f"""
-        WITH base AS (
-          SELECT *
-          FROM v_cmo_intro_friction_traffic_manager_market_pipeline
-          {where_hm}
-          AND mkt_market IS NOT NULL
-          AND mkt_manager IS NOT NULL
-        )
-        SELECT
-          mkt_market,
-          mkt_manager,
-          SUM(intro_calls)::int AS intro_calls,
-          SUM(intro_flups)::int AS intro_flups,
-          ROUND(
-            (SUM(intro_flups)::numeric) / NULLIF(SUM(intro_calls), 0),
-            2
-          ) AS intro_friction_index,
-          (SUM(intro_calls) + SUM(intro_flups))::int AS calls_in_calc
-        FROM base
-        GROUP BY mkt_market, mkt_manager
-        """,
-        params_hm,
-    )
+    with st.spinner("Loading heatmap view..."):
+        by_mm = fetch_view_data("v_cmo_intro_friction_traffic_manager_market_pipeline")
 
-    if not by_mm_sql.empty:
-        by_mm = by_mm_sql
-    else:
-        intro_calls = (
-            df[df["call_type"] == "intro_call"]
-            .groupby(["mkt_market", "mkt_manager"], dropna=False)
-            .size()
-            .reset_index(name="intro_calls")
-        )
-        intro_flups = (
-            df[df["call_type"] == "intro_followup"]
-            .groupby(["mkt_market", "mkt_manager"], dropna=False)
-            .size()
-            .reset_index(name="intro_flups")
-        )
-        by_mm = intro_calls.merge(intro_flups, on=["mkt_market", "mkt_manager"], how="outer").fillna(0)
-        by_mm["intro_friction_index"] = (
-            by_mm["intro_flups"] / by_mm["intro_calls"].replace(0, pd.NA)
-        ).fillna(0).round(2)
-        by_mm["calls_in_calc"] = (by_mm["intro_calls"] + by_mm["intro_flups"]).astype(int)
+    if by_mm.empty:
+        st.warning("No data available from SQL view (v_cmo_intro_friction_traffic_manager_market_pipeline).")
+        return
+
+    if "call_date" in by_mm.columns:
+        by_mm["call_date"] = pd.to_datetime(by_mm["call_date"], errors="coerce").dt.date
+
+    mask_hm = pd.Series([True] * len(by_mm))
+    if len(date_range) == 2 and "call_date" in by_mm.columns:
+        mask_hm = mask_hm & (by_mm["call_date"] >= date_range[0]) & (by_mm["call_date"] <= date_range[1])
+    if selected_markets and "mkt_market" in by_mm.columns:
+        mask_hm = mask_hm & by_mm["mkt_market"].isin(selected_markets)
+    if selected_pipelines and "pipeline_name" in by_mm.columns:
+        mask_hm = mask_hm & by_mm["pipeline_name"].isin(selected_pipelines)
+
+    by_mm = by_mm[mask_hm].copy()
+    if by_mm.empty:
+        st.warning("No heatmap data matches current filters in SQL view.")
+        return
+
+    by_mm["intro_calls"] = pd.to_numeric(by_mm.get("intro_calls"), errors="coerce").fillna(0).astype(int)
+    by_mm["intro_flups"] = pd.to_numeric(by_mm.get("intro_flups"), errors="coerce").fillna(0).astype(int)
+    by_mm = (
+        by_mm.groupby(["mkt_market", "mkt_manager"], dropna=False)[["intro_calls", "intro_flups"]]
+        .sum()
+        .reset_index()
+    )
+    by_mm["calls_in_calc"] = (by_mm["intro_calls"] + by_mm["intro_flups"]).astype(int)
+    by_mm["intro_friction_index"] = pd.to_numeric(
+        by_mm["intro_flups"] / by_mm["intro_calls"].replace(0, pd.NA),
+        errors="coerce",
+    ).fillna(0).round(2)
+
+    by_mm["mkt_market"] = by_mm["mkt_market"].astype(str).str.strip()
+    by_mm["mkt_manager"] = by_mm["mkt_manager"].astype(str).str.strip()
+    by_mm = by_mm[
+        (~by_mm["mkt_market"].isin({"", "Unknown", "0", "nan", "None"}))
+        & (~by_mm["mkt_manager"].isin({"", "0", "nan", "None"}))
+    ].copy()
+    if by_mm.empty:
+        st.warning("No valid market/manager values for heatmap after cleaning.")
+        return
 
     friction = by_mm.pivot(index="mkt_market", columns="mkt_manager", values="intro_friction_index").fillna(0)
     calls = by_mm.pivot(index="mkt_market", columns="mkt_manager", values="intro_calls").fillna(0).astype(int)

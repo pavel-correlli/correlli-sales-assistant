@@ -76,11 +76,11 @@ def set_page(page_name):
     st.session_state.page = page_name
 
 def render_sidebar():
-    is_light = st.sidebar.toggle("Light Mode", value=st.session_state.get("ui_theme_v1") == "light")
-    next_theme = "light" if is_light else "dark"
-    if next_theme != st.session_state.get("ui_theme_v1"):
-        st.session_state["ui_theme_v1"] = next_theme
-        st.rerun()
+    def _render_sections(section_items: list[tuple[str, str]]):
+        links_html = "\n".join(
+            [f'<a class="sidebar-section-link" href="#{anchor}">{label}</a>' for label, anchor in section_items]
+        )
+        st.sidebar.markdown(f'<div class="sidebar-sections sidebar-sections-inline">{links_html}</div>', unsafe_allow_html=True)
 
     st.sidebar.markdown(
         f"""
@@ -91,7 +91,7 @@ def render_sidebar():
               src="https://static.tildacdn.one/tild3465-3861-4835-b137-616235373932/Logo_de_Algonova_by_.svg"
               alt="Algonova"
             />
-            <div class="sidebar-title">Conversation Intelligence</div>
+            <div class="sidebar-title">Conversation Intelligence Dashboard</div>
             <div class="sidebar-subtitle">Build: {BUILD_ID} by Correlli Engineering</div>
           </div>
         </div>
@@ -99,6 +99,27 @@ def render_sidebar():
         unsafe_allow_html=True,
     )
     
+    sections_map: dict[str, list[tuple[str, str]]] = {
+        "CSO": [
+            ("Operations Feed", "operations-feed"),
+            ("Manager Productivity Timeline", "manager-productivity-timeline"),
+            ("Call Control", "call-control"),
+            ("Friction & Resistance", "friction-and-resistance"),
+            ("Discovery Depth Index", "discovery-depth-index"),
+        ],
+        "CEO": [
+            ("Total Friction", "total-friction"),
+            ("Vague Index by Market", "vague-index-by-market"),
+            ("One-Call-Close Rate by Pipeline", "one-call-close-rate-by-pipeline"),
+            ("Talk Time per Lead by Pipeline", "talk-time-per-lead-by-pipeline"),
+            ("Total Talk Time by Pipeline", "total-talk-time-by-pipeline"),
+        ],
+        "CMO": [
+            ("Traffic Viscosity vs Intro Friction", "traffic-viscosity-vs-intro-friction"),
+            ("Intro Friction / Traffic Manager", "intro-friction-traffic-manager"),
+        ],
+    }
+
     if st.sidebar.button(
         "CEO",
         key="nav_btn_ceo",
@@ -108,6 +129,9 @@ def render_sidebar():
         if st.session_state.page != "CEO":
             set_page("CEO")
             st.rerun()
+    if st.session_state.page == "CEO":
+        _render_sections(sections_map["CEO"])
+
     if st.sidebar.button(
         "CMO",
         key="nav_btn_cmo",
@@ -117,6 +141,9 @@ def render_sidebar():
         if st.session_state.page != "CMO":
             set_page("CMO")
             st.rerun()
+    if st.session_state.page == "CMO":
+        _render_sections(sections_map["CMO"])
+
     if st.sidebar.button(
         "CSO",
         key="nav_btn_cso",
@@ -126,6 +153,9 @@ def render_sidebar():
         if st.session_state.page != "CSO":
             set_page("CSO")
             st.rerun()
+    if st.session_state.page == "CSO":
+        _render_sections(sections_map["CSO"])
+
     if st.sidebar.button(
         "Data Lab",
         key="nav_btn_lab",
@@ -135,36 +165,6 @@ def render_sidebar():
         if st.session_state.page != "LAB":
             set_page("LAB")
             st.rerun()
-
-    sections = []
-    if st.session_state.page == "CSO":
-        sections = [
-            ("Operations Feed", "operations-feed"),
-            ("Manager Productivity Timeline", "manager-productivity-timeline"),
-            ("Call Control", "call-control"),
-            ("Friction & Resistance", "friction-and-resistance"),
-            ("Discovery Depth Index", "discovery-depth-index"),
-        ]
-    elif st.session_state.page == "CEO":
-        sections = [
-            ("Total Friction", "total-friction"),
-            ("Vague Index by Market", "vague-index-by-market"),
-            ("One-Call-Close Rate by Pipeline", "one-call-close-rate-by-pipeline"),
-            ("Talk Time per Lead by Pipeline", "talk-time-per-lead-by-pipeline"),
-            ("Total Talk Time by Pipeline", "total-talk-time-by-pipeline"),
-        ]
-    elif st.session_state.page == "CMO":
-        sections = [
-            ("Traffic Viscosity vs Intro Friction", "traffic-viscosity-vs-intro-friction"),
-            ("Intro Friction / Traffic Manager", "intro-friction-traffic-manager"),
-        ]
-
-    if sections:
-        with st.sidebar.expander("Sections", expanded=False):
-            links_html = "\n".join(
-                [f'<a class="sidebar-section-link" href="#{anchor}">{label}</a>' for label, anchor in sections]
-            )
-            st.sidebar.markdown(f'<div class="sidebar-sections">{links_html}</div>', unsafe_allow_html=True)
     
     st.sidebar.markdown("---")
     summary_placeholder = st.sidebar.empty()

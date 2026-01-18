@@ -161,7 +161,10 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                         anomalies.sort_values("call_duration_sec", ascending=False)[show_cols],
                         use_container_width=True,
                         hide_index=True,
-                        column_config={"audio_url": st.column_config.LinkColumn("Audio URL")},
+                        column_config={
+                            "audio_url": st.column_config.LinkColumn("Audio URL"),
+                            "kommo_link": st.column_config.LinkColumn("Kommo"),
+                        },
                     )
             elif "call_duration_sec" not in df_feed.columns:
                 st.warning("call_duration_sec is missing, duration-based anomalies are unavailable.")
@@ -182,7 +185,10 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                         low_q.sort_values("Average_quality", ascending=True)[show_cols],
                         use_container_width=True,
                         hide_index=True,
-                        column_config={"audio_url": st.column_config.LinkColumn("Audio URL")},
+                        column_config={
+                            "audio_url": st.column_config.LinkColumn("Audio URL"),
+                            "kommo_link": st.column_config.LinkColumn("Kommo"),
+                        },
                     )
             else:
                 st.warning("Average_quality is missing, quality filter is unavailable.")
@@ -226,6 +232,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 color="call_type_group",
                 orientation="h",
                 template=_plotly_template(),
+                pattern_shape_sequence=[""],
                 title="Talk Time by Manager",
                 hover_data=["calls", "call_type_group", "total_calls"],
                 text="label_calls",
@@ -276,6 +283,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 color="call_type_group",
                 orientation="h",
                 template=_plotly_template(),
+                pattern_shape_sequence=[""],
                 title="Total Calls by Pipeline",
                 hover_data=["minutes", "call_type_group", "total_minutes"],
                 text="label_minutes",
@@ -378,6 +386,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 title="Defined vs. Vague (100% Stacked)",
                 barmode="relative",
                 color_discrete_map={"Defined": "#2ecc71", "Vague": "#e74c3c"},
+                pattern_shape_sequence=[""],
                 hover_data=["total_calls"],
             )
             fig_vague.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="")
@@ -437,20 +446,28 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     barmode="group",
                     title="Friction Index by Pipeline",
                     color_discrete_map={"Intro Friction": "#3498db", "Sales Friction": "#e67e22"},
+                    pattern_shape_sequence=[""],
                     hover_data=["Total Calls"],
                 )
                 fig_friction.update_layout(yaxis_title="Friction Index (Flup / Primary)", xaxis_title="")
                 st.plotly_chart(fig_friction, use_container_width=True)
 
             with col2:
+                intro_calls_wtd = int((df_wtd["call_type"] == "intro_call").sum())
+                intro_flups_wtd = int((df_wtd["call_type"] == "intro_followup").sum())
+                sales_calls_wtd = int((df_wtd["call_type"] == "sales_call").sum())
+                sales_flups_wtd = int((df_wtd["call_type"] == "sales_followup").sum())
+
+                avg_intro_friction = (intro_flups_wtd / intro_calls_wtd) if intro_calls_wtd > 0 else 0.0
+                avg_sales_friction = (sales_flups_wtd / sales_calls_wtd) if sales_calls_wtd > 0 else 0.0
                 st.metric(
                     "Avg Intro Friction",
-                    f"{df_fric[df_fric['Type'] == 'Intro Friction']['Value'].mean():.2f}",
+                    f"{avg_intro_friction:.2f}",
                     help=r"$Intro\ Friction=\frac{Intro\ Flups}{Intro\ Calls}$",
                 )
                 st.metric(
                     "Avg Sales Friction",
-                    f"{df_fric[df_fric['Type'] == 'Sales Friction']['Value'].mean():.2f}",
+                    f"{avg_sales_friction:.2f}",
                     help=r"$Sales\ Friction=\frac{Sales\ Flups}{Sales\ Calls}$",
                 )
 
@@ -580,6 +597,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             y="value",
             color="Bucket",
             template=_plotly_template(),
+            pattern_shape_sequence=[""],
             barmode="relative",
             labels={"value": "Share (%)"},
             custom_data=["no_objections_calls", "with_objections_calls", "total_calls", "market", "avg_quality"],
@@ -599,7 +617,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         fig_dd.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="", legend_title="")
         st.plotly_chart(fig_dd, use_container_width=True)
 
-        st.subheader("No Objections Calls Rating")
+        st.markdown("<h2 style='text-align:center;'>No Objections Calls Rating</h2>", unsafe_allow_html=True)
 
         intro_calls_mgr = df_global[df_global["call_type"] == "intro_call"].groupby("manager").size()
         intro_flup_mgr = df_global[df_global["call_type"] == "intro_followup"].groupby("manager").size()

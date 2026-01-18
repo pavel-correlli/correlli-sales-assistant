@@ -165,6 +165,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         color="type",
         barmode="group",
         template=_plotly_template(),
+        pattern_shape_sequence=[""],
         custom_data=["primaries", "followups", "calls_in_calc"],
         labels={"friction_index": "Friction Index (Flup / Primary)", "market": "Market"},
     )
@@ -192,6 +193,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         color="outcome_category",
         barmode="relative",
         template=_plotly_template(),
+        pattern_shape_sequence=[""],
         color_discrete_map={"Defined Next Step": "#7d3cff", "Vague": "#e74c3c"},
     )
     fig_vi.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="Market", legend_title="")
@@ -236,6 +238,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
             x="pipeline_name",
             y="occ_rate_pct",
             template=_plotly_template(),
+            pattern_shape_sequence=[""],
             hover_data=["occ_leads", "total_leads"],
             labels={"pipeline_name": "Pipeline", "occ_rate_pct": "OCC Rate (%)"},
         )
@@ -326,6 +329,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         color="call_type_group",
         barmode="relative",
         template=_plotly_template(),
+        pattern_shape_sequence=[""],
         custom_data=[
             "leads_total",
             "calls_type",
@@ -362,6 +366,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         color="call_type_group",
         barmode="relative",
         template=_plotly_template(),
+        pattern_shape_sequence=[""],
         custom_data=["leads_total", "calls_type", "total_minutes_type", "total_minutes_pipeline"],
         labels={"pipeline_name": "Pipeline", "share_pct": "Share (%)"},
     )
