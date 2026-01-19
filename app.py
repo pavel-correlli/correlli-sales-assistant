@@ -117,6 +117,9 @@ def render_sidebar():
         "CMO": [
             ("Traffic Viscosity vs Intro Friction", "traffic-viscosity-vs-intro-friction"),
             ("Intro Friction / Traffic Manager", "intro-friction-traffic-manager"),
+            ("Goal Frequency / Pipeline", "goal-heatmap"),
+            ("Objection Frequency / Pipeline", "objection-heatmap"),
+            ("Fear Frequency / Pipeline", "fear-heatmap"),
         ],
     }
 
