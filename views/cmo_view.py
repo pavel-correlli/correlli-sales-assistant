@@ -16,16 +16,18 @@ def _fetch_attribute_frequency_for_heatmap(
     selected_markets,
     selected_pipelines,
 ) -> pd.DataFrame:
-    if not date_range or len(date_range) != 2:
-        return pd.DataFrame()
+    has_date = bool(date_range) and len(date_range) == 2
+    start_date, end_date = (date_range[0], date_range[1]) if has_date else (None, None)
 
-    start_date, end_date = date_range
-
-    pipeline_filter_sql = ""
-    pipeline_params: list = []
+    calls_where_clauses: list[str] = []
+    calls_params: list = []
+    if has_date:
+        calls_where_clauses.append("call_date BETWEEN %s AND %s")
+        calls_params.extend([start_date, end_date])
     if selected_pipelines:
-        pipeline_filter_sql = " AND pipeline_name = ANY(%s)"
-        pipeline_params.append(list(selected_pipelines))
+        calls_where_clauses.append("pipeline_name = ANY(%s)")
+        calls_params.append(list(selected_pipelines))
+    calls_where_sql = f"WHERE {' AND '.join(calls_where_clauses)}" if calls_where_clauses else ""
 
     market_filter_sql = ""
     market_params: list = []
@@ -46,8 +48,7 @@ def _fetch_attribute_frequency_for_heatmap(
           ELSE 'Others'
         END AS mkt_market
       FROM v_analytics_calls_enhanced
-      WHERE call_date BETWEEN %s AND %s
-      {pipeline_filter_sql}
+      {calls_where_sql}
     ),
     calls_base AS (
       SELECT *
@@ -71,7 +72,7 @@ def _fetch_attribute_frequency_for_heatmap(
       FROM calls_base cb
       JOIN v_analytics_attributes_frequency f
         ON f.call_id = cb.call_id
-      WHERE f.attr_type = %s
+      WHERE LOWER(f.attr_type) = LOWER(%s)
         AND f.attr_value IS NOT NULL
         AND btrim(f.attr_value) <> ''
     ),
@@ -100,7 +101,7 @@ def _fetch_attribute_frequency_for_heatmap(
     ORDER BY a.calls_with_attr DESC;
     """
 
-    params = [start_date, end_date, *pipeline_params, *market_params, attr_type]
+    params = [*calls_params, *market_params, attr_type]
     return query_postgres(sql, tuple(params))
 
 
