@@ -21,34 +21,38 @@ def _fetch_attribute_frequency_for_heatmap(
 
     calls_where_clauses: list[str] = []
     calls_params: list = []
-    if has_date:
-        calls_where_clauses.append("call_date BETWEEN %s AND %s")
-        calls_params.extend([start_date, end_date])
     if selected_pipelines:
         calls_where_clauses.append("pipeline_name = ANY(%s)")
         calls_params.append(list(selected_pipelines))
     calls_where_sql = f"WHERE {' AND '.join(calls_where_clauses)}" if calls_where_clauses else ""
 
-    market_filter_sql = ""
-    market_params: list = []
+    base_where_clauses: list[str] = []
+    base_params: list = []
+    if has_date:
+        base_where_clauses.append("call_date BETWEEN %s AND %s")
+        base_params.extend([start_date, end_date])
     if selected_markets:
-        market_filter_sql = " WHERE market = ANY(%s)"
-        market_params.append(list(selected_markets))
+        base_where_clauses.append("market = ANY(%s)")
+        base_params.append(list(selected_markets))
+    base_where_sql = f"WHERE {' AND '.join(base_where_clauses)}" if base_where_clauses else ""
 
     sql = f"""
     WITH calls_raw AS (
       SELECT
         call_id,
         pipeline_name,
-        call_date,
+        COALESCE(
+          NULLIF(call_datetime, '')::timestamptz::date,
+          NULLIF(date, '')::date
+        ) AS call_date,
         COALESCE(NULLIF(market, ''), split_part(pipeline_name, ' ', 1)) AS market
-      FROM v_analytics_calls_enhanced
+      FROM "Algonova_Calls_Raw"
       {calls_where_sql}
     ),
     calls_base AS (
       SELECT *
       FROM calls_raw
-      {market_filter_sql}
+      {base_where_sql}
     ),
     totals AS (
       SELECT
@@ -91,7 +95,7 @@ def _fetch_attribute_frequency_for_heatmap(
     ORDER BY a.calls_with_attr DESC;
     """
 
-    params = [*calls_params, *market_params, attr_type]
+    params = [*calls_params, *base_params, attr_type]
     return query_postgres(sql, tuple(params))
 
 
