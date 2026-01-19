@@ -32,7 +32,7 @@ def _fetch_attribute_frequency_for_heatmap(
     market_filter_sql = ""
     market_params: list = []
     if selected_markets:
-        market_filter_sql = " WHERE mkt_market = ANY(%s)"
+        market_filter_sql = " WHERE market = ANY(%s)"
         market_params.append(list(selected_markets))
 
     sql = f"""
@@ -41,12 +41,7 @@ def _fetch_attribute_frequency_for_heatmap(
         call_id,
         pipeline_name,
         call_date,
-        CASE
-          WHEN pipeline_name ILIKE 'CZ%%' THEN 'CZ'
-          WHEN pipeline_name ILIKE 'SK%%' THEN 'SK'
-          WHEN pipeline_name ILIKE 'RUK%%' THEN 'RUK'
-          ELSE 'Others'
-        END AS mkt_market
+        COALESCE(NULLIF(market, ''), split_part(pipeline_name, ' ', 1)) AS market
       FROM v_analytics_calls_enhanced
       {calls_where_sql}
     ),
@@ -57,15 +52,13 @@ def _fetch_attribute_frequency_for_heatmap(
     ),
     totals AS (
       SELECT
-        mkt_market,
         pipeline_name,
         COUNT(DISTINCT call_id) AS total_calls
       FROM calls_base
-      GROUP BY 1, 2
+      GROUP BY 1
     ),
     attr_rows AS (
       SELECT
-        cb.mkt_market,
         cb.pipeline_name,
         f.attr_value,
         cb.call_id
@@ -78,16 +71,14 @@ def _fetch_attribute_frequency_for_heatmap(
     ),
     agg AS (
       SELECT
-        mkt_market,
         pipeline_name,
         attr_value,
         COUNT(DISTINCT call_id) AS calls_with_attr,
         COUNT(*) AS mentions
       FROM attr_rows
-      GROUP BY 1, 2, 3
+      GROUP BY 1, 2
     )
     SELECT
-      a.mkt_market,
       a.pipeline_name,
       a.attr_value,
       a.calls_with_attr,
@@ -96,8 +87,7 @@ def _fetch_attribute_frequency_for_heatmap(
       (a.calls_with_attr::float / NULLIF(t.total_calls, 0)) AS frequency
     FROM agg a
     JOIN totals t
-      ON t.mkt_market = a.mkt_market
-     AND t.pipeline_name = a.pipeline_name
+      ON t.pipeline_name = a.pipeline_name
     ORDER BY a.calls_with_attr DESC;
     """
 
