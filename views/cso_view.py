@@ -409,20 +409,20 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
     st.markdown("<div id='friction-and-resistance'></div>", unsafe_allow_html=True)
     st.markdown("<h2 style='text-align:center;'>Friction & Resistance</h2>", unsafe_allow_html=True)
     render_hint("Friction & Resistance: A compact view of workload and follow-up pressure by segment.")
-    wtd_start = date.today() - timedelta(days=date.today().weekday())
-    df_wtd = df_no_date[(df_no_date["call_date"] >= wtd_start) & (df_no_date["call_date"] <= date.today())].copy()
 
-    if df_wtd.empty:
-        st.warning("No data for current week with selected filters.")
-    elif "call_type" not in df_wtd.columns or "pipeline_name" not in df_wtd.columns:
+    df_segment = df_global.copy()
+
+    if df_segment.empty:
+        st.warning("No data for current selection in Friction & Resistance.")
+    elif "call_type" not in df_segment.columns or "pipeline_name" not in df_segment.columns:
         st.warning("Not enough data for Friction & Resistance (need call_type and pipeline_name).")
     else:
-        intro_prim = df_wtd[df_wtd["call_type"] == "intro_call"].groupby("pipeline_name").size()
-        intro_fu = df_wtd[df_wtd["call_type"] == "intro_followup"].groupby("pipeline_name").size()
-        sales_prim = df_wtd[df_wtd["call_type"] == "sales_call"].groupby("pipeline_name").size()
-        sales_fu = df_wtd[df_wtd["call_type"] == "sales_followup"].groupby("pipeline_name").size()
+        intro_prim = df_segment[df_segment["call_type"] == "intro_call"].groupby("pipeline_name").size()
+        intro_fu = df_segment[df_segment["call_type"] == "intro_followup"].groupby("pipeline_name").size()
+        sales_prim = df_segment[df_segment["call_type"] == "sales_call"].groupby("pipeline_name").size()
+        sales_fu = df_segment[df_segment["call_type"] == "sales_followup"].groupby("pipeline_name").size()
 
-        pipelines = df_wtd["pipeline_name"].dropna().unique()
+        pipelines = df_segment["pipeline_name"].dropna().unique()
         friction_data = []
         for p in pipelines:
             ip = int(intro_prim.get(p, 0))
@@ -453,13 +453,13 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 st.plotly_chart(fig_friction, use_container_width=True)
 
             with col2:
-                intro_calls_wtd = int((df_wtd["call_type"] == "intro_call").sum())
-                intro_flups_wtd = int((df_wtd["call_type"] == "intro_followup").sum())
-                sales_calls_wtd = int((df_wtd["call_type"] == "sales_call").sum())
-                sales_flups_wtd = int((df_wtd["call_type"] == "sales_followup").sum())
+                intro_calls_seg = int((df_segment["call_type"] == "intro_call").sum())
+                intro_flups_seg = int((df_segment["call_type"] == "intro_followup").sum())
+                sales_calls_seg = int((df_segment["call_type"] == "sales_call").sum())
+                sales_flups_seg = int((df_segment["call_type"] == "sales_followup").sum())
 
-                avg_intro_friction = (intro_flups_wtd / intro_calls_wtd) if intro_calls_wtd > 0 else 0.0
-                avg_sales_friction = (sales_flups_wtd / sales_calls_wtd) if sales_calls_wtd > 0 else 0.0
+                avg_intro_friction = (intro_flups_seg / intro_calls_seg) if intro_calls_seg > 0 else 0.0
+                avg_sales_friction = (sales_flups_seg / sales_calls_seg) if sales_calls_seg > 0 else 0.0
                 st.metric(
                     "Avg Intro Friction",
                     f"{avg_intro_friction:.2f}",
@@ -473,12 +473,12 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
         st.markdown("<h3 style='text-align:center;'>Friction vs. Defined Rate</h3>", unsafe_allow_html=True)
         render_hint("Each bubble is a manager+pipeline segment. X = Defined Rate on primaries, Y = Flups/Primary (friction).")
-        df_wtd["is_primary"] = df_wtd["call_type"].isin(["intro_call", "sales_call"])
-        df_wtd["is_followup"] = df_wtd["call_type"].isin(["intro_followup", "sales_followup"])
-        df_wtd["is_defined_primary"] = df_wtd["is_primary"] & (df_wtd["outcome_category"] != "Vague")
+        df_segment["is_primary"] = df_segment["call_type"].isin(["intro_call", "sales_call"])
+        df_segment["is_followup"] = df_segment["call_type"].isin(["intro_followup", "sales_followup"])
+        df_segment["is_defined_primary"] = df_segment["is_primary"] & (df_segment["outcome_category"] != "Vague")
 
         bubble_stats = (
-            df_wtd.groupby(["manager", "pipeline_name", "computed_market"], dropna=False)
+            df_segment.groupby(["manager", "pipeline_name", "computed_market"], dropna=False)
             .agg(
                 Average_quality=("Average_quality", "mean"), 
                 total_calls=("call_id", "count"),
