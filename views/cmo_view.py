@@ -2,12 +2,181 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from database import fetch_view_data
+from database import fetch_view_data, query_postgres
 from views.shared_ui import render_hint
 
 
 def _plotly_template():
     return "plotly_dark" if st.session_state.get("ui_theme_v1", "dark") == "dark" else "plotly_white"
+
+
+def _fetch_attribute_frequency_for_heatmap(
+    attr_type: str,
+    date_range,
+    selected_markets,
+    selected_pipelines,
+) -> pd.DataFrame:
+    if not date_range or len(date_range) != 2:
+        return pd.DataFrame()
+
+    start_date, end_date = date_range
+
+    pipeline_filter_sql = ""
+    pipeline_params: list = []
+    if selected_pipelines:
+        pipeline_filter_sql = " AND pipeline_name = ANY(%s)"
+        pipeline_params.append(list(selected_pipelines))
+
+    market_filter_sql = ""
+    market_params: list = []
+    if selected_markets:
+        market_filter_sql = " WHERE mkt_market = ANY(%s)"
+        market_params.append(list(selected_markets))
+
+    sql = f"""
+    WITH calls_raw AS (
+      SELECT
+        call_id,
+        pipeline_name,
+        call_date,
+        CASE
+          WHEN pipeline_name ILIKE 'CZ%%' THEN 'CZ'
+          WHEN pipeline_name ILIKE 'SK%%' THEN 'SK'
+          WHEN pipeline_name ILIKE 'RUK%%' THEN 'RUK'
+          ELSE 'Others'
+        END AS mkt_market
+      FROM v_analytics_calls_enhanced
+      WHERE call_date BETWEEN %s AND %s
+      {pipeline_filter_sql}
+    ),
+    calls_base AS (
+      SELECT *
+      FROM calls_raw
+      {market_filter_sql}
+    ),
+    totals AS (
+      SELECT
+        mkt_market,
+        pipeline_name,
+        COUNT(DISTINCT call_id) AS total_calls
+      FROM calls_base
+      GROUP BY 1, 2
+    ),
+    attr_rows AS (
+      SELECT
+        cb.mkt_market,
+        cb.pipeline_name,
+        f.attr_value,
+        cb.call_id
+      FROM calls_base cb
+      JOIN v_analytics_attributes_frequency f
+        ON f.call_id = cb.call_id
+      WHERE f.attr_type = %s
+        AND f.attr_value IS NOT NULL
+        AND btrim(f.attr_value) <> ''
+    ),
+    agg AS (
+      SELECT
+        mkt_market,
+        pipeline_name,
+        attr_value,
+        COUNT(DISTINCT call_id) AS calls_with_attr,
+        COUNT(*) AS mentions
+      FROM attr_rows
+      GROUP BY 1, 2, 3
+    )
+    SELECT
+      a.mkt_market,
+      a.pipeline_name,
+      a.attr_value,
+      a.calls_with_attr,
+      a.mentions,
+      t.total_calls,
+      (a.calls_with_attr::float / NULLIF(t.total_calls, 0)) AS frequency
+    FROM agg a
+    JOIN totals t
+      ON t.mkt_market = a.mkt_market
+     AND t.pipeline_name = a.pipeline_name
+    ORDER BY a.calls_with_attr DESC;
+    """
+
+    params = [start_date, end_date, *pipeline_params, *market_params, attr_type]
+    return query_postgres(sql, tuple(params))
+
+
+def _render_attribute_frequency_heatmap(
+    attr_type: str,
+    title: str,
+    colorscale,
+    date_range,
+    selected_markets,
+    selected_pipelines,
+):
+    df = _fetch_attribute_frequency_for_heatmap(attr_type, date_range, selected_markets, selected_pipelines)
+    if df.empty:
+        st.warning(f"No data available for {attr_type} heatmap with current filters.")
+        return
+
+    df["attr_value"] = df["attr_value"].astype(str).str.strip()
+    df["pipeline_name"] = df["pipeline_name"].astype(str).str.strip()
+    df = df[(df["attr_value"] != "") & (df["pipeline_name"] != "")].copy()
+    if df.empty:
+        st.warning(f"No valid values to render {attr_type} heatmap after cleaning.")
+        return
+
+    z = df.pivot(index="attr_value", columns="pipeline_name", values="frequency").fillna(0.0)
+    calls_with_attr = df.pivot(index="attr_value", columns="pipeline_name", values="calls_with_attr").fillna(0).astype(int)
+    mentions = df.pivot(index="attr_value", columns="pipeline_name", values="mentions").fillna(0).astype(int)
+    total_calls = df.pivot(index="attr_value", columns="pipeline_name", values="total_calls").fillna(0).astype(int)
+
+    calls_with_attr = calls_with_attr.reindex(index=z.index, columns=z.columns, fill_value=0)
+    mentions = mentions.reindex(index=z.index, columns=z.columns, fill_value=0)
+    total_calls = total_calls.reindex(index=z.index, columns=z.columns, fill_value=0)
+
+    custom = []
+    for y in z.index:
+        row = []
+        for x in z.columns:
+            row.append([int(calls_with_attr.loc[y, x]), int(total_calls.loc[y, x]), int(mentions.loc[y, x])])
+        custom.append(row)
+
+    st.subheader(title)
+    fig = go.Figure(
+        data=[
+            go.Heatmap(
+                z=z.values,
+                x=list(z.columns),
+                y=list(z.index),
+                customdata=custom,
+                colorscale=colorscale,
+                zmin=0,
+                zmax=1,
+                showscale=True,
+                colorbar=dict(title="Frequency", tickformat=".0%"),
+                hovertemplate=(
+                    f"{attr_type}: %{{y}}<br>"
+                    "Pipeline: %{x}<br>"
+                    "Calls with entity: %{customdata[0]}<br>"
+                    "Total calls: %{customdata[1]}<br>"
+                    "Mentions: %{customdata[2]}<br>"
+                    "Frequency: %{z:.1%}<br>"
+                    "Formula: Calls with entity / Total calls<extra></extra>"
+                ),
+            )
+        ]
+    )
+    fig.update_layout(
+        template=_plotly_template(),
+        margin=dict(l=10, r=10, t=10, b=90),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        xaxis_title="Pipeline",
+        yaxis_title=attr_type,
+        height=max(520, 24 * len(z.index) + 260),
+    )
+    fig.update_xaxes(tickangle=-35, automargin=True)
+    fig.update_yaxes(automargin=True)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
@@ -212,3 +381,33 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     fig_hm.update_xaxes(tickangle=-35, automargin=True)
     fig_hm.update_yaxes(automargin=True)
     st.plotly_chart(fig_hm, use_container_width=True)
+
+    st.markdown("<div id='attribute-frequency-heatmaps'></div>", unsafe_allow_html=True)
+    render_hint(
+        "These heatmaps show how frequently an entity appears in calls within each pipeline "
+        "(Calls with entity / Total calls)."
+    )
+    _render_attribute_frequency_heatmap(
+        attr_type="Goal",
+        title="Goal Frequency / Pipeline",
+        colorscale="Greens",
+        date_range=date_range,
+        selected_markets=selected_markets,
+        selected_pipelines=selected_pipelines,
+    )
+    _render_attribute_frequency_heatmap(
+        attr_type="Objection",
+        title="Objection Frequency / Pipeline",
+        colorscale="Blues",
+        date_range=date_range,
+        selected_markets=selected_markets,
+        selected_pipelines=selected_pipelines,
+    )
+    _render_attribute_frequency_heatmap(
+        attr_type="Fear",
+        title="Fear Frequency / Pipeline",
+        colorscale="Reds",
+        date_range=date_range,
+        selected_markets=selected_markets,
+        selected_pipelines=selected_pipelines,
+    )
