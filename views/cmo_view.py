@@ -337,7 +337,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
             merged_for_chart[col] = pd.to_numeric(merged_for_chart[col], errors="coerce").fillna(0).round(2)
 
     long_df = merged_for_chart.melt(
-        id_vars=["mkt_manager", "total_calls", "total_leads", "intro_primaries", "intro_followups"],
+        id_vars=["mkt_manager", "mkt_market", "total_calls", "total_leads", "intro_primaries", "intro_followups"],
         value_vars=["viscosity_index", "intro_friction_index"],
         var_name="metric",
         value_name="value",
@@ -345,6 +345,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     long_df["metric"] = long_df["metric"].map(
         {"viscosity_index": "Viscosity Index", "intro_friction_index": "Intro Friction Index"}
     )
+    long_df["mkt_market"] = long_df["mkt_market"].fillna("Unknown").astype(str).str.strip()
 
     fig_bar = px.bar(
         long_df,
@@ -352,10 +353,33 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         y="value",
         color="metric",
         barmode="group",
+        text="mkt_market",
         template=_plotly_template(),
         pattern_shape_sequence=[""],
         labels={"mkt_manager": "Traffic Manager", "value": "Index"},
-        hover_data=["total_calls", "total_leads", "intro_primaries", "intro_followups"],
+        custom_data=["mkt_market", "total_calls", "total_leads", "intro_primaries", "intro_followups"],
+    )
+    fig_bar.update_traces(textposition="inside", texttemplate="%{text}")
+    fig_bar.for_each_trace(
+        lambda t: t.update(
+            hovertemplate=(
+                "Traffic Manager: %{x}<br>"
+                "Market: %{customdata[0]}<br>"
+                "Viscosity Index: %{y:.2f}<br>"
+                "Total Calls: %{customdata[1]}<br>"
+                "Total Leads: %{customdata[2]}<br>"
+                "Formula: Calls / Leads<extra></extra>"
+            )
+            if t.name == "Viscosity Index"
+            else (
+                "Traffic Manager: %{x}<br>"
+                "Market: %{customdata[0]}<br>"
+                "Intro Friction Index: %{y:.2f}<br>"
+                "Intro Primaries: %{customdata[3]}<br>"
+                "Intro Followups: %{customdata[4]}<br>"
+                "Total Calls: %{customdata[1]}<extra></extra>"
+            )
+        )
     )
     fig_bar.update_layout(xaxis_title="Traffic Manager", margin=dict(l=10, r=10, t=10, b=80))
     fig_bar.update_xaxes(tickangle=-35, automargin=True)
