@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date, timedelta
-from database import fetch_view_data, ensure_chart_views
+from database import fetch_view_data, ensure_chart_views, rpc_df, rpc_df_long
 from styles import get_css
 from views.ceo_view import render_ceo_dashboard
 from views.cmo_view import render_cmo_analytics
@@ -259,28 +259,48 @@ def render_sidebar():
             initial_date_range,
             key="date_range_v2",
         )
-    
-    df_raw_filters = fetch_view_data("Algonova_Calls_Raw")
-    
-    all_markets = []
-    market_pipelines_map = {}
-    all_managers = []
-    
-    if not df_raw_filters.empty:
-        if "market" not in df_raw_filters.columns and "pipeline_name" in df_raw_filters.columns:
-            df_raw_filters = df_raw_filters.copy()
-            df_raw_filters["market"] = df_raw_filters["pipeline_name"].apply(_determine_market)
 
-        if "market" in df_raw_filters.columns:
-            all_markets = sorted(df_raw_filters["market"].dropna().unique().tolist())
-            if "pipeline_name" in df_raw_filters.columns:
-                for m in all_markets:
+    def _load_sidebar_dims():
+        df_mp = rpc_df_long("rpc_app_markets_pipelines")
+        df_mgr = rpc_df_long("rpc_app_managers")
+        if df_mp.empty and df_mgr.empty:
+            df_raw_filters = fetch_view_data("Algonova_Calls_Raw")
+            if df_raw_filters.empty:
+                return [], {}, []
+            if "market" not in df_raw_filters.columns and "pipeline_name" in df_raw_filters.columns:
+                df_raw_filters = df_raw_filters.copy()
+                df_raw_filters["market"] = df_raw_filters["pipeline_name"].apply(_determine_market)
+            markets = sorted(df_raw_filters.get("market", pd.Series(dtype=str)).dropna().unique().tolist())
+            market_pipelines_map = {}
+            if "pipeline_name" in df_raw_filters.columns and "market" in df_raw_filters.columns:
+                for m in markets:
                     market_pipelines_map[m] = sorted(
                         df_raw_filters[df_raw_filters["market"] == m]["pipeline_name"].dropna().unique().tolist()
                     )
+            managers = sorted(df_raw_filters.get("manager", pd.Series(dtype=str)).dropna().unique().tolist())
+            return markets, market_pipelines_map, managers
 
-        if "manager" in df_raw_filters.columns:
-            all_managers = sorted(df_raw_filters["manager"].dropna().unique().tolist())
+        if df_mp.empty or not {"market", "pipeline_name"}.issubset(df_mp.columns):
+            all_markets = []
+            market_pipelines_map = {}
+        else:
+            df_mp["market"] = df_mp["market"].astype(str)
+            df_mp["pipeline_name"] = df_mp["pipeline_name"].astype(str)
+            all_markets = sorted(df_mp["market"].dropna().unique().tolist())
+            market_pipelines_map = {
+                m: sorted(df_mp[df_mp["market"] == m]["pipeline_name"].dropna().unique().tolist())
+                for m in all_markets
+            }
+
+        if df_mgr.empty or "manager" not in df_mgr.columns:
+            all_managers = []
+        else:
+            df_mgr["manager"] = df_mgr["manager"].astype(str)
+            all_managers = sorted(df_mgr["manager"].dropna().unique().tolist())
+
+        return all_markets, market_pipelines_map, all_managers
+
+    all_markets, market_pipelines_map, all_managers = _load_sidebar_dims()
 
     # --- Cascading Checkbox Logic ---
     st.sidebar.markdown("### Markets & Pipelines")
@@ -334,41 +354,22 @@ def render_sidebar():
         help="Filter data by specific managers. Default is ALL."
     )
 
-    if df_raw_filters.empty:
-        total_rows = 0
-        filtered_rows = 0
-        date_range_text = "—"
-    else:
-        total_rows = int(df_raw_filters.attrs.get("supabase_rows_loaded", len(df_raw_filters)))
-
-        df_stats = df_raw_filters.copy()
-        if "call_datetime" in df_stats.columns:
-            df_stats["call_datetime"] = pd.to_datetime(df_stats["call_datetime"], errors="coerce", utc=True)
-            df_stats["call_date"] = df_stats["call_datetime"].dt.date
-        elif "call_date" in df_stats.columns:
-            df_stats["call_date"] = pd.to_datetime(df_stats["call_date"], errors="coerce").dt.date
-
-        mask = pd.Series([True] * len(df_stats))
-        if len(date_range) == 2 and "call_date" in df_stats.columns:
-            mask = mask & (df_stats["call_date"] >= date_range[0]) & (df_stats["call_date"] <= date_range[1])
-        if selected_markets and "market" in df_stats.columns:
-            mask = mask & df_stats["market"].isin(selected_markets)
-        if selected_pipelines and "pipeline_name" in df_stats.columns:
-            mask = mask & df_stats["pipeline_name"].isin(selected_pipelines)
-        if selected_managers and "manager" in df_stats.columns:
-            mask = mask & df_stats["manager"].isin(selected_managers)
-
-        df_filtered = df_stats[mask].copy()
-        filtered_rows = int(len(df_filtered))
-
-        if "call_date" in df_filtered.columns:
-            dates = df_filtered["call_date"].dropna()
-            if len(dates) > 0:
-                date_range_text = f"{dates.min()} → {dates.max()}"
-            else:
-                date_range_text = "—"
-        else:
-            date_range_text = "—"
+    date_start = date_range[0] if len(date_range) == 2 else None
+    date_end = date_range[1] if len(date_range) == 2 else None
+    summary_params = {
+        "date_start": date_start.isoformat() if date_start else None,
+        "date_end": date_end.isoformat() if date_end else None,
+        "markets": selected_markets or [],
+        "pipelines": selected_pipelines or [],
+        "managers": selected_managers or [],
+    }
+    summary_df = rpc_df("rpc_app_calls_summary", summary_params)
+    summary = summary_df.iloc[0].to_dict() if not summary_df.empty else {"total_rows": 0, "filtered_rows": 0, "min_call_date": None, "max_call_date": None}
+    total_rows = int(summary.get("total_rows") or 0)
+    filtered_rows = int(summary.get("filtered_rows") or 0)
+    min_d = summary.get("min_call_date")
+    max_d = summary.get("max_call_date")
+    date_range_text = f"{min_d} → {max_d}" if min_d and max_d else "—"
 
     summary_placeholder.markdown(
         f"**Showing Calls**\n\n{filtered_rows} / {total_rows}\n\n**Date Range in Result**\n\n{date_range_text}"

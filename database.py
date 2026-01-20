@@ -100,6 +100,59 @@ def get_supabase_client() -> Client:
         st.stop()
     return create_client(url, key)
 
+
+@st.cache_data(ttl=300)
+def rpc_df(function_name: str, params: dict | None = None) -> pd.DataFrame:
+    supabase = get_supabase_client()
+    try:
+        res = supabase.rpc(function_name, params or {}).execute()
+        return pd.DataFrame(res.data or [])
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=3600)
+def rpc_df_long(function_name: str, params: dict | None = None) -> pd.DataFrame:
+    supabase = get_supabase_client()
+    try:
+        res = supabase.rpc(function_name, params or {}).execute()
+        return pd.DataFrame(res.data or [])
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=300)
+def select_df(
+    table_or_view: str,
+    columns: str = "*",
+    eq: dict | None = None,
+    in_: dict | None = None,
+    gte: dict | None = None,
+    lte: dict | None = None,
+    limit: int | None = None,
+) -> pd.DataFrame:
+    supabase = get_supabase_client()
+    try:
+        q = supabase.table(table_or_view).select(columns)
+        if eq:
+            for k, v in eq.items():
+                q = q.eq(k, v)
+        if in_:
+            for k, v in in_.items():
+                q = q.in_(k, v)
+        if gte:
+            for k, v in gte.items():
+                q = q.gte(k, v)
+        if lte:
+            for k, v in lte.items():
+                q = q.lte(k, v)
+        if limit is not None:
+            q = q.limit(int(limit))
+        res = q.execute()
+        return pd.DataFrame(res.data or [])
+    except Exception:
+        return pd.DataFrame()
+
 @st.cache_data(ttl=600)
 def fetch_view_data(view_name: str, page_size: int = 1000):
     supabase = get_supabase_client()
@@ -219,6 +272,10 @@ def compute_friction_index(
 
 @st.cache_resource
 def ensure_chart_views():
+    flag = _get_secret("apply_db_views_on_start") or os.getenv("APPLY_DB_VIEWS_ON_START")
+    if flag is not None and str(flag).strip().lower() in {"0", "false", "no", "off"}:
+        return False
+
     cfg = _get_secret("database")
     if not cfg:
         return False

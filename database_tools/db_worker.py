@@ -14,15 +14,8 @@ def get_db_config():
             secrets = toml.load(path)
             if 'database' in secrets:
                 return secrets['database']
-    
-    # Fallback to hardcoded (last resort)
-    return {
-        'host': "db.ygehbksgnswmmhmtwwba.supabase.co",
-        'name': "postgres",
-        'user': "postgres",
-        'pass': "w3P1asNPO4oc6mHF",
-        'port': "5432"
-    }
+
+    raise FileNotFoundError("Database configuration not found in .streamlit/secrets.toml")
 
 def fetch_schema():
     config = get_db_config()

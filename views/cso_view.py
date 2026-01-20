@@ -2,8 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from database import fetch_view_data
-from datetime import date, timedelta
+from database import rpc_df
 from views.shared_ui import render_hint
 
 
@@ -11,325 +10,169 @@ def _plotly_template():
     return "plotly_dark" if st.session_state.get("ui_theme_v1", "dark") == "dark" else "plotly_white"
 
 
-def _determine_market(pipeline):
-    p = str(pipeline).upper()
-    if p.startswith("CZ"):
-        return "CZ"
-    if p.startswith("SK"):
-        return "SK"
-    if p.startswith("RUK"):
-        return "RUK"
-    return "Others"
-
-
 def _existing_columns(df: pd.DataFrame, cols: list[str]) -> list[str]:
     return [c for c in cols if c in df.columns]
 
 
-def _is_callback_vague(val) -> bool:
-    ns = str(val or "").lower()
-    return ns == "callback_vague" or ("callback" in ns and "vague" in ns)
-
-
-def _compute_outcome_category(df: pd.DataFrame) -> pd.Series:
-    def get_outcome(row):
-        ns = str(row.get("next_step_type", "")).lower()
-        if any(x in ns for x in ["lesson_scheduled", "callback_scheduled", "payment_pending", "sold"]):
-            return "Defined"
-        if "vague" in ns:
-            return "Vague"
-        return "Other"
-
-    return df.apply(get_outcome, axis=1)
-
 def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selected_managers=None):
     st.markdown("<h1 style='text-align:center;'>Operations Dashboard</h1>", unsafe_allow_html=True)
 
-    with st.spinner("Analyzing call metadata..."):
-        df = fetch_view_data("Algonova_Calls_Raw")
-        if df.empty:
-            df = fetch_view_data("v_analytics_calls_enhanced")
-
-    if df.empty:
-        st.warning("No data available. Please check database connection.")
-        return
-
-    total_raw_rows = int(df.attrs.get("supabase_rows_loaded", len(df)))
-
-    if "call_datetime" in df.columns:
-        df["call_datetime"] = pd.to_datetime(df["call_datetime"], errors="coerce", utc=True)
-    else:
-        df["call_datetime"] = pd.NaT
-
-    df["call_date"] = df["call_datetime"].dt.date
-
-    if "pipeline_name" in df.columns:
-        df["computed_market"] = df["pipeline_name"].apply(_determine_market)
-    else:
-        df["computed_market"] = df.get("market", "Others")
-
-    if "Average_quality" in df.columns:
-        df["Average_quality"] = pd.to_numeric(df["Average_quality"], errors="coerce")
-
-    if "call_duration_sec" in df.columns:
-        df["call_duration_sec"] = pd.to_numeric(df["call_duration_sec"], errors="coerce").fillna(0)
-
-    df["outcome_category"] = _compute_outcome_category(df)
-
-    mask_date = pd.Series([True] * len(df))
-    if len(date_range) == 2:
-        mask_date = (df["call_date"] >= date_range[0]) & (df["call_date"] <= date_range[1])
-
-    mask_pipeline = pd.Series([True] * len(df))
-    if selected_pipelines:
-        mask_pipeline = df["pipeline_name"].isin(selected_pipelines)
-
-    mask_market = pd.Series([True] * len(df))
-    if selected_markets:
-        if "market" in df.columns:
-            mask_market = df["computed_market"].isin(selected_markets) | df["market"].isin(selected_markets)
-        else:
-            mask_market = df["computed_market"].isin(selected_markets)
-
-    mask_manager = pd.Series([True] * len(df))
-    if selected_managers:
-        mask_manager = df["manager"].isin(selected_managers)
-
-    mask_all = mask_date & mask_pipeline & mask_market & mask_manager
-    mask_no_date = mask_pipeline & mask_market & mask_manager
-
-    df_global = df[mask_all].copy()
-    df_no_date = df[mask_no_date].copy()
-
-    if df_global.empty:
-        st.warning(f"No data found for the current selection (Filtered from {total_raw_rows} raw records).")
-        return
+    date_start = date_range[0] if len(date_range) == 2 else None
+    date_end = date_range[1] if len(date_range) == 2 else None
+    params = {
+        "date_start": date_start.isoformat() if date_start else None,
+        "date_end": date_end.isoformat() if date_end else None,
+        "markets": selected_markets or [],
+        "pipelines": selected_pipelines or [],
+        "managers": selected_managers or [],
+    }
 
     st.markdown("<div id='operations-feed'></div>", unsafe_allow_html=True)
 
-    df_feed = df_global.copy()
+    df_kpi = rpc_df("rpc_cso_ops_kpis", params)
+    if df_kpi.empty:
+        st.warning("No data available for current filters.")
+        return
 
-    if df_feed.empty:
-        st.warning("No data for current filters.")
-    else:
-        ops_cols = st.columns(6)
-        total_calls = int(df_feed["call_id"].count()) if "call_id" in df_feed.columns else int(len(df_feed))
-        intro_calls = 0
-        intro_flup = 0
-        sales_calls = 0
-        sales_flup = 0
-        if "call_type" in df_feed.columns:
-            intro_calls = int(df_feed[df_feed["call_type"] == "intro_call"].shape[0])
-            intro_flup = int(df_feed[df_feed["call_type"] == "intro_followup"].shape[0])
-            sales_calls = int(df_feed[df_feed["call_type"] == "sales_call"].shape[0])
-            sales_flup = int(df_feed[df_feed["call_type"] == "sales_followup"].shape[0])
-        avg_quality = float(df_feed["Average_quality"].mean()) if "Average_quality" in df_feed.columns else float("nan")
+    kpi = df_kpi.iloc[0].to_dict()
+    ops_cols = st.columns(6)
+    with ops_cols[0]:
+        st.metric("Total Calls", f"{int(kpi.get('total_calls') or 0)}")
+    with ops_cols[1]:
+        st.metric("Intro Calls", f"{int(kpi.get('intro_calls') or 0)}")
+    with ops_cols[2]:
+        st.metric("Intro Follow Up", f"{int(kpi.get('intro_flup') or 0)}")
+    with ops_cols[3]:
+        st.metric("Sales Calls", f"{int(kpi.get('sales_calls') or 0)}")
+    with ops_cols[4]:
+        st.metric("Sales Follow Up", f"{int(kpi.get('sales_flup') or 0)}")
+    with ops_cols[5]:
+        avg_q = kpi.get("avg_quality", None)
+        st.metric("Avg Quality", "—" if avg_q in (None, "", "nan") else f"{float(avg_q):.2f}")
 
-        with ops_cols[0]:
-            st.metric("Total Calls", f"{total_calls}")
-        with ops_cols[1]:
-            st.metric("Intro Calls", f"{intro_calls}")
-        with ops_cols[2]:
-            st.metric("Intro Follow Up", f"{intro_flup}")
-        with ops_cols[3]:
-            st.metric("Sales Calls", f"{sales_calls}")
-        with ops_cols[4]:
-            st.metric("Sales Follow Up", f"{sales_flup}")
-        with ops_cols[5]:
-            if pd.isna(avg_quality):
-                st.metric("Avg Quality", "—")
-            else:
-                st.metric("Avg Quality", f"{avg_quality:.2f}")
+    tab_a, tab_b = st.tabs(["Anomalies", "Low Quality Calls"])
+    with tab_a:
+        anomalies = rpc_df("rpc_cso_anomalies", params)
+        show_cols = _existing_columns(
+            anomalies,
+            ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "audio_url", "kommo_link"],
+        )
+        if anomalies.empty:
+            st.success("No anomalies for current filters.")
+        else:
+            st.dataframe(
+                anomalies[show_cols],
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "audio_url": st.column_config.LinkColumn("Audio URL"),
+                    "kommo_link": st.column_config.LinkColumn("Kommo"),
+                },
+            )
 
-        tab_a, tab_b = st.tabs(["Anomalies", "Low Quality Calls"])
+    with tab_b:
+        low_q = rpc_df("rpc_cso_low_quality", params)
+        show_cols = _existing_columns(
+            low_q,
+            ["call_datetime", "manager", "pipeline_name", "average_quality", "audio_url", "kommo_link"],
+        )
+        if low_q.empty:
+            st.success("No low-quality calls for current filters.")
+        else:
+            low_q = low_q.copy()
+            low_q = low_q.sort_values("average_quality", ascending=True, na_position="last")
+            st.dataframe(
+                low_q[show_cols],
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "audio_url": st.column_config.LinkColumn("Audio URL"),
+                    "kommo_link": st.column_config.LinkColumn("Kommo"),
+                },
+            )
 
-        with tab_a:
-            if "call_duration_sec" in df_feed.columns and "next_step_type" in df_feed.columns:
-                anomalies = df_feed[
-                    (df_feed["call_duration_sec"] > 600)
-                    & df_feed["next_step_type"].apply(_is_callback_vague)
-                ].copy()
-                anomalies["duration_min"] = (anomalies["call_duration_sec"] / 60).round(1)
-                show_cols = _existing_columns(
-                    anomalies,
-                    ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "audio_url", "kommo_link"],
-                )
-                if anomalies.empty:
-                    st.success("No anomalies for current filters.")
-                else:
-                    st.dataframe(
-                        anomalies.sort_values("call_duration_sec", ascending=False)[show_cols],
-                        use_container_width=True,
-                        hide_index=True,
-                        column_config={
-                            "audio_url": st.column_config.LinkColumn("Audio URL"),
-                            "kommo_link": st.column_config.LinkColumn("Kommo"),
-                        },
-                    )
-            elif "call_duration_sec" not in df_feed.columns:
-                st.warning("call_duration_sec is missing, duration-based anomalies are unavailable.")
-            else:
-                st.warning("next_step_type is missing, vague callback anomalies are unavailable.")
+    df_mgr = rpc_df("rpc_cso_talk_time_by_manager", params)
+    if not df_mgr.empty and {"manager", "call_type_group", "minutes", "calls", "total_calls"}.issubset(df_mgr.columns):
+        type_order = ["Intro Call", "Intro Flup", "Sales Call", "Sales Flup"]
+        df_mgr = df_mgr.copy()
+        df_mgr["call_type_group"] = pd.Categorical(df_mgr["call_type_group"], categories=type_order, ordered=True)
+        df_mgr = df_mgr.sort_values(["manager", "call_type_group"])
+        last_type = type_order[-1]
+        df_mgr["label_calls"] = df_mgr.apply(
+            lambda r: str(int(r["total_calls"])) if r["call_type_group"] == last_type else "",
+            axis=1,
+        )
+        fig_ops = px.bar(
+            df_mgr,
+            y="manager",
+            x="minutes",
+            color="call_type_group",
+            orientation="h",
+            template=_plotly_template(),
+            pattern_shape_sequence=[""],
+            title="Talk Time by Manager",
+            hover_data=["calls", "call_type_group", "total_calls"],
+            text="label_calls",
+        )
+        fig_ops.update_traces(
+            hovertemplate="Manager: %{y}<br>Type: %{customdata[1]}<br>Minutes: %{x:.1f}<br>Calls: %{customdata[0]}<br>Total Calls: %{customdata[2]}<extra></extra>"
+        )
+        fig_ops.update_layout(yaxis_title="", xaxis_title="Minutes", legend_title="Call Type")
+        st.plotly_chart(fig_ops, use_container_width=True)
 
-        with tab_b:
-            if "Average_quality" in df_feed.columns:
-                low_q = df_feed[df_feed["Average_quality"] < 4.0].copy()
-                show_cols = _existing_columns(
-                    low_q,
-                    ["call_datetime", "manager", "pipeline_name", "Average_quality", "audio_url", "kommo_link"],
-                )
-                if low_q.empty:
-                    st.success("No low-quality calls for current filters.")
-                else:
-                    st.dataframe(
-                        low_q.sort_values("Average_quality", ascending=True)[show_cols],
-                        use_container_width=True,
-                        hide_index=True,
-                        column_config={
-                            "audio_url": st.column_config.LinkColumn("Audio URL"),
-                            "kommo_link": st.column_config.LinkColumn("Kommo"),
-                        },
-                    )
-            else:
-                st.warning("Average_quality is missing, quality filter is unavailable.")
-
-        if "call_duration_sec" in df_feed.columns and "manager" in df_feed.columns and "call_type" in df_feed.columns:
-            mgr_group = (
-                df_feed.groupby(["manager", "call_type"], dropna=False)
-                .agg(
-                    total_sec=("call_duration_sec", "sum"),
-                    calls=("call_id", "count"),
-                )
-                .reset_index()
-            )
-            mgr_group["minutes"] = mgr_group["total_sec"] / 60.0
-            type_map = {
-                "intro_call": "Intro Call",
-                "intro_followup": "Intro Flup",
-                "sales_call": "Sales Call",
-                "sales_followup": "Sales Flup",
-            }
-            mgr_group["call_type_group"] = mgr_group["call_type"].map(type_map).fillna("Other")
-            mgr_totals = (
-                mgr_group.groupby("manager")["calls"]
-                .sum()
-                .rename("total_calls")
-                .reset_index()
-            )
-            mgr_group = mgr_group.merge(mgr_totals, on="manager", how="left")
-            type_order = ["Intro Call", "Intro Flup", "Sales Call", "Sales Flup"]
-            mgr_group["call_type_group"] = pd.Categorical(mgr_group["call_type_group"], categories=type_order, ordered=True)
-            mgr_group = mgr_group.sort_values(["manager", "call_type_group"])
-            last_type = type_order[-1]
-            mgr_group["label_calls"] = mgr_group.apply(
-                lambda r: str(r["total_calls"]) if r["call_type_group"] == last_type else "",
-                axis=1,
-            )
-            fig_ops = px.bar(
-                mgr_group,
-                y="manager",
-                x="minutes",
-                color="call_type_group",
-                orientation="h",
-                template=_plotly_template(),
-                pattern_shape_sequence=[""],
-                title="Talk Time by Manager",
-                hover_data=["calls", "call_type_group", "total_calls"],
-                text="label_calls",
-            )
-            fig_ops.update_traces(
-                hovertemplate="Manager: %{y}<br>Type: %{customdata[1]}<br>Minutes: %{x:.1f}<br>Calls: %{customdata[0]}<br>Total Calls: %{customdata[2]}<extra></extra>"
-            )
-            fig_ops.update_layout(yaxis_title="", xaxis_title="Minutes", legend_title="Call Type")
-            st.plotly_chart(fig_ops, use_container_width=True)
-
-        if "pipeline_name" in df_feed.columns and "call_duration_sec" in df_feed.columns and "call_type" in df_feed.columns:
-            pipe_group = (
-                df_feed.groupby(["pipeline_name", "call_type"], dropna=False)
-                .agg(
-                    calls=("call_id", "count"),
-                    total_sec=("call_duration_sec", "sum"),
-                )
-                .reset_index()
-            )
-            pipe_group["minutes"] = pipe_group["total_sec"] / 60.0
-            pipe_group["pipeline_name"] = pipe_group["pipeline_name"].fillna("Unknown")
-            type_map = {
-                "intro_call": "Intro Call",
-                "intro_followup": "Intro Flup",
-                "sales_call": "Sales Call",
-                "sales_followup": "Sales Flup",
-            }
-            pipe_group["call_type_group"] = pipe_group["call_type"].map(type_map).fillna("Other")
-            pipe_totals = (
-                pipe_group.groupby("pipeline_name")["minutes"]
-                .sum()
-                .rename("total_minutes")
-                .reset_index()
-            )
-            pipe_group = pipe_group.merge(pipe_totals, on="pipeline_name", how="left")
-            type_order = ["Intro Call", "Intro Flup", "Sales Call", "Sales Flup"]
-            pipe_group["call_type_group"] = pd.Categorical(pipe_group["call_type_group"], categories=type_order, ordered=True)
-            pipe_group = pipe_group.sort_values(["pipeline_name", "call_type_group"])
-            last_type = type_order[-1]
-            pipe_group["label_minutes"] = pipe_group.apply(
-                lambda r: f"{r['total_minutes']:.1f}" if r["call_type_group"] == last_type else "",
-                axis=1,
-            )
-            fig_pipe = px.bar(
-                pipe_group,
-                y="pipeline_name",
-                x="calls",
-                color="call_type_group",
-                orientation="h",
-                template=_plotly_template(),
-                pattern_shape_sequence=[""],
-                title="Total Calls by Pipeline",
-                hover_data=["minutes", "call_type_group", "total_minutes"],
-                text="label_minutes",
-            )
-            fig_pipe.update_traces(
-                hovertemplate="Pipeline: %{y}<br>Type: %{customdata[1]}<br>Calls: %{x}<br>Minutes: %{customdata[0]:.1f}<br>Total Minutes: %{customdata[2]:.1f}<extra></extra>"
-            )
-            fig_pipe.update_layout(yaxis_title="", xaxis_title="Calls", legend_title="Call Type")
-            st.plotly_chart(fig_pipe, use_container_width=True)
+    df_pipe = rpc_df("rpc_cso_calls_by_pipeline", params)
+    if not df_pipe.empty and {"pipeline_name", "call_type_group", "calls", "minutes", "total_minutes"}.issubset(df_pipe.columns):
+        type_order = ["Intro Call", "Intro Flup", "Sales Call", "Sales Flup"]
+        df_pipe = df_pipe.copy()
+        df_pipe["pipeline_name"] = df_pipe["pipeline_name"].fillna("Unknown")
+        df_pipe["call_type_group"] = pd.Categorical(df_pipe["call_type_group"], categories=type_order, ordered=True)
+        df_pipe = df_pipe.sort_values(["pipeline_name", "call_type_group"])
+        last_type = type_order[-1]
+        df_pipe["label_minutes"] = df_pipe.apply(
+            lambda r: f"{float(r['total_minutes']):.1f}" if r["call_type_group"] == last_type else "",
+            axis=1,
+        )
+        fig_pipe = px.bar(
+            df_pipe,
+            y="pipeline_name",
+            x="calls",
+            color="call_type_group",
+            orientation="h",
+            template=_plotly_template(),
+            pattern_shape_sequence=[""],
+            title="Total Calls by Pipeline",
+            hover_data=["minutes", "call_type_group", "total_minutes"],
+            text="label_minutes",
+        )
+        fig_pipe.update_traces(
+            hovertemplate="Pipeline: %{y}<br>Type: %{customdata[1]}<br>Calls: %{x}<br>Minutes: %{customdata[0]:.1f}<br>Total Minutes: %{customdata[2]:.1f}<extra></extra>"
+        )
+        fig_pipe.update_layout(yaxis_title="", xaxis_title="Calls", legend_title="Call Type")
+        st.plotly_chart(fig_pipe, use_container_width=True)
 
     st.markdown("---")
 
     st.markdown("<div id='manager-productivity-timeline'></div>", unsafe_allow_html=True)
     st.markdown("<h2 style='text-align:center;'>Manager Productivity Timeline</h2>", unsafe_allow_html=True)
-    if "call_duration_sec" not in df_global.columns or "manager" not in df_global.columns:
-        st.warning("Not enough data for timeline (need manager and call_duration_sec).")
+    daily = rpc_df("rpc_cso_manager_productivity_timeline", params)
+    if daily.empty:
+        st.warning("Not enough data for timeline for current filters.")
     else:
-        timeline = df_global.dropna(subset=["manager", "call_date"]).copy()
-        timeline["call_duration_sec"] = pd.to_numeric(timeline["call_duration_sec"], errors="coerce").fillna(0)
-
-        daily = (
-            timeline.groupby(["call_date", "manager", "computed_market"], dropna=False)
-            .agg(
-                total_minutes=("call_duration_sec", lambda s: float(s.sum()) / 60.0),
-                intro_calls=("call_type", lambda s: int((s == "intro_call").sum())),
-                intro_flup=("call_type", lambda s: int((s == "intro_followup").sum())),
-                sales_calls=("call_type", lambda s: int((s == "sales_call").sum())),
-                sales_flup=("call_type", lambda s: int((s == "sales_followup").sum())),
-            )
-            .reset_index()
-        )
-        daily["total_minutes"] = daily["total_minutes"].fillna(0)
-
+        daily = daily.copy()
+        daily["call_date"] = pd.to_datetime(daily["call_date"], errors="coerce").dt.date
+        daily["total_minutes"] = pd.to_numeric(daily.get("total_minutes"), errors="coerce").fillna(0.0)
         market_color_map = {
             "CZ": "#1f77b4",
             "SK": "#d62728",
             "RUK": "#2ca02c",
             "Others": "#9467bd",
         }
-
         fig = go.Figure()
         for manager in sorted(daily["manager"].dropna().unique().tolist()):
             sub = daily[daily["manager"] == manager].sort_values("call_date")
             if sub.empty:
                 continue
-            market = sub["computed_market"].iloc[0]
+            market = str(sub["computed_market"].iloc[0])
             fig.add_trace(
                 go.Scatter(
                     x=sub["call_date"],
@@ -338,9 +181,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     name=str(manager),
                     marker={"size": 9},
                     line={"color": market_color_map.get(market, "#9467bd")},
-                    customdata=sub[
-                        ["computed_market", "intro_calls", "intro_flup", "sales_calls", "sales_flup"]
-                    ].to_numpy(),
+                    customdata=sub[["computed_market", "intro_calls", "intro_flup", "sales_calls", "sales_flup"]].to_numpy(),
                     hovertemplate=(
                         "Date: %{x}<br>"
                         "Manager: %{fullData.name} (%{customdata[0]})<br>"
@@ -351,12 +192,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     ),
                 )
             )
-        fig.update_layout(
-            template=_plotly_template(),
-            yaxis_title="Total Minutes",
-            xaxis_title="Date",
-            legend_title="Manager",
-        )
+        fig.update_layout(template=_plotly_template(), yaxis_title="Total Minutes", xaxis_title="Date", legend_title="Manager")
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
@@ -367,17 +203,11 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         "Tracks 'Next-Step Clarity'—the extent to which a manager dictates the rules of engagement and avoids dead-end conversations."
     )
     col_v1, col_v2 = st.columns([3, 2])
-    mgr_stats = df_global.groupby("manager").agg(call_id=("call_id", "count"), Average_quality=("Average_quality", "mean")).reset_index()
-    outcome_counts = df_global.groupby(["manager", "outcome_category"]).size().reset_index(name="count")
-    defined_counts = df_global[df_global["outcome_category"] == "Defined"].groupby("manager").size()
-    mgr_stats["defined_count"] = mgr_stats["manager"].map(defined_counts).fillna(0)
-    mgr_stats["defined_rate"] = (mgr_stats["defined_count"] / mgr_stats["call_id"]).fillna(0)
+    df_control = rpc_df("rpc_cso_call_control", params)
 
     with col_v1:
-        if not outcome_counts.empty:
-            data_chart = outcome_counts[outcome_counts["outcome_category"].isin(["Defined", "Vague"])].copy()
-            mgr_totals = df_global.groupby("manager")["call_id"].count().to_dict()
-            data_chart["total_calls"] = data_chart["manager"].map(mgr_totals).fillna(0).astype("int64")
+        if not df_control.empty:
+            data_chart = df_control[df_control["outcome_category"].isin(["Defined", "Vague"])].copy()
             fig_vague = px.bar(
                 data_chart,
                 x="manager",
@@ -397,10 +227,18 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             )
 
     with col_v2:
-        lb_df = mgr_stats.sort_values("defined_rate", ascending=False).copy()
-        lb_df["defined_rate_pct"] = (lb_df["defined_rate"] * 100).round(2).astype(str) + "%"
-        lb_df["Avg Quality"] = lb_df["Average_quality"].round(2)
-        lb_df = lb_df[["manager", "defined_rate_pct", "call_id", "Avg Quality"]]
+        if df_control.empty:
+            lb_df = pd.DataFrame(columns=["Manager", "Defined %", "Calls", "Avg Quality"])
+        else:
+            mgr_stats = (
+                df_control.groupby("manager", dropna=False)
+                .agg(total_calls=("total_calls", "max"), avg_quality=("avg_quality", "max"), defined_rate=("defined_rate", "max"))
+                .reset_index()
+            )
+            lb_df = mgr_stats.sort_values("defined_rate", ascending=False).copy()
+            lb_df["defined_rate_pct"] = (pd.to_numeric(lb_df["defined_rate"], errors="coerce").fillna(0) * 100).round(2).astype(str) + "%"
+            lb_df["Avg Quality"] = pd.to_numeric(lb_df["avg_quality"], errors="coerce").round(2)
+            lb_df = lb_df[["manager", "defined_rate_pct", "total_calls", "Avg Quality"]]
         lb_df.columns = ["Manager", "Defined %", "Calls", "Avg Quality"]
         st.dataframe(lb_df, hide_index=True, use_container_width=True)
 
@@ -410,32 +248,13 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
     st.markdown("<h2 style='text-align:center;'>Friction & Resistance</h2>", unsafe_allow_html=True)
     render_hint("Friction & Resistance: A compact view of workload and follow-up pressure by segment.")
 
-    df_segment = df_global.copy()
-
-    if df_segment.empty:
+    df_fric = rpc_df("rpc_cso_friction_by_pipeline", params)
+    if df_fric.empty:
         st.warning("No data for current selection in Friction & Resistance.")
-    elif "call_type" not in df_segment.columns or "pipeline_name" not in df_segment.columns:
-        st.warning("Not enough data for Friction & Resistance (need call_type and pipeline_name).")
     else:
-        intro_prim = df_segment[df_segment["call_type"] == "intro_call"].groupby("pipeline_name").size()
-        intro_fu = df_segment[df_segment["call_type"] == "intro_followup"].groupby("pipeline_name").size()
-        sales_prim = df_segment[df_segment["call_type"] == "sales_call"].groupby("pipeline_name").size()
-        sales_fu = df_segment[df_segment["call_type"] == "sales_followup"].groupby("pipeline_name").size()
-
-        pipelines = df_segment["pipeline_name"].dropna().unique()
-        friction_data = []
-        for p in pipelines:
-            ip = int(intro_prim.get(p, 0))
-            ifu = int(intro_fu.get(p, 0))
-            sp = int(sales_prim.get(p, 0))
-            sfu = int(sales_fu.get(p, 0))
-            i_fric = ifu / ip if ip > 0 else 0
-            s_fric = sfu / sp if sp > 0 else 0
-            friction_data.append({"Pipeline": p, "Type": "Intro Friction", "Value": round(i_fric, 2), "Total Calls": ip + ifu})
-            friction_data.append({"Pipeline": p, "Type": "Sales Friction", "Value": round(s_fric, 2), "Total Calls": sp + sfu})
-
-        if friction_data:
-            df_fric = pd.DataFrame(friction_data)
+        df_fric = df_fric.copy()
+        df_fric = df_fric.rename(columns={"pipeline_name": "Pipeline", "type": "Type", "value": "Value", "total_calls": "Total Calls"})
+        if not df_fric.empty:
             col1, col2 = st.columns([2, 1])
             with col1:
                 fig_friction = px.bar(
@@ -453,11 +272,10 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 st.plotly_chart(fig_friction, use_container_width=True)
 
             with col2:
-                intro_calls_seg = int((df_segment["call_type"] == "intro_call").sum())
-                intro_flups_seg = int((df_segment["call_type"] == "intro_followup").sum())
-                sales_calls_seg = int((df_segment["call_type"] == "sales_call").sum())
-                sales_flups_seg = int((df_segment["call_type"] == "sales_followup").sum())
-
+                intro_calls_seg = int(kpi.get("intro_calls") or 0)
+                intro_flups_seg = int(kpi.get("intro_flup") or 0)
+                sales_calls_seg = int(kpi.get("sales_calls") or 0)
+                sales_flups_seg = int(kpi.get("sales_flup") or 0)
                 avg_intro_friction = (intro_flups_seg / intro_calls_seg) if intro_calls_seg > 0 else 0.0
                 avg_sales_friction = (sales_flups_seg / sales_calls_seg) if sales_calls_seg > 0 else 0.0
                 st.metric(
@@ -473,31 +291,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
         st.markdown("<h3 style='text-align:center;'>Friction vs. Defined Rate</h3>", unsafe_allow_html=True)
         render_hint("Each bubble is a manager+pipeline segment. X = Defined Rate on primaries, Y = Flups/Primary (friction).")
-        df_segment["is_primary"] = df_segment["call_type"].isin(["intro_call", "sales_call"])
-        df_segment["is_followup"] = df_segment["call_type"].isin(["intro_followup", "sales_followup"])
-        df_segment["is_defined_primary"] = df_segment["is_primary"] & (df_segment["outcome_category"] != "Vague")
-
-        bubble_stats = (
-            df_segment.groupby(["manager", "pipeline_name", "computed_market"], dropna=False)
-            .agg(
-                Average_quality=("Average_quality", "mean"), 
-                total_calls=("call_id", "count"),
-                primaries=("is_primary", "sum"),
-                followups=("is_followup", "sum"),
-                defined_primaries=("is_defined_primary", "sum")
-            )
-            .reset_index()
-        )
-        bubble_stats["Average_quality"] = bubble_stats["Average_quality"].round(2)
-        bubble_stats["defined_rate_pct"] = (
-            (bubble_stats["defined_primaries"] / bubble_stats["primaries"]) * 100
-        ).fillna(0).round(2)
-        bubble_stats["friction_index"] = 0.0
-        mask_p = bubble_stats["primaries"] > 0
-        bubble_stats.loc[mask_p, "friction_index"] = (
-            bubble_stats.loc[mask_p, "followups"] / bubble_stats.loc[mask_p, "primaries"]
-        ).round(2)
-
+        bubble_stats = rpc_df("rpc_cso_friction_defined_bubble", params)
         if not bubble_stats.empty:
             market_color_map = {
                 "CZ": "#1f77b4",
@@ -521,7 +315,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     "total_calls": "Calls",
                     "computed_market": "Market",
                 },
-                hover_data=["pipeline_name", "total_calls", "Average_quality", "primaries", "followups", "defined_primaries"],
+                hover_data=["pipeline_name", "total_calls", "average_quality", "primaries", "followups", "defined_primaries"],
             )
             fig_bubble.add_vline(x=bubble_stats["defined_rate_pct"].mean(), line_dash="dot", annotation_text="Avg Defined")
             fig_bubble.add_hline(y=bubble_stats["friction_index"].mean(), line_dash="dot", annotation_text="Avg Friction")
@@ -536,136 +330,94 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         "mean the manager failed to surface real barriers. If the lead has no objections, "
         "the manager is not in control of the deal."
     )
+    df_dd = rpc_df("rpc_cso_discovery_depth", params)
+    if df_dd.empty:
+        st.warning("Not enough data for Discovery Depth Index for current filters.")
+        return
 
-    if "call_type" not in df_global.columns or "main_objection_type" not in df_global.columns:
-        st.warning("Not enough data for Discovery Depth Index (need call_type and main_objection_type).")
-    else:
-        silence_df = df_global[df_global["call_type"].isin(["intro_call", "sales_call"])].copy()
-
-    if "call_type" in df_global.columns and "main_objection_type" in df_global.columns and not silence_df.empty:
-        silence_df["is_sterile"] = silence_df["main_objection_type"].fillna("None").apply(
-            lambda x: str(x).lower() in ["none", "", "nan"]
+    chart_rows = []
+    for _, row in df_dd.iterrows():
+        chart_rows.append(
+            {
+                "manager": row["manager"],
+                "Bucket": "No Objections Calls",
+                "value": int(row["no_objections_calls"]),
+                "market": row.get("market"),
+                "avg_quality": row.get("avg_quality"),
+                "no_objections_calls": int(row["no_objections_calls"]),
+                "with_objections_calls": int(row["with_objections_calls"]),
+                "total_calls": int(row["total_calls"]),
+            }
         )
-        mgr_silence = (
-            silence_df.groupby("manager")
-            .agg(call_id=("call_id", "count"), is_sterile=("is_sterile", "sum"))
-            .reset_index()
-        )
-        mgr_silence["sterile_rate"] = (mgr_silence["is_sterile"] / mgr_silence["call_id"] * 100).round(2)
-        mgr_silence["with_objections"] = mgr_silence["call_id"] - mgr_silence["is_sterile"]
-
-        market_quality = (
-            silence_df.groupby("manager")
-            .agg(
-                market=("computed_market", lambda s: s.mode().iloc[0] if not s.mode().empty else "Mixed"),
-                avg_quality=("Average_quality", "mean"),
-            )
-            .reset_index()
-        )
-        mgr_chart = mgr_silence.merge(market_quality, on="manager", how="left")
-        chart_rows = []
-        for _, row in mgr_chart.iterrows():
-            chart_rows.append(
-                {
-                    "manager": row["manager"],
-                    "Bucket": "No Objections Calls",
-                    "value": row["is_sterile"],
-                    "market": row["market"],
-                    "avg_quality": row["avg_quality"],
-                    "no_objections_calls": row["is_sterile"],
-                    "with_objections_calls": row["with_objections"],
-                    "total_calls": row["call_id"],
-                }
-            )
-            chart_rows.append(
-                {
-                    "manager": row["manager"],
-                    "Bucket": "Calls With Objections",
-                    "value": row["with_objections"],
-                    "market": row["market"],
-                    "avg_quality": row["avg_quality"],
-                    "no_objections_calls": row["is_sterile"],
-                    "with_objections_calls": row["with_objections"],
-                    "total_calls": row["call_id"],
-                }
-            )
-        chart_df = pd.DataFrame(chart_rows)
-
-        fig_dd = px.bar(
-            chart_df,
-            x="manager",
-            y="value",
-            color="Bucket",
-            template=_plotly_template(),
-            pattern_shape_sequence=[""],
-            barmode="relative",
-            labels={"value": "Share (%)"},
-            custom_data=["no_objections_calls", "with_objections_calls", "total_calls", "market", "avg_quality"],
-        )
-        fig_dd.update_traces(
-            hovertemplate=(
-                "Manager: %{x}<br>"
-                "Bucket: %{fullData.name}<br>"
-                "Share: %{y:.1f}%<br>"
-                "No Objections: %{customdata[0]}<br>"
-                "With Objections: %{customdata[1]}<br>"
-                "Total Calls: %{customdata[2]}<br>"
-                "Market: %{customdata[3]}<br>"
-                "Avg Quality: %{customdata[4]:.2f}<extra></extra>"
-            )
-        )
-        fig_dd.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="", legend_title="")
-        st.plotly_chart(fig_dd, use_container_width=True)
-
-        st.markdown("<h2 style='text-align:center;'>No Objections Calls Rating</h2>", unsafe_allow_html=True)
-
-        intro_calls_mgr = df_global[df_global["call_type"] == "intro_call"].groupby("manager").size()
-        intro_flup_mgr = df_global[df_global["call_type"] == "intro_followup"].groupby("manager").size()
-        sales_calls_mgr = df_global[df_global["call_type"] == "sales_call"].groupby("manager").size()
-        sales_flup_mgr = df_global[df_global["call_type"] == "sales_followup"].groupby("manager").size()
-
-        mgr_silence["intro_calls"] = mgr_silence["manager"].map(intro_calls_mgr).fillna(0).astype(int)
-        mgr_silence["intro_flups"] = mgr_silence["manager"].map(intro_flup_mgr).fillna(0).astype(int)
-        mgr_silence["sales_calls"] = mgr_silence["manager"].map(sales_calls_mgr).fillna(0).astype(int)
-        mgr_silence["sales_flups"] = mgr_silence["manager"].map(sales_flup_mgr).fillna(0).astype(int)
-
-        mgr_silence["intro_friction"] = mgr_silence.apply(
-            lambda r: (r["intro_flups"] / r["intro_calls"]) if r["intro_calls"] > 0 else 0.0,
-            axis=1,
-        )
-        mgr_silence["sales_friction"] = mgr_silence.apply(
-            lambda r: (r["sales_flups"] / r["sales_calls"]) if r["sales_calls"] > 0 else 0.0,
-            axis=1,
+        chart_rows.append(
+            {
+                "manager": row["manager"],
+                "Bucket": "Calls With Objections",
+                "value": int(row["with_objections_calls"]),
+                "market": row.get("market"),
+                "avg_quality": row.get("avg_quality"),
+                "no_objections_calls": int(row["no_objections_calls"]),
+                "with_objections_calls": int(row["with_objections_calls"]),
+                "total_calls": int(row["total_calls"]),
+            }
         )
 
-        lb = mgr_silence.merge(market_quality, on="manager", how="left")
-        lb = lb.sort_values("sterile_rate", ascending=False).copy()
-        lb["Avg Quality"] = lb["avg_quality"].round(2)
-        lb["Intro Friction"] = lb["intro_friction"].round(2)
-        lb["Sales Friction"] = lb["sales_friction"].round(2)
-        lb = lb[
-            [
-                "manager",
-                "call_id",
-                "is_sterile",
-                "sterile_rate",
-                "market",
-                "Avg Quality",
-                "Intro Friction",
-                "Sales Friction",
-            ]
-        ]
-        lb.columns = [
-            "Manager",
-            "Total Calls",
-            "No Objections Calls",
-            "No Objections Share %",
-            "Market",
+    chart_df = pd.DataFrame(chart_rows)
+    fig_dd = px.bar(
+        chart_df,
+        x="manager",
+        y="value",
+        color="Bucket",
+        template=_plotly_template(),
+        pattern_shape_sequence=[""],
+        barmode="relative",
+        labels={"value": "Share (%)"},
+        custom_data=["no_objections_calls", "with_objections_calls", "total_calls", "market", "avg_quality"],
+    )
+    fig_dd.update_traces(
+        hovertemplate=(
+            "Manager: %{x}<br>"
+            "Bucket: %{fullData.name}<br>"
+            "Share: %{y:.1f}%<br>"
+            "No Objections: %{customdata[0]}<br>"
+            "With Objections: %{customdata[1]}<br>"
+            "Total Calls: %{customdata[2]}<br>"
+            "Market: %{customdata[3]}<br>"
+            "Avg Quality: %{customdata[4]:.2f}<extra></extra>"
+        )
+    )
+    fig_dd.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="", legend_title="")
+    st.plotly_chart(fig_dd, use_container_width=True)
+
+    st.markdown("<h2 style='text-align:center;'>No Objections Calls Rating</h2>", unsafe_allow_html=True)
+
+    lb = df_dd.copy()
+    lb["Avg Quality"] = pd.to_numeric(lb["avg_quality"], errors="coerce").round(2)
+    lb["Intro Friction"] = pd.to_numeric(lb["intro_friction"], errors="coerce").round(2)
+    lb["Sales Friction"] = pd.to_numeric(lb["sales_friction"], errors="coerce").round(2)
+    lb = lb[
+        [
+            "manager",
+            "total_calls",
+            "no_objections_calls",
+            "sterile_rate",
+            "market",
             "Avg Quality",
             "Intro Friction",
             "Sales Friction",
         ]
-        st.dataframe(lb, hide_index=True, use_container_width=True)
+    ]
+    lb.columns = [
+        "Manager",
+        "Total Calls",
+        "No Objections Calls",
+        "No Objections Share %",
+        "Market",
+        "Avg Quality",
+        "Intro Friction",
+        "Sales Friction",
+    ]
+    st.dataframe(lb, hide_index=True, use_container_width=True)
 
 if __name__ == "__main__":
     pass

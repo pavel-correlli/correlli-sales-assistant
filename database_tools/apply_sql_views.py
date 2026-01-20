@@ -19,10 +19,96 @@ def _read_sql(sql_path: str) -> str:
         return f.read()
 
 
+def _split_sql_statements(sql: str) -> list[str]:
+    statements: list[str] = []
+    buf: list[str] = []
+
+    in_single = False
+    in_double = False
+    dollar_tag: str | None = None
+
+    i = 0
+    n = len(sql)
+    while i < n:
+        ch = sql[i]
+
+        if dollar_tag is not None:
+            if sql.startswith(dollar_tag, i):
+                buf.append(dollar_tag)
+                i += len(dollar_tag)
+                dollar_tag = None
+                continue
+            buf.append(ch)
+            i += 1
+            continue
+
+        if in_single:
+            buf.append(ch)
+            if ch == "'":
+                if i + 1 < n and sql[i + 1] == "'":
+                    buf.append("'")
+                    i += 2
+                    continue
+                in_single = False
+            i += 1
+            continue
+
+        if in_double:
+            buf.append(ch)
+            if ch == '"':
+                if i + 1 < n and sql[i + 1] == '"':
+                    buf.append('"')
+                    i += 2
+                    continue
+                in_double = False
+            i += 1
+            continue
+
+        if ch == "'":
+            in_single = True
+            buf.append(ch)
+            i += 1
+            continue
+
+        if ch == '"':
+            in_double = True
+            buf.append(ch)
+            i += 1
+            continue
+
+        if ch == "$":
+            j = i + 1
+            while j < n and (sql[j].isalnum() or sql[j] == "_"):
+                j += 1
+            if j < n and sql[j] == "$":
+                tag = sql[i : j + 1]
+                dollar_tag = tag
+                buf.append(tag)
+                i = j + 1
+                continue
+
+        if ch == ";":
+            stmt = "".join(buf).strip()
+            if stmt:
+                statements.append(stmt)
+            buf = []
+            i += 1
+            continue
+
+        buf.append(ch)
+        i += 1
+
+    tail = "".join(buf).strip()
+    if tail:
+        statements.append(tail)
+    return statements
+
+
 def apply_views(sql_path: str):
     secrets = _load_secrets()
     cfg = secrets["database"]
     sql = _read_sql(sql_path)
+    statements = _split_sql_statements(sql)
 
     def _connect(host: str):
         return psycopg2.connect(
@@ -62,7 +148,13 @@ def apply_views(sql_path: str):
 
         conn.autocommit = True
         with conn.cursor() as cur:
-            cur.execute(sql)
+            cur.execute("SET statement_timeout TO 0;")
+            for idx, stmt in enumerate(statements, start=1):
+                try:
+                    cur.execute(stmt)
+                except Exception as e:
+                    preview = stmt.replace("\n", " ")[:400]
+                    raise RuntimeError(f"Failed SQL statement #{idx}/{len(statements)}: {preview}") from e
     finally:
         if conn is not None:
             conn.close()

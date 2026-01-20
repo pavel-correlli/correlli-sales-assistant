@@ -15,8 +15,8 @@ def get_supabase_config():
             secrets = toml.load(path)
             if 'supabase' in secrets:
                 return secrets['supabase']['url'], secrets['supabase']['key']
-    
-    return "https://ygehbksgnswmmhmtwwba.supabase.co", "sb_publishable_oet6SI6-WSEFE9ObDPVtGA_5zBFnPDh"
+
+    raise FileNotFoundError("Supabase configuration not found in .streamlit/secrets.toml")
 
 def main():
     try:
