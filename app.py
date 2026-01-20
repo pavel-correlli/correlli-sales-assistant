@@ -1,14 +1,37 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date, timedelta
-from database import fetch_view_data, ensure_chart_views, rpc_df, rpc_df_long
+import database as db
+
+if not hasattr(db, "rpc_df"):
+    @st.cache_data(ttl=300)
+    def _rpc_df_fallback(function_name: str, params: dict | None = None) -> pd.DataFrame:
+        try:
+            supabase = db.get_supabase_client()
+            res = supabase.rpc(function_name, params or {}).execute()
+            return pd.DataFrame(res.data or [])
+        except Exception:
+            return pd.DataFrame()
+
+    @st.cache_data(ttl=3600)
+    def _rpc_df_long_fallback(function_name: str, params: dict | None = None) -> pd.DataFrame:
+        return _rpc_df_fallback(function_name, params)
+
+    db.rpc_df = _rpc_df_fallback
+    db.rpc_df_long = _rpc_df_long_fallback
+
+fetch_view_data = getattr(db, "fetch_view_data", None)
+ensure_chart_views = getattr(db, "ensure_chart_views", lambda: False)
+rpc_df = db.rpc_df
+rpc_df_long = getattr(db, "rpc_df_long", db.rpc_df)
+
+BUILD_ID = "2026-01-20-deploy-01"
+
 from styles import get_css
 from views.ceo_view import render_ceo_dashboard
 from views.cmo_view import render_cmo_analytics
 from views.cso_view import render_cso_dashboard
 from views.lab_view import render_data_lab
-
-BUILD_ID = "2026-01-17-deploy-02"
 
 
 def _get_prev_ops_day(today: date) -> date:
@@ -264,6 +287,8 @@ def render_sidebar():
         df_mp = rpc_df_long("rpc_app_markets_pipelines")
         df_mgr = rpc_df_long("rpc_app_managers")
         if df_mp.empty and df_mgr.empty:
+            if fetch_view_data is None:
+                return [], {}, []
             df_raw_filters = fetch_view_data("Algonova_Calls_Raw")
             if df_raw_filters.empty:
                 return [], {}, []

@@ -289,8 +289,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     help=r"$Sales\ Friction=\frac{Sales\ Flups}{Sales\ Calls}$",
                 )
 
-        st.markdown("<h3 style='text-align:center;'>Friction vs. Defined Rate</h3>", unsafe_allow_html=True)
-        render_hint("Each bubble is a manager+pipeline segment. X = Defined Rate on primaries, Y = Flups/Primary (friction).")
+        st.markdown("<h3 style='text-align:center;'>Friction vs. Next Step Defined Rate</h3>", unsafe_allow_html=True)
+        render_hint("Each bubble is a manager+pipeline segment. X = Next Step Defined Rate on primaries, Y = Flups/Primary (friction).")
         bubble_stats = rpc_df("rpc_cso_friction_defined_bubble", params)
         if not bubble_stats.empty:
             market_color_map = {
@@ -310,7 +310,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 size_max=60,
                 color_discrete_map=market_color_map,
                 labels={
-                    "defined_rate_pct": "Defined Rate (%)",
+                    "defined_rate_pct": "Next Step Defined Rate (%)",
                     "friction_index": "Friction Index (Flup / Primary)",
                     "total_calls": "Calls",
                     "computed_market": "Market",

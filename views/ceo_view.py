@@ -124,17 +124,23 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
 
     st.markdown("<div id='talk-time-per-lead-by-pipeline'></div>", unsafe_allow_html=True)
     st.subheader("Talk Time per Lead by Pipeline")
-    render_hint("100% split of total pipeline minutes by call type. Hover shows averages, leads, calls, and minutes.")
+    render_hint("100% split of total pipeline calls by call type. Hover shows averages, leads, calls, and minutes.")
 
     tt_sql = rpc_df("rpc_ceo_talk_time_per_lead_by_pipeline", rpc_params)
     if tt_sql.empty:
         st.warning("No data available for Talk Time chart for current filters.")
         return
 
+    calls_total = tt_sql.groupby("pipeline_name", dropna=False)["calls_type"].sum().reset_index(name="calls_total_pipeline")
+    tt_sql = tt_sql.merge(calls_total, on="pipeline_name", how="left")
+    tt_sql["share_calls_pct"] = (
+        tt_sql["calls_type"] / tt_sql["calls_total_pipeline"].replace(0, pd.NA) * 100
+    ).fillna(0.0)
+
     fig_share = px.bar(
         tt_sql,
         x="pipeline_name",
-        y="share_pct",
+        y="share_calls_pct",
         color="call_type_group",
         barmode="relative",
         template=_plotly_template(),
@@ -147,14 +153,14 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
             "avg_minutes_per_lead_type",
             "total_minutes_pipeline",
         ],
-        labels={"pipeline_name": "Pipeline", "share_pct": "Share (%)"},
+        labels={"pipeline_name": "Pipeline", "share_calls_pct": "Share (%)"},
     )
     fig_share.update_layout(yaxis_title="Share (%)", xaxis_title="Pipeline", legend_title="")
     fig_share.update_traces(
         hovertemplate=(
             "Pipeline: %{x}<br>"
             "Type: %{fullData.name}<br>"
-            "Share of Minutes: %{y:.2f}%<br>"
+            "Share of Calls: %{y:.2f}%<br>"
             "Avg Minutes/Call: %{customdata[3]:.2f}<br>"
             "Avg Minutes/Lead: %{customdata[4]:.2f}<br>"
             "Leads: %{customdata[0]}<br>"
@@ -167,24 +173,24 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
 
     st.markdown("<div id='total-talk-time-by-pipeline'></div>", unsafe_allow_html=True)
     st.subheader("Total Talk Time by Pipeline")
-    render_hint("100% split of total pipeline minutes by call type. Hover shows leads, calls, and minutes.")
+    render_hint("100% split of total pipeline calls by call type. Hover shows leads, calls, and minutes.")
     fig_tot = px.bar(
         tt_sql,
         x="pipeline_name",
-        y="share_pct",
+        y="share_calls_pct",
         color="call_type_group",
         barmode="relative",
         template=_plotly_template(),
         pattern_shape_sequence=[""],
         custom_data=["leads_total", "calls_type", "total_minutes_type", "total_minutes_pipeline"],
-        labels={"pipeline_name": "Pipeline", "share_pct": "Share (%)"},
+        labels={"pipeline_name": "Pipeline", "share_calls_pct": "Share (%)"},
     )
     fig_tot.update_layout(yaxis_title="Share (%)", xaxis_title="Pipeline", legend_title="")
     fig_tot.update_traces(
         hovertemplate=(
             "Pipeline: %{x}<br>"
             "Type: %{fullData.name}<br>"
-            "Share of Minutes: %{y:.2f}%<br>"
+            "Share of Calls: %{y:.2f}%<br>"
             "Leads: %{customdata[0]}<br>"
             "Calls (type): %{customdata[1]}<br>"
             "Minutes (type): %{customdata[2]:.1f}<br>"
