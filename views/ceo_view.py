@@ -123,7 +123,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         st.plotly_chart(fig_occ, use_container_width=True)
 
     st.markdown("<div id='talk-time-per-lead-by-pipeline'></div>", unsafe_allow_html=True)
-    st.subheader("Talk Time per Lead by Pipeline")
+    st.subheader("Сall type per Lead by Pipeline")
     render_hint("100% split of total pipeline calls by call type. Hover shows averages, leads, calls, and minutes.")
 
     tt_sql = rpc_df("rpc_ceo_talk_time_per_lead_by_pipeline", rpc_params)
