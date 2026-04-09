@@ -32,7 +32,7 @@ ensure_chart_views = getattr(db, "ensure_chart_views", lambda: False)
 rpc_df = db.rpc_df
 rpc_df_long = getattr(db, "rpc_df_long", db.rpc_df)
 
-BUILD_ID = "2026-01-20-deploy-01"
+BUILD_ID = "2026-04-09-ru-business-01"
 
 
 def _get_prev_ops_day(today: date) -> date:
