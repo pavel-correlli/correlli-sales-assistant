@@ -1,8 +1,8 @@
-import streamlit as st
+﻿import streamlit as st
 import pandas as pd
 import plotly.express as px
 from database import rpc_df
-from i18n import call_type_label, market_label, pipeline_label, t
+from app_i18n import call_type_label, market_label, pipeline_label, t
 from views.shared_ui import render_hint
 
 
@@ -71,11 +71,11 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     fig_fr.update_traces(
         hovertemplate=(
             f"{t('label.market')}: "+"%{x}<br>"
-            "Тип: %{fullData.name}<br>"
+            "РўРёРї: %{fullData.name}<br>"
             f"{t('ceo.total_market_friction')}: "+"%{y:.2f}<br>"
-            "Первичные звонки: %{customdata[0]}<br>"
-            "Повторные звонки: %{customdata[1]}<br>"
-            "Звонков в расчете: %{customdata[2]}<extra></extra>"
+            "РџРµСЂРІРёС‡РЅС‹Рµ Р·РІРѕРЅРєРё: %{customdata[0]}<br>"
+            "РџРѕРІС‚РѕСЂРЅС‹Рµ Р·РІРѕРЅРєРё: %{customdata[1]}<br>"
+            "Р—РІРѕРЅРєРѕРІ РІ СЂР°СЃС‡РµС‚Рµ: %{customdata[2]}<extra></extra>"
         )
     )
     st.plotly_chart(fig_fr, use_container_width=True)
@@ -153,14 +153,14 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     fig_share.update_traces(
         hovertemplate=(
             f"{t('label.funnel')}: "+"%{x}<br>"
-            "Тип: %{fullData.name}<br>"
+            "РўРёРї: %{fullData.name}<br>"
             f"{t('label.share_pct')}: "+"%{y:.2f}<br>"
-            "Сред. минут на звонок: %{customdata[3]:.2f}<br>"
-            "Сред. минут на лида: %{customdata[4]:.2f}<br>"
-            "Лидов: %{customdata[0]}<br>"
-            "Звонков (тип): %{customdata[1]}<br>"
-            "Минут (тип): %{customdata[2]:.1f}<br>"
-            "Минут всего по воронке: %{customdata[5]:.1f}<extra></extra>"
+            "РЎСЂРµРґ. РјРёРЅСѓС‚ РЅР° Р·РІРѕРЅРѕРє: %{customdata[3]:.2f}<br>"
+            "РЎСЂРµРґ. РјРёРЅСѓС‚ РЅР° Р»РёРґР°: %{customdata[4]:.2f}<br>"
+            "Р›РёРґРѕРІ: %{customdata[0]}<br>"
+            "Р—РІРѕРЅРєРѕРІ (С‚РёРї): %{customdata[1]}<br>"
+            "РњРёРЅСѓС‚ (С‚РёРї): %{customdata[2]:.1f}<br>"
+            "РњРёРЅСѓС‚ РІСЃРµРіРѕ РїРѕ РІРѕСЂРѕРЅРєРµ: %{customdata[5]:.1f}<extra></extra>"
         )
     )
     st.plotly_chart(fig_share, use_container_width=True)
@@ -183,12 +183,13 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     fig_tot.update_traces(
         hovertemplate=(
             f"{t('label.funnel')}: "+"%{x}<br>"
-            "Тип: %{fullData.name}<br>"
+            "РўРёРї: %{fullData.name}<br>"
             f"{t('label.share_pct')}: "+"%{y:.2f}<br>"
-            "Лидов: %{customdata[0]}<br>"
-            "Звонков (тип): %{customdata[1]}<br>"
-            "Минут (тип): %{customdata[2]:.1f}<br>"
-            "Минут всего по воронке: %{customdata[3]:.1f}<extra></extra>"
+            "Р›РёРґРѕРІ: %{customdata[0]}<br>"
+            "Р—РІРѕРЅРєРѕРІ (С‚РёРї): %{customdata[1]}<br>"
+            "РњРёРЅСѓС‚ (С‚РёРї): %{customdata[2]:.1f}<br>"
+            "РњРёРЅСѓС‚ РІСЃРµРіРѕ РїРѕ РІРѕСЂРѕРЅРєРµ: %{customdata[3]:.1f}<extra></extra>"
         )
     )
     st.plotly_chart(fig_tot, use_container_width=True)
+

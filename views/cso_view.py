@@ -1,9 +1,9 @@
-import streamlit as st
+﻿import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from database import rpc_df
-from i18n import call_type_label, market_label, pipeline_label, t
+from app_i18n import call_type_label, market_label, pipeline_label, t
 from views.shared_ui import render_hint
 
 
@@ -106,7 +106,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         fig_ops.update_traces(
             hovertemplate=(
                 f"{t('label.manager')}: "+"%{y}<br>"
-                "Тип: %{customdata[1]}<br>"
+                "РўРёРї: %{customdata[1]}<br>"
                 f"{t('label.minutes')}: "+"%{x:.1f}<br>"
                 f"{t('label.calls')}: "+"%{customdata[0]}<br>"
                 f"{t('cso.kpi.total_calls')}: "+"%{customdata[2]}<extra></extra>"
@@ -139,10 +139,10 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         fig_pipe.update_traces(
             hovertemplate=(
                 f"{t('label.funnel')}: "+"%{y}<br>"
-                "Тип: %{customdata[1]}<br>"
+                "РўРёРї: %{customdata[1]}<br>"
                 f"{t('label.calls')}: "+"%{x}<br>"
                 f"{t('label.minutes')}: "+"%{customdata[0]:.1f}<br>"
-                "Минут всего: %{customdata[2]:.1f}<extra></extra>"
+                "РњРёРЅСѓС‚ РІСЃРµРіРѕ: %{customdata[2]:.1f}<extra></extra>"
             )
         )
         fig_pipe.update_layout(yaxis_title="", xaxis_title=t("label.calls"), legend_title="")
@@ -175,7 +175,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     line={"color": market_color_map.get(market, "#9467bd")},
                     customdata=sub[["computed_market", "intro_calls", "intro_flup", "sales_calls", "sales_flup"]].to_numpy(),
                     hovertemplate=(
-                        "Дата: %{x}<br>"
+                        "Р”Р°С‚Р°: %{x}<br>"
                         f"{t('label.manager')}: "+"%{fullData.name} (%{customdata[0]})<br>"
                         f"{t('cso.kpi.intro_calls')}: "+"%{customdata[1]}<br>"
                         f"{t('cso.kpi.intro_flup')}: "+"%{customdata[2]}<br>"
@@ -184,7 +184,7 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     ),
                 )
             )
-        fig.update_layout(template=_plotly_template(), yaxis_title=t("label.minutes"), xaxis_title="Дата", legend_title=t("label.manager"))
+        fig.update_layout(template=_plotly_template(), yaxis_title=t("label.minutes"), xaxis_title="Р”Р°С‚Р°", legend_title=t("label.manager"))
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
@@ -318,10 +318,10 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
     fig_dd.update_traces(
         hovertemplate=(
             f"{t('label.manager')}: "+"%{x}<br>"
-            "Сегмент: %{fullData.name}<br>"
+            "РЎРµРіРјРµРЅС‚: %{fullData.name}<br>"
             f"{t('label.share_pct')}: "+"%{y:.1f}<br>"
-            "Без возражений: %{customdata[0]}<br>"
-            "С возражениями: %{customdata[1]}<br>"
+            "Р‘РµР· РІРѕР·СЂР°Р¶РµРЅРёР№: %{customdata[0]}<br>"
+            "РЎ РІРѕР·СЂР°Р¶РµРЅРёСЏРјРё: %{customdata[1]}<br>"
             f"{t('cso.kpi.total_calls')}: "+"%{customdata[2]}<br>"
             f"{t('label.market')}: "+"%{customdata[3]}<br>"
             f"{t('label.avg_quality')}: "+"%{customdata[4]:.2f}<extra></extra>"
@@ -344,3 +344,4 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
 if __name__ == "__main__":
     pass
+

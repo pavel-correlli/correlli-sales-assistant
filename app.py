@@ -1,9 +1,9 @@
-import streamlit as st
+﻿import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
 import database as db
 
-from i18n import LANGUAGES, get_lang, market_label, pipeline_label, set_lang, t
+from app_i18n import LANGUAGES, get_lang, market_label, pipeline_label, set_lang, t
 from styles import get_css
 from views.ceo_view import render_ceo_dashboard
 from views.cmo_view import render_cmo_analytics
@@ -426,3 +426,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

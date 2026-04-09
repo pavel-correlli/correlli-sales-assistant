@@ -1,5 +1,5 @@
-import streamlit as st
-from i18n import t
+﻿import streamlit as st
+from app_i18n import t
 
 
 def render_hint(text: str):
@@ -18,3 +18,4 @@ def render_data_health_volume(
         if date_range_in_result is not None:
             start, end = date_range_in_result
             st.write(f"**{t('shared.date_range_result')}:** {start} -> {end}")
+

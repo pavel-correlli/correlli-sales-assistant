@@ -1,11 +1,11 @@
-import streamlit as st
+﻿import streamlit as st
 import pandas as pd
 from supabase import create_client, Client
 import os
 import time
 import httpx
 import psycopg2
-from i18n import t
+from app_i18n import t
 
 
 def _get_nested_secret(section: str, key: str):
@@ -315,3 +315,4 @@ def query_postgres(sql: str, params: tuple | None = None) -> pd.DataFrame:
             conn.close()
     except Exception:
         return pd.DataFrame()
+

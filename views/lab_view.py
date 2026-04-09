@@ -1,6 +1,6 @@
-import streamlit as st
+﻿import streamlit as st
 from database import fetch_view_data
-from i18n import t
+from app_i18n import t
 
 
 def render_data_lab():
@@ -20,3 +20,4 @@ def render_data_lab():
         renderer.explorer()
     else:
         st.warning(t("lab.no_data"))
+

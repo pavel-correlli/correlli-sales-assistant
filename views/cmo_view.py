@@ -1,9 +1,9 @@
-import streamlit as st
+﻿import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from database import fetch_view_data, rpc_df
-from i18n import market_label, pipeline_label, t
+from app_i18n import market_label, pipeline_label, t
 from views.shared_ui import render_hint
 
 
@@ -192,7 +192,7 @@ def _render_attribute_frequency_heatmap(attr_type: str, title: str, colorscale, 
                     f"{attr_type}: %{{y}}<br>"
                     f"{t('label.funnel')}: "+"%{x}<br>"
                     f"{t('cmo.calls_with_entity')}: "+"%{customdata[0]}<br>"
-                    "Всего звонков: %{customdata[1]}<br>"
+                    "Р’СЃРµРіРѕ Р·РІРѕРЅРєРѕРІ: %{customdata[1]}<br>"
                     f"{t('cmo.mentions')}: "+"%{customdata[2]}<br>"
                     f"{t('cmo.mentions_per_call')}: "+"%{customdata[3]:.2f}<br>"
                     f"{t('cmo.share_mentions_funnel')}: "+"%{customdata[4]:.1%}<br>"
@@ -275,7 +275,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
                 f"{t('cmo.viscosity_index')}: "+"%{y:.2f}<br>"
                 f"{t('cmo.total_calls')}: "+"%{customdata[1]}<br>"
                 f"{t('cmo.total_leads')}: "+"%{customdata[2]}<br>"
-                "Формула: Звонки / Лиды<extra></extra>"
+                "Р¤РѕСЂРјСѓР»Р°: Р—РІРѕРЅРєРё / Р›РёРґС‹<extra></extra>"
             )
             if tr.name == t("cmo.viscosity_index")
             else (
@@ -353,9 +353,9 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
                     f"{t('cmo.traffic_manager')}: "+"%{x}<br>"
                     f"{t('cmo.intro_primaries')}: "+"%{customdata[0]}<br>"
                     f"{t('cmo.intro_followups')}: "+"%{customdata[1]}<br>"
-                    "Звонков в расчете: %{customdata[2]}<br>"
+                    "Р—РІРѕРЅРєРѕРІ РІ СЂР°СЃС‡РµС‚Рµ: %{customdata[2]}<br>"
                     f"{t('cmo.intro_friction')}: "+"%{z:.2f}<br>"
-                    "Формула: Повторные звонки / Первичные звонки<extra></extra>"
+                    "Р¤РѕСЂРјСѓР»Р°: РџРѕРІС‚РѕСЂРЅС‹Рµ Р·РІРѕРЅРєРё / РџРµСЂРІРёС‡РЅС‹Рµ Р·РІРѕРЅРєРё<extra></extra>"
                 ),
             )
         ]
@@ -381,4 +381,5 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     _render_attribute_frequency_heatmap("Objection", t("cmo.section.objection"), _entity_heatmap_colorscale("Objection"), date_range, selected_markets, selected_pipelines)
     st.markdown("<div id='fear-heatmap'></div>", unsafe_allow_html=True)
     _render_attribute_frequency_heatmap("Fear", t("cmo.section.fear"), _entity_heatmap_colorscale("Fear"), date_range, selected_markets, selected_pipelines)
+
 
