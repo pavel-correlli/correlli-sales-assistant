@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from database import rpc_df
-from i18n import t
+from i18n import call_type_label, market_label, pipeline_label, t
 from views.shared_ui import render_hint
 
 
@@ -17,7 +17,6 @@ def _existing_columns(df: pd.DataFrame, cols: list[str]) -> list[str]:
 
 def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selected_managers=None):
     st.markdown(f"<h1 style='text-align:center;'>{t('cso.title')}</h1>", unsafe_allow_html=True)
-
     date_start = date_range[0] if len(date_range) == 2 else None
     date_end = date_range[1] if len(date_range) == 2 else None
     params = {
@@ -29,7 +28,6 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
     }
 
     st.markdown("<div id='operations-feed'></div>", unsafe_allow_html=True)
-
     df_kpi = rpc_df("rpc_cso_ops_kpis", params)
     if df_kpi.empty:
         st.warning(t("cso.no_data"))
@@ -37,16 +35,17 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
     kpi = df_kpi.iloc[0].to_dict()
     ops_cols = st.columns(6)
-    with ops_cols[0]:
-        st.metric(t("cso.kpi.total_calls"), f"{int(kpi.get('total_calls') or 0)}")
-    with ops_cols[1]:
-        st.metric(t("cso.kpi.intro_calls"), f"{int(kpi.get('intro_calls') or 0)}")
-    with ops_cols[2]:
-        st.metric(t("cso.kpi.intro_flup"), f"{int(kpi.get('intro_flup') or 0)}")
-    with ops_cols[3]:
-        st.metric(t("cso.kpi.sales_calls"), f"{int(kpi.get('sales_calls') or 0)}")
-    with ops_cols[4]:
-        st.metric(t("cso.kpi.sales_flup"), f"{int(kpi.get('sales_flup') or 0)}")
+    ops_vals = [
+        t("cso.kpi.total_calls"),
+        t("cso.kpi.intro_calls"),
+        t("cso.kpi.intro_flup"),
+        t("cso.kpi.sales_calls"),
+        t("cso.kpi.sales_flup"),
+    ]
+    ops_raw = [int(kpi.get("total_calls") or 0), int(kpi.get("intro_calls") or 0), int(kpi.get("intro_flup") or 0), int(kpi.get("sales_calls") or 0), int(kpi.get("sales_flup") or 0)]
+    for i in range(5):
+        with ops_cols[i]:
+            st.metric(ops_vals[i], f"{ops_raw[i]}")
     with ops_cols[5]:
         avg_q = kpi.get("avg_quality", None)
         st.metric(t("cso.kpi.avg_quality"), "-" if avg_q in (None, "", "nan") else f"{float(avg_q):.2f}")
@@ -54,99 +53,102 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
     tab_a, tab_b = st.tabs([t("cso.tab.anomalies"), t("cso.tab.low_quality")])
     with tab_a:
         anomalies = rpc_df("rpc_cso_anomalies", params)
-        show_cols = _existing_columns(
-            anomalies,
-            ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "audio_url", "kommo_link"],
-        )
+        show_cols = _existing_columns(anomalies, ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "audio_url", "kommo_link"])
         if anomalies.empty:
             st.success(t("cso.anomalies.empty"))
         else:
+            out = anomalies.copy()
+            if "pipeline_name" in out.columns:
+                out["pipeline_name"] = out["pipeline_name"].apply(pipeline_label)
             st.dataframe(
-                anomalies[show_cols],
+                out[show_cols],
                 use_container_width=True,
                 hide_index=True,
-                column_config={
-                    "audio_url": st.column_config.LinkColumn(t("cso.audio_url")),
-                    "kommo_link": st.column_config.LinkColumn(t("cso.kommo")),
-                },
+                column_config={"audio_url": st.column_config.LinkColumn(t("cso.audio_url")), "kommo_link": st.column_config.LinkColumn(t("cso.kommo"))},
             )
 
     with tab_b:
         low_q = rpc_df("rpc_cso_low_quality", params)
-        show_cols = _existing_columns(
-            low_q,
-            ["call_datetime", "manager", "pipeline_name", "average_quality", "audio_url", "kommo_link"],
-        )
+        show_cols = _existing_columns(low_q, ["call_datetime", "manager", "pipeline_name", "average_quality", "audio_url", "kommo_link"])
         if low_q.empty:
             st.success(t("cso.low_quality.empty"))
         else:
-            low_q = low_q.copy()
-            low_q = low_q.sort_values("average_quality", ascending=True, na_position="last")
+            out = low_q.copy().sort_values("average_quality", ascending=True, na_position="last")
+            if "pipeline_name" in out.columns:
+                out["pipeline_name"] = out["pipeline_name"].apply(pipeline_label)
             st.dataframe(
-                low_q[show_cols],
+                out[show_cols],
                 use_container_width=True,
                 hide_index=True,
-                column_config={
-                    "audio_url": st.column_config.LinkColumn(t("cso.audio_url")),
-                    "kommo_link": st.column_config.LinkColumn(t("cso.kommo")),
-                },
+                column_config={"audio_url": st.column_config.LinkColumn(t("cso.audio_url")), "kommo_link": st.column_config.LinkColumn(t("cso.kommo"))},
             )
 
     df_mgr = rpc_df("rpc_cso_talk_time_by_manager", params)
     if not df_mgr.empty and {"manager", "call_type_group", "minutes", "calls", "total_calls"}.issubset(df_mgr.columns):
-        type_order = ["Intro Call", "Intro Flup", "Sales Call", "Sales Flup"]
         df_mgr = df_mgr.copy()
-        df_mgr["call_type_group"] = pd.Categorical(df_mgr["call_type_group"], categories=type_order, ordered=True)
-        df_mgr = df_mgr.sort_values(["manager", "call_type_group"])
-        last_type = type_order[-1]
-        df_mgr["label_calls"] = df_mgr.apply(lambda r: str(int(r["total_calls"])) if r["call_type_group"] == last_type else "", axis=1)
+        df_mgr["call_type_display"] = df_mgr["call_type_group"].apply(call_type_label)
+        type_order = [call_type_label("Intro Call"), call_type_label("Intro Flup"), call_type_label("Sales Call"), call_type_label("Sales Flup")]
+        df_mgr["call_type_display"] = pd.Categorical(df_mgr["call_type_display"], categories=type_order, ordered=True)
+        df_mgr = df_mgr.sort_values(["manager", "call_type_display"])
+        df_mgr["label_calls"] = df_mgr.apply(lambda r: str(int(r["total_calls"])) if r["call_type_display"] == type_order[-1] else "", axis=1)
         fig_ops = px.bar(
             df_mgr,
             y="manager",
             x="minutes",
-            color="call_type_group",
+            color="call_type_display",
             orientation="h",
             template=_plotly_template(),
             pattern_shape_sequence=[""],
             title=t("cso.chart.talk_time_manager"),
-            hover_data=["calls", "call_type_group", "total_calls"],
+            hover_data=["calls", "call_type_display", "total_calls"],
             text="label_calls",
         )
         fig_ops.update_traces(
-            hovertemplate="Manager: %{y}<br>Type: %{customdata[1]}<br>Minutes: %{x:.1f}<br>Calls: %{customdata[0]}<br>Total Calls: %{customdata[2]}<extra></extra>"
+            hovertemplate=(
+                f"{t('label.manager')}: "+"%{y}<br>"
+                "Тип: %{customdata[1]}<br>"
+                f"{t('label.minutes')}: "+"%{x:.1f}<br>"
+                f"{t('label.calls')}: "+"%{customdata[0]}<br>"
+                f"{t('cso.kpi.total_calls')}: "+"%{customdata[2]}<extra></extra>"
+            )
         )
-        fig_ops.update_layout(yaxis_title="", xaxis_title="Minutes", legend_title="Call Type")
+        fig_ops.update_layout(yaxis_title="", xaxis_title=t("label.minutes"), legend_title="")
         st.plotly_chart(fig_ops, use_container_width=True)
 
     df_pipe = rpc_df("rpc_cso_calls_by_pipeline", params)
     if not df_pipe.empty and {"pipeline_name", "call_type_group", "calls", "minutes", "total_minutes"}.issubset(df_pipe.columns):
-        type_order = ["Intro Call", "Intro Flup", "Sales Call", "Sales Flup"]
         df_pipe = df_pipe.copy()
-        df_pipe["pipeline_name"] = df_pipe["pipeline_name"].fillna(t("cmo.unknown"))
-        df_pipe["call_type_group"] = pd.Categorical(df_pipe["call_type_group"], categories=type_order, ordered=True)
-        df_pipe = df_pipe.sort_values(["pipeline_name", "call_type_group"])
-        last_type = type_order[-1]
-        df_pipe["label_minutes"] = df_pipe.apply(lambda r: f"{float(r['total_minutes']):.1f}" if r["call_type_group"] == last_type else "", axis=1)
+        df_pipe["pipeline_display"] = df_pipe["pipeline_name"].fillna(t("cmo.unknown")).apply(pipeline_label)
+        df_pipe["call_type_display"] = df_pipe["call_type_group"].apply(call_type_label)
+        type_order = [call_type_label("Intro Call"), call_type_label("Intro Flup"), call_type_label("Sales Call"), call_type_label("Sales Flup")]
+        df_pipe["call_type_display"] = pd.Categorical(df_pipe["call_type_display"], categories=type_order, ordered=True)
+        df_pipe = df_pipe.sort_values(["pipeline_display", "call_type_display"])
+        df_pipe["label_minutes"] = df_pipe.apply(lambda r: f"{float(r['total_minutes']):.1f}" if r["call_type_display"] == type_order[-1] else "", axis=1)
         fig_pipe = px.bar(
             df_pipe,
-            y="pipeline_name",
+            y="pipeline_display",
             x="calls",
-            color="call_type_group",
+            color="call_type_display",
             orientation="h",
             template=_plotly_template(),
             pattern_shape_sequence=[""],
-            title=t("cso.chart.total_calls_pipeline"),
-            hover_data=["minutes", "call_type_group", "total_minutes"],
+            title=t("cso.chart.total_calls_funnel"),
+            hover_data=["minutes", "call_type_display", "total_minutes"],
             text="label_minutes",
         )
         fig_pipe.update_traces(
-            hovertemplate="Pipeline: %{y}<br>Type: %{customdata[1]}<br>Calls: %{x}<br>Minutes: %{customdata[0]:.1f}<br>Total Minutes: %{customdata[2]:.1f}<extra></extra>"
+            hovertemplate=(
+                f"{t('label.funnel')}: "+"%{y}<br>"
+                "Тип: %{customdata[1]}<br>"
+                f"{t('label.calls')}: "+"%{x}<br>"
+                f"{t('label.minutes')}: "+"%{customdata[0]:.1f}<br>"
+                "Минут всего: %{customdata[2]:.1f}<extra></extra>"
+            )
         )
-        fig_pipe.update_layout(yaxis_title="", xaxis_title=t("cso.table.calls"), legend_title="Call Type")
+        fig_pipe.update_layout(yaxis_title="", xaxis_title=t("label.calls"), legend_title="")
         st.plotly_chart(fig_pipe, use_container_width=True)
 
     st.markdown("---")
-
     st.markdown("<div id='manager-productivity-timeline'></div>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='text-align:center;'>{t('cso.section.manager_timeline')}</h2>", unsafe_allow_html=True)
     daily = rpc_df("rpc_cso_manager_productivity_timeline", params)
@@ -173,20 +175,19 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                     line={"color": market_color_map.get(market, "#9467bd")},
                     customdata=sub[["computed_market", "intro_calls", "intro_flup", "sales_calls", "sales_flup"]].to_numpy(),
                     hovertemplate=(
-                        "Date: %{x}<br>"
-                        "Manager: %{fullData.name} (%{customdata[0]})<br>"
-                        "Intro Calls: %{customdata[1]}<br>"
-                        "Intro Flup: %{customdata[2]}<br>"
-                        "Sales Calls: %{customdata[3]}<br>"
-                        "Sales Flup: %{customdata[4]}<extra></extra>"
+                        "Дата: %{x}<br>"
+                        f"{t('label.manager')}: "+"%{fullData.name} (%{customdata[0]})<br>"
+                        f"{t('cso.kpi.intro_calls')}: "+"%{customdata[1]}<br>"
+                        f"{t('cso.kpi.intro_flup')}: "+"%{customdata[2]}<br>"
+                        f"{t('cso.kpi.sales_calls')}: "+"%{customdata[3]}<br>"
+                        f"{t('cso.kpi.sales_flup')}: "+"%{customdata[4]}<extra></extra>"
                     ),
                 )
             )
-        fig.update_layout(template=_plotly_template(), yaxis_title="Total Minutes", xaxis_title="Date", legend_title=t("cso.table.manager"))
+        fig.update_layout(template=_plotly_template(), yaxis_title=t("label.minutes"), xaxis_title="Дата", legend_title=t("label.manager"))
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
-
     st.markdown("<div id='call-control'></div>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='text-align:center;'>{t('cso.section.call_control')}</h2>", unsafe_allow_html=True)
     render_hint(t("cso.hint.call_control"))
@@ -202,13 +203,13 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
                 x="manager",
                 y="count",
                 color="outcome_display",
-                title="Defined vs. Vague (100% Stacked)",
+                title=f"{t('ceo.defined_next_step')} vs {t('ceo.vague')}",
                 barmode="relative",
                 color_discrete_map={t("ceo.defined_next_step"): "#2ecc71", t("ceo.vague"): "#e74c3c"},
                 pattern_shape_sequence=[""],
                 hover_data=["total_calls"],
             )
-            fig_vague.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="")
+            fig_vague.update_layout(barnorm="percent", yaxis_title=t("label.share_pct"), xaxis_title="")
             st.plotly_chart(fig_vague, use_container_width=True)
             st.caption(t("cso.caption.outcome_definitions"))
 
@@ -223,13 +224,12 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
             )
             lb_df = mgr_stats.sort_values("defined_rate", ascending=False).copy()
             lb_df["defined_rate_pct"] = (pd.to_numeric(lb_df["defined_rate"], errors="coerce").fillna(0) * 100).round(2).astype(str) + "%"
-            lb_df["Avg Quality"] = pd.to_numeric(lb_df["avg_quality"], errors="coerce").round(2)
-            lb_df = lb_df[["manager", "defined_rate_pct", "total_calls", "Avg Quality"]]
+            lb_df["avg_quality_display"] = pd.to_numeric(lb_df["avg_quality"], errors="coerce").round(2)
+            lb_df = lb_df[["manager", "defined_rate_pct", "total_calls", "avg_quality_display"]]
         lb_df.columns = [t("cso.table.manager"), t("cso.table.defined_pct"), t("cso.table.calls"), t("cso.table.avg_quality")]
         st.dataframe(lb_df, hide_index=True, use_container_width=True)
 
     st.markdown("---")
-
     st.markdown("<div id='friction-and-resistance'></div>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='text-align:center;'>{t('cso.section.friction_resistance')}</h2>", unsafe_allow_html=True)
     render_hint(t("cso.hint.friction_resistance"))
@@ -239,71 +239,57 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         st.warning(t("cso.friction.empty"))
     else:
         df_fric = df_fric.copy()
-        df_fric = df_fric.rename(columns={"pipeline_name": "Pipeline", "type": "Type", "value": "Value", "total_calls": "Total Calls"})
-        if not df_fric.empty:
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                fig_friction = px.bar(
-                    df_fric,
-                    x="Pipeline",
-                    y="Value",
-                    color="Type",
-                    barmode="group",
-                    title=t("cso.chart.friction_by_pipeline"),
-                    color_discrete_map={"Intro Friction": "#3498db", "Sales Friction": "#e67e22"},
-                    pattern_shape_sequence=[""],
-                    hover_data=["Total Calls"],
-                )
-                fig_friction.update_layout(yaxis_title="Friction Index (Flup / Primary)", xaxis_title="")
-                st.plotly_chart(fig_friction, use_container_width=True)
+        df_fric["funnel_display"] = df_fric["pipeline_name"].apply(pipeline_label)
+        df_fric["type_display"] = df_fric["type"].map({"Intro Friction": t("cso.metric.avg_intro_friction"), "Sales Friction": t("cso.metric.avg_sales_friction")}).fillna(df_fric["type"].astype(str))
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            fig_friction = px.bar(
+                df_fric,
+                x="funnel_display",
+                y="value",
+                color="type_display",
+                barmode="group",
+                title=t("cso.chart.friction_by_funnel"),
+                pattern_shape_sequence=[""],
+                hover_data=["total_calls"],
+            )
+            fig_friction.update_layout(yaxis_title=t("cso.chart.friction_by_funnel"), xaxis_title="")
+            st.plotly_chart(fig_friction, use_container_width=True)
 
-            with col2:
-                intro_calls_seg = int(kpi.get("intro_calls") or 0)
-                intro_flups_seg = int(kpi.get("intro_flup") or 0)
-                sales_calls_seg = int(kpi.get("sales_calls") or 0)
-                sales_flups_seg = int(kpi.get("sales_flup") or 0)
-                avg_intro_friction = (intro_flups_seg / intro_calls_seg) if intro_calls_seg > 0 else 0.0
-                avg_sales_friction = (sales_flups_seg / sales_calls_seg) if sales_calls_seg > 0 else 0.0
-                st.metric(
-                    t("cso.metric.avg_intro_friction"),
-                    f"{avg_intro_friction:.2f}",
-                    help=r"$Intro\ Friction=\frac{Intro\ Flups}{Intro\ Calls}$",
-                )
-                st.metric(
-                    t("cso.metric.avg_sales_friction"),
-                    f"{avg_sales_friction:.2f}",
-                    help=r"$Sales\ Friction=\frac{Sales\ Flups}{Sales\ Calls}$",
-                )
+        with col2:
+            intro_calls_seg = int(kpi.get("intro_calls") or 0)
+            intro_flups_seg = int(kpi.get("intro_flup") or 0)
+            sales_calls_seg = int(kpi.get("sales_calls") or 0)
+            sales_flups_seg = int(kpi.get("sales_flup") or 0)
+            avg_intro_friction = (intro_flups_seg / intro_calls_seg) if intro_calls_seg > 0 else 0.0
+            avg_sales_friction = (sales_flups_seg / sales_calls_seg) if sales_calls_seg > 0 else 0.0
+            st.metric(t("cso.metric.avg_intro_friction"), f"{avg_intro_friction:.2f}")
+            st.metric(t("cso.metric.avg_sales_friction"), f"{avg_sales_friction:.2f}")
 
         st.markdown(f"<h3 style='text-align:center;'>{t('cso.chart.friction_vs_defined')}</h3>", unsafe_allow_html=True)
         render_hint(t("cso.hint.friction_vs_defined"))
         bubble_stats = rpc_df("rpc_cso_friction_defined_bubble", params)
         if not bubble_stats.empty:
-            market_color_map = {"CZ": "#1f77b4", "SK": "#d62728", "RUK": "#2ca02c", "Others": "#9467bd"}
+            bubble_stats = bubble_stats.copy()
+            bubble_stats["market_display"] = bubble_stats["computed_market"].apply(market_label)
+            bubble_stats["funnel_display"] = bubble_stats["pipeline_name"].apply(pipeline_label)
             fig_bubble = px.scatter(
                 bubble_stats,
                 x="defined_rate_pct",
                 y="friction_index",
                 size="total_calls",
-                color="computed_market",
+                color="market_display",
                 hover_name="manager",
                 template=_plotly_template(),
                 size_max=60,
-                color_discrete_map=market_color_map,
-                labels={
-                    "defined_rate_pct": "Next Step Defined Rate (%)",
-                    "friction_index": "Friction Index (Flup / Primary)",
-                    "total_calls": t("cso.table.calls"),
-                    "computed_market": t("cmo.market"),
-                },
-                hover_data=["pipeline_name", "total_calls", "average_quality", "primaries", "followups", "defined_primaries"],
+                labels={"defined_rate_pct": t("cso.table.defined_pct"), "friction_index": t("cso.chart.friction_by_funnel"), "total_calls": t("label.calls"), "market_display": t("label.market")},
+                hover_data=["funnel_display", "total_calls", "average_quality", "primaries", "followups", "defined_primaries"],
             )
             fig_bubble.add_vline(x=bubble_stats["defined_rate_pct"].mean(), line_dash="dot", annotation_text=t("cso.avg_defined"))
             fig_bubble.add_hline(y=bubble_stats["friction_index"].mean(), line_dash="dot", annotation_text=t("cso.avg_friction"))
             st.plotly_chart(fig_bubble, use_container_width=True)
 
     st.markdown("---")
-
     st.markdown("<div id='discovery-depth-index'></div>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='text-align:center;'>{t('cso.section.discovery_depth')}</h2>", unsafe_allow_html=True)
     st.caption(t("cso.caption.discovery_depth"))
@@ -314,30 +300,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
 
     chart_rows = []
     for _, row in df_dd.iterrows():
-        chart_rows.append(
-            {
-                "manager": row["manager"],
-                "Bucket": t("cso.bucket.no_objections"),
-                "value": int(row["no_objections_calls"]),
-                "market": row.get("market"),
-                "avg_quality": row.get("avg_quality"),
-                "no_objections_calls": int(row["no_objections_calls"]),
-                "with_objections_calls": int(row["with_objections_calls"]),
-                "total_calls": int(row["total_calls"]),
-            }
-        )
-        chart_rows.append(
-            {
-                "manager": row["manager"],
-                "Bucket": t("cso.bucket.with_objections"),
-                "value": int(row["with_objections_calls"]),
-                "market": row.get("market"),
-                "avg_quality": row.get("avg_quality"),
-                "no_objections_calls": int(row["no_objections_calls"]),
-                "with_objections_calls": int(row["with_objections_calls"]),
-                "total_calls": int(row["total_calls"]),
-            }
-        )
+        chart_rows.append({"manager": row["manager"], "Bucket": t("cso.bucket.no_objections"), "value": int(row["no_objections_calls"]), "market": row.get("market"), "avg_quality": row.get("avg_quality"), "no_objections_calls": int(row["no_objections_calls"]), "with_objections_calls": int(row["with_objections_calls"]), "total_calls": int(row["total_calls"])})
+        chart_rows.append({"manager": row["manager"], "Bucket": t("cso.bucket.with_objections"), "value": int(row["with_objections_calls"]), "market": row.get("market"), "avg_quality": row.get("avg_quality"), "no_objections_calls": int(row["no_objections_calls"]), "with_objections_calls": int(row["with_objections_calls"]), "total_calls": int(row["total_calls"])})
 
     chart_df = pd.DataFrame(chart_rows)
     fig_dd = px.bar(
@@ -348,52 +312,33 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         template=_plotly_template(),
         pattern_shape_sequence=[""],
         barmode="relative",
-        labels={"value": "Share (%)"},
+        labels={"value": t("label.share_pct")},
         custom_data=["no_objections_calls", "with_objections_calls", "total_calls", "market", "avg_quality"],
     )
     fig_dd.update_traces(
         hovertemplate=(
-            "Manager: %{x}<br>"
-            "Bucket: %{fullData.name}<br>"
-            "Share: %{y:.1f}%<br>"
-            "No Objections: %{customdata[0]}<br>"
-            "With Objections: %{customdata[1]}<br>"
-            "Total Calls: %{customdata[2]}<br>"
-            "Market: %{customdata[3]}<br>"
-            "Avg Quality: %{customdata[4]:.2f}<extra></extra>"
+            f"{t('label.manager')}: "+"%{x}<br>"
+            "Сегмент: %{fullData.name}<br>"
+            f"{t('label.share_pct')}: "+"%{y:.1f}<br>"
+            "Без возражений: %{customdata[0]}<br>"
+            "С возражениями: %{customdata[1]}<br>"
+            f"{t('cso.kpi.total_calls')}: "+"%{customdata[2]}<br>"
+            f"{t('label.market')}: "+"%{customdata[3]}<br>"
+            f"{t('label.avg_quality')}: "+"%{customdata[4]:.2f}<extra></extra>"
         )
     )
-    fig_dd.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="", legend_title="")
+    fig_dd.update_layout(barnorm="percent", yaxis_title=t("label.share_pct"), xaxis_title="", legend_title="")
     st.plotly_chart(fig_dd, use_container_width=True)
 
     st.markdown(f"<h2 style='text-align:center;'>{t('cso.section.no_objections_rating')}</h2>", unsafe_allow_html=True)
-
     lb = df_dd.copy()
     lb["Avg Quality"] = pd.to_numeric(lb["avg_quality"], errors="coerce").round(2)
     lb["Intro Friction"] = pd.to_numeric(lb["intro_friction"], errors="coerce").round(2)
     lb["Sales Friction"] = pd.to_numeric(lb["sales_friction"], errors="coerce").round(2)
-    lb = lb[
-        [
-            "manager",
-            "total_calls",
-            "no_objections_calls",
-            "sterile_rate",
-            "market",
-            "Avg Quality",
-            "Intro Friction",
-            "Sales Friction",
-        ]
-    ]
-    lb.columns = [
-        t("cso.table.manager"),
-        t("cso.table.total_calls"),
-        t("cso.table.no_objections_calls"),
-        t("cso.table.no_objections_share"),
-        t("cso.table.market"),
-        t("cso.table.avg_quality"),
-        t("cso.table.intro_friction"),
-        t("cso.table.sales_friction"),
-    ]
+    if "market" in lb.columns:
+        lb["market"] = lb["market"].apply(market_label)
+    lb = lb[["manager", "total_calls", "no_objections_calls", "sterile_rate", "market", "Avg Quality", "Intro Friction", "Sales Friction"]]
+    lb.columns = [t("cso.table.manager"), t("cso.table.total_calls"), t("cso.table.no_objections_calls"), t("cso.table.no_objections_share"), t("cso.table.market"), t("cso.table.avg_quality"), t("cso.table.intro_friction"), t("cso.table.sales_friction")]
     st.dataframe(lb, hide_index=True, use_container_width=True)
 
 

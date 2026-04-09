@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import date, timedelta
 import database as db
 
-from i18n import LANGUAGES, get_lang, set_lang, t
+from i18n import LANGUAGES, get_lang, market_label, pipeline_label, set_lang, t
 from styles import get_css
 from views.ceo_view import render_ceo_dashboard
 from views.cmo_view import render_cmo_analytics
@@ -349,7 +349,7 @@ def render_sidebar():
         if market_key not in st.session_state:
             st.session_state[market_key] = market in default_markets
         is_market_selected = st.sidebar.checkbox(
-            f"{t('sidebar.market_prefix')}: {market}",
+            f"{t('sidebar.market_prefix')}: {market_label(market)}",
             value=market in default_markets,
             key=market_key,
         )
@@ -358,13 +358,13 @@ def render_sidebar():
             selected_markets.append(market)
             available_pipelines = market_pipelines_map.get(market, [])
             if available_pipelines:
-                st.sidebar.markdown(f"**{market} {t('sidebar.pipelines_suffix')}:**")
+                st.sidebar.markdown(f"**{market_label(market)} {t('sidebar.funnels_suffix')}:**")
                 for pl in available_pipelines:
                     pl_key = f"chk_pl_{market}_{pl}"
                     if pl_key not in st.session_state:
                         st.session_state[pl_key] = market in default_markets and pl in {market, f"{market} | Online", f"{market} | TCM"}
                     is_pl_selected = st.sidebar.checkbox(
-                        f"{pl}",
+                        f"{pipeline_label(pl)}",
                         value=(market in default_markets and pl in {market, f"{market} | Online", f"{market} | TCM"}),
                         key=pl_key,
                     )
@@ -381,6 +381,7 @@ def render_sidebar():
         key="selected_managers_v1",
         help=t("sidebar.managers_help"),
     )
+    st.sidebar.caption(t("sidebar.managers_note"))
 
     date_start = date_range[0] if len(date_range) == 2 else None
     date_end = date_range[1] if len(date_range) == 2 else None
