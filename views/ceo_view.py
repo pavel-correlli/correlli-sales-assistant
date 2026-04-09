@@ -71,11 +71,11 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     fig_fr.update_traces(
         hovertemplate=(
             f"{t('label.market')}: "+"%{x}<br>"
-            "РўРёРї: %{fullData.name}<br>"
+            f"{t('label.type')}: "+"%{fullData.name}<br>"
             f"{t('ceo.total_market_friction')}: "+"%{y:.2f}<br>"
-            "РџРµСЂРІРёС‡РЅС‹Рµ Р·РІРѕРЅРєРё: %{customdata[0]}<br>"
-            "РџРѕРІС‚РѕСЂРЅС‹Рµ Р·РІРѕРЅРєРё: %{customdata[1]}<br>"
-            "Р—РІРѕРЅРєРѕРІ РІ СЂР°СЃС‡РµС‚Рµ: %{customdata[2]}<extra></extra>"
+            f"{t('label.primary_calls')}: "+"%{customdata[0]}<br>"
+            f"{t('label.repeat_calls')}: "+"%{customdata[1]}<br>"
+            f"{t('label.calls_in_calc')}: "+"%{customdata[2]}<extra></extra>"
         )
     )
     st.plotly_chart(fig_fr, use_container_width=True)
@@ -153,14 +153,14 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     fig_share.update_traces(
         hovertemplate=(
             f"{t('label.funnel')}: "+"%{x}<br>"
-            "РўРёРї: %{fullData.name}<br>"
+            f"{t('label.type')}: "+"%{fullData.name}<br>"
             f"{t('label.share_pct')}: "+"%{y:.2f}<br>"
-            "РЎСЂРµРґ. РјРёРЅСѓС‚ РЅР° Р·РІРѕРЅРѕРє: %{customdata[3]:.2f}<br>"
-            "РЎСЂРµРґ. РјРёРЅСѓС‚ РЅР° Р»РёРґР°: %{customdata[4]:.2f}<br>"
-            "Р›РёРґРѕРІ: %{customdata[0]}<br>"
-            "Р—РІРѕРЅРєРѕРІ (С‚РёРї): %{customdata[1]}<br>"
-            "РњРёРЅСѓС‚ (С‚РёРї): %{customdata[2]:.1f}<br>"
-            "РњРёРЅСѓС‚ РІСЃРµРіРѕ РїРѕ РІРѕСЂРѕРЅРєРµ: %{customdata[5]:.1f}<extra></extra>"
+            f"{t('label.avg_minutes_per_call')}: "+"%{customdata[3]:.2f}<br>"
+            f"{t('label.avg_minutes_per_lead')}: "+"%{customdata[4]:.2f}<br>"
+            f"{t('label.total_leads')}: "+"%{customdata[0]}<br>"
+            f"{t('label.calls')} ({t('label.type').lower()}): "+"%{customdata[1]}<br>"
+            f"{t('label.total_minutes_type')}: "+"%{customdata[2]:.1f}<br>"
+            f"{t('label.total_minutes_funnel')}: "+"%{customdata[5]:.1f}<extra></extra>"
         )
     )
     st.plotly_chart(fig_share, use_container_width=True)
@@ -183,12 +183,12 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     fig_tot.update_traces(
         hovertemplate=(
             f"{t('label.funnel')}: "+"%{x}<br>"
-            "РўРёРї: %{fullData.name}<br>"
+            f"{t('label.type')}: "+"%{fullData.name}<br>"
             f"{t('label.share_pct')}: "+"%{y:.2f}<br>"
-            "Р›РёРґРѕРІ: %{customdata[0]}<br>"
-            "Р—РІРѕРЅРєРѕРІ (С‚РёРї): %{customdata[1]}<br>"
-            "РњРёРЅСѓС‚ (С‚РёРї): %{customdata[2]:.1f}<br>"
-            "РњРёРЅСѓС‚ РІСЃРµРіРѕ РїРѕ РІРѕСЂРѕРЅРєРµ: %{customdata[3]:.1f}<extra></extra>"
+            f"{t('label.total_leads')}: "+"%{customdata[0]}<br>"
+            f"{t('label.calls')} ({t('label.type').lower()}): "+"%{customdata[1]}<br>"
+            f"{t('label.total_minutes_type')}: "+"%{customdata[2]:.1f}<br>"
+            f"{t('label.total_minutes_funnel')}: "+"%{customdata[3]:.1f}<extra></extra>"
         )
     )
     st.plotly_chart(fig_tot, use_container_width=True)

@@ -128,6 +128,8 @@ def _fetch_attribute_frequency_for_heatmap(attr_type: str, date_range, selected_
 
 
 def _render_attribute_frequency_heatmap(attr_type: str, title: str, colorscale, date_range, selected_markets, selected_pipelines):
+    attr_label_map = {"Goal": t("cmo.attr.goal"), "Objection": t("cmo.attr.objection"), "Fear": t("cmo.attr.fear")}
+    attr_label = attr_label_map.get(attr_type, attr_type)
     df = _fetch_attribute_frequency_for_heatmap(attr_type, date_range, selected_markets, selected_pipelines)
     if df.empty:
         st.warning(t("cmo.no_data_heatmap_attr", attr_type=attr_type))
@@ -189,10 +191,10 @@ def _render_attribute_frequency_heatmap(attr_type: str, title: str, colorscale, 
                 showscale=True,
                 colorbar=dict(title=t("label.frequency"), tickformat=".0%"),
                 hovertemplate=(
-                    f"{attr_type}: %{{y}}<br>"
+                    f"{attr_label}: %{{y}}<br>"
                     f"{t('label.funnel')}: "+"%{x}<br>"
                     f"{t('cmo.calls_with_entity')}: "+"%{customdata[0]}<br>"
-                    "Р’СЃРµРіРѕ Р·РІРѕРЅРєРѕРІ: %{customdata[1]}<br>"
+                    f"{t('label.total_calls')}: "+"%{customdata[1]}<br>"
                     f"{t('cmo.mentions')}: "+"%{customdata[2]}<br>"
                     f"{t('cmo.mentions_per_call')}: "+"%{customdata[3]:.2f}<br>"
                     f"{t('cmo.share_mentions_funnel')}: "+"%{customdata[4]:.1%}<br>"
@@ -208,7 +210,7 @@ def _render_attribute_frequency_heatmap(attr_type: str, title: str, colorscale, 
         paper_bgcolor=_traffic_chart_bgcolor(),
         plot_bgcolor=_traffic_chart_bgcolor(),
         xaxis_title=t("label.funnel"),
-        yaxis_title=attr_type,
+        yaxis_title=attr_label,
         height=max(520, 24 * len(z.index) + 260),
     )
     fig.update_xaxes(tickangle=-35, automargin=True)
@@ -275,17 +277,18 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
                 f"{t('cmo.viscosity_index')}: "+"%{y:.2f}<br>"
                 f"{t('cmo.total_calls')}: "+"%{customdata[1]}<br>"
                 f"{t('cmo.total_leads')}: "+"%{customdata[2]}<br>"
-                "Р¤РѕСЂРјСѓР»Р°: Р—РІРѕРЅРєРё / Р›РёРґС‹<extra></extra>"
+                f"{t('cmo.formula_calls_per_lead')}<extra></extra>"
             )
             if tr.name == t("cmo.viscosity_index")
             else (
                 f"{t('cmo.traffic_manager')}: "+"%{x}<br>"
                 f"{t('label.market')}: "+"%{customdata[0]}<br>"
-                f"{t('cmo.intro_friction_index')}: "+"%{y:.2f}<br>"
-                f"{t('cmo.intro_primaries')}: "+"%{customdata[3]}<br>"
-                f"{t('cmo.intro_followups')}: "+"%{customdata[4]}<br>"
-                f"{t('cmo.total_calls')}: "+"%{customdata[1]}<extra></extra>"
-            )
+                    f"{t('cmo.intro_friction_index')}: "+"%{y:.2f}<br>"
+                    f"{t('cmo.intro_primaries')}: "+"%{customdata[3]}<br>"
+                    f"{t('cmo.intro_followups')}: "+"%{customdata[4]}<br>"
+                    f"{t('cmo.total_calls')}: "+"%{customdata[1]}<br>"
+                    f"{t('cmo.formula_intro_friction')}<extra></extra>"
+                )
         )
     )
     fig_bar.update_layout(xaxis_title=t("cmo.traffic_manager"), margin=dict(l=10, r=10, t=10, b=80))
@@ -353,9 +356,9 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
                     f"{t('cmo.traffic_manager')}: "+"%{x}<br>"
                     f"{t('cmo.intro_primaries')}: "+"%{customdata[0]}<br>"
                     f"{t('cmo.intro_followups')}: "+"%{customdata[1]}<br>"
-                    "Р—РІРѕРЅРєРѕРІ РІ СЂР°СЃС‡РµС‚Рµ: %{customdata[2]}<br>"
+                    f"{t('label.calls_in_calc')}: "+"%{customdata[2]}<br>"
                     f"{t('cmo.intro_friction')}: "+"%{z:.2f}<br>"
-                    "Р¤РѕСЂРјСѓР»Р°: РџРѕРІС‚РѕСЂРЅС‹Рµ Р·РІРѕРЅРєРё / РџРµСЂРІРёС‡РЅС‹Рµ Р·РІРѕРЅРєРё<extra></extra>"
+                    f"{t('cmo.formula_intro_friction')}<extra></extra>"
                 ),
             )
         ]
