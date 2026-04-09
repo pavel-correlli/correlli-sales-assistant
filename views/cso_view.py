@@ -2,7 +2,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from database import rpc_df
+from database import fetch_view_data, rpc_df
 from app_i18n import call_type_label, market_label, pipeline_label, t
 from views.shared_ui import render_hint
 
@@ -13,6 +13,164 @@ def _plotly_template():
 
 def _existing_columns(df: pd.DataFrame, cols: list[str]) -> list[str]:
     return [c for c in cols if c in df.columns]
+
+
+def _to_num(series: pd.Series) -> pd.Series:
+    s = series.astype(str).str.strip().str.replace(",", ".", regex=False)
+    s = s.replace({"": None, "None": None, "nan": None, "NaN": None})
+    return pd.to_numeric(s, errors="coerce")
+
+
+def _load_cso_quality_df(date_range, selected_markets, selected_pipelines, selected_managers=None) -> pd.DataFrame:
+    df = fetch_view_data("Algonova_Calls_Raw")
+    if df.empty:
+        return df
+
+    out = df.copy()
+    out["call_datetime"] = pd.to_datetime(out.get("call_datetime"), errors="coerce", utc=True)
+    out = out[out["call_datetime"].notna()].copy()
+    if out.empty:
+        return out
+
+    if date_range and len(date_range) == 2:
+        start_ts = pd.to_datetime(date_range[0]).tz_localize("UTC")
+        end_ts = pd.to_datetime(date_range[1]).tz_localize("UTC") + pd.Timedelta(days=1) - pd.Timedelta(microseconds=1)
+        out = out[(out["call_datetime"] >= start_ts) & (out["call_datetime"] <= end_ts)].copy()
+    if selected_markets:
+        out = out[out["market"].astype(str).isin(selected_markets)].copy()
+    if selected_pipelines:
+        out = out[out["pipeline_name"].astype(str).isin(selected_pipelines)].copy()
+    if selected_managers:
+        out = out[out["manager"].astype(str).isin(selected_managers)].copy()
+    if out.empty:
+        return out
+
+    out["manager"] = out["manager"].astype(str).str.strip()
+    out = out[out["manager"] != ""].copy()
+    if out.empty:
+        return out
+
+    out["avg_quality"] = _to_num(out.get("Average_quality", pd.Series(index=out.index, dtype="object")))
+    out["control_score"] = _to_num(out.get("score_control", pd.Series(index=out.index, dtype="object")))
+    out["sales_discovery_score_n"] = _to_num(out.get("sales_discovery_score", pd.Series(index=out.index, dtype="object")))
+    out["sales_objection_score_n"] = _to_num(out.get("sales_objection_handling_score", pd.Series(index=out.index, dtype="object")))
+    out["followup_next_action_score_n"] = _to_num(out.get("followup_next_action_score", pd.Series(index=out.index, dtype="object")))
+    out["call_week"] = out["call_datetime"].dt.to_period("W").dt.start_time
+    out["call_type"] = out["call_type"].astype(str).str.strip()
+    return out
+
+
+def _render_cso_sales_quality(date_range, selected_markets, selected_pipelines, selected_managers=None):
+    st.markdown("---")
+    st.markdown("<div id='sales-quality'></div>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align:center;'>{t('cso.section.sales_quality')}</h2>", unsafe_allow_html=True)
+    render_hint(t("cso.hint.sales_quality"))
+
+    qdf = _load_cso_quality_df(date_range, selected_markets, selected_pipelines, selected_managers)
+    if qdf.empty:
+        st.warning(t("cso.sales_quality.empty"))
+        return
+
+    sales_mask = qdf["call_type"].eq("sales_call")
+    flup_mask = qdf["call_type"].isin(["intro_followup", "sales_followup"])
+    total_calls = int(len(qdf))
+
+    kpi_avg_quality = float(qdf["avg_quality"].mean()) if qdf["avg_quality"].notna().any() else None
+    kpi_discovery = float(qdf.loc[sales_mask, "sales_discovery_score_n"].mean()) if qdf.loc[sales_mask, "sales_discovery_score_n"].notna().any() else None
+    kpi_objection = float(qdf.loc[sales_mask, "sales_objection_score_n"].mean()) if qdf.loc[sales_mask, "sales_objection_score_n"].notna().any() else None
+    kpi_next_action = float(qdf.loc[flup_mask, "followup_next_action_score_n"].mean()) if qdf.loc[flup_mask, "followup_next_action_score_n"].notna().any() else None
+
+    n_avg_quality = int(qdf["avg_quality"].notna().sum())
+    n_discovery = int(qdf.loc[sales_mask, "sales_discovery_score_n"].notna().sum())
+    n_objection = int(qdf.loc[sales_mask, "sales_objection_score_n"].notna().sum())
+    n_next_action = int(qdf.loc[flup_mask, "followup_next_action_score_n"].notna().sum())
+
+    cols = st.columns(4)
+    with cols[0]:
+        st.metric(t("cso.sales_quality.kpi.avg_quality"), "-" if kpi_avg_quality is None else f"{kpi_avg_quality:.2f}")
+        st.caption(t("cso.sales_quality.coverage", n=n_avg_quality, total=total_calls))
+    with cols[1]:
+        st.metric(t("cso.sales_quality.kpi.discovery"), "-" if kpi_discovery is None else f"{kpi_discovery:.2f}")
+        st.caption(t("cso.sales_quality.coverage", n=n_discovery, total=int(sales_mask.sum())))
+    with cols[2]:
+        st.metric(t("cso.sales_quality.kpi.objection"), "-" if kpi_objection is None else f"{kpi_objection:.2f}")
+        st.caption(t("cso.sales_quality.coverage", n=n_objection, total=int(sales_mask.sum())))
+    with cols[3]:
+        st.metric(t("cso.sales_quality.kpi.next_action"), "-" if kpi_next_action is None else f"{kpi_next_action:.2f}")
+        st.caption(t("cso.sales_quality.coverage", n=n_next_action, total=int(flup_mask.sum())))
+
+    mgr = (
+        qdf.groupby("manager", dropna=False)
+        .agg(
+            calls=("call_id", "count"),
+            avg_quality=("avg_quality", "mean"),
+            control=("control_score", "mean"),
+            discovery=("sales_discovery_score_n", "mean"),
+            objection=("sales_objection_score_n", "mean"),
+            next_action=("followup_next_action_score_n", "mean"),
+            sales_calls=("call_type", lambda s: int((s == "sales_call").sum())),
+            followup_calls=("call_type", lambda s: int(s.isin(["intro_followup", "sales_followup"]).sum())),
+        )
+        .reset_index()
+    )
+    mgr = mgr[mgr["calls"] >= 30].copy()
+    if not mgr.empty:
+        score_cols = ["avg_quality", "control", "discovery", "objection", "next_action"]
+        mgr["sales_quality_index"] = mgr[score_cols].mean(axis=1, skipna=True)
+        mgr = mgr.sort_values(["sales_quality_index", "calls"], ascending=[False, False]).copy()
+
+        st.markdown(f"### {t('cso.sales_quality.manager_ranking')}")
+        ranking = mgr[
+            ["manager", "calls", "sales_calls", "followup_calls", "sales_quality_index", "avg_quality", "control", "discovery", "objection", "next_action"]
+        ].copy()
+        ranking.columns = [
+            t("cso.table.manager"),
+            t("cso.table.calls"),
+            t("cso.sales_quality.table.sales_calls"),
+            t("cso.sales_quality.table.followup_calls"),
+            t("cso.sales_quality.table.index"),
+            t("cso.sales_quality.table.avg_quality"),
+            t("cso.sales_quality.table.control"),
+            t("cso.sales_quality.table.discovery"),
+            t("cso.sales_quality.table.objection"),
+            t("cso.sales_quality.table.next_action"),
+        ]
+        st.dataframe(ranking.round(2), hide_index=True, use_container_width=True)
+
+    trend = (
+        qdf.groupby("call_week", dropna=False)
+        .agg(
+            avg_quality=("avg_quality", "mean"),
+            discovery=("sales_discovery_score_n", "mean"),
+            objection=("sales_objection_score_n", "mean"),
+            next_action=("followup_next_action_score_n", "mean"),
+        )
+        .reset_index()
+        .sort_values("call_week")
+    )
+    if not trend.empty:
+        trend_long = trend.melt(id_vars=["call_week"], var_name="metric", value_name="value")
+        metric_map = {
+            "avg_quality": t("cso.sales_quality.metric.avg_quality"),
+            "discovery": t("cso.sales_quality.metric.discovery"),
+            "objection": t("cso.sales_quality.metric.objection"),
+            "next_action": t("cso.sales_quality.metric.next_action"),
+        }
+        trend_long["metric"] = trend_long["metric"].map(metric_map)
+        trend_long = trend_long[trend_long["value"].notna()].copy()
+        if not trend_long.empty:
+            st.markdown(f"### {t('cso.sales_quality.timeline')}")
+            fig_t = px.line(
+                trend_long,
+                x="call_week",
+                y="value",
+                color="metric",
+                markers=True,
+                template=_plotly_template(),
+                labels={"call_week": t("label.date"), "value": t("cso.sales_quality.yaxis"), "metric": ""},
+            )
+            fig_t.update_layout(legend_title="")
+            st.plotly_chart(fig_t, use_container_width=True)
 
 
 def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selected_managers=None):
@@ -340,6 +498,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
     lb = lb[["manager", "total_calls", "no_objections_calls", "sterile_rate", "market", "Avg Quality", "Intro Friction", "Sales Friction"]]
     lb.columns = [t("cso.table.manager"), t("cso.table.total_calls"), t("cso.table.no_objections_calls"), t("cso.table.no_objections_share"), t("cso.table.market"), t("cso.table.avg_quality"), t("cso.table.intro_friction"), t("cso.table.sales_friction")]
     st.dataframe(lb, hide_index=True, use_container_width=True)
+
+    _render_cso_sales_quality(date_range, selected_markets, selected_pipelines, selected_managers)
 
 
 if __name__ == "__main__":
