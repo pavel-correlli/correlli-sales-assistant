@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from database import rpc_df
+from i18n import t
 from views.shared_ui import render_hint
 
 
@@ -10,7 +11,7 @@ def _plotly_template():
 
 
 def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
-    st.markdown("<h1 style='text-align:center;'>Strategic Radar</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align:center;'>{t('ceo.title')}</h1>", unsafe_allow_html=True)
     date_start = date_range[0] if len(date_range) == 2 else None
     date_end = date_range[1] if len(date_range) == 2 else None
     rpc_params = {
@@ -22,7 +23,7 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
 
     df_kpi = rpc_df("rpc_ceo_kpis", rpc_params)
     if df_kpi.empty:
-        st.warning("No data available for current filters.")
+        st.warning(t("ceo.no_data"))
         return
 
     kpi = df_kpi.iloc[0].to_dict()
@@ -33,32 +34,32 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
 
     with top_cols[0]:
         st.metric(
-            "Average Quality Score",
-            "—" if avg_quality in (None, "", "nan") else f"{float(avg_quality):.2f}",
-            help="Overall compliance with company standards.",
+            t("ceo.avg_quality"),
+            "-" if avg_quality in (None, "", "nan") else f"{float(avg_quality):.2f}",
+            help=t("ceo.avg_quality_help"),
         )
     with top_cols[1]:
         st.metric(
-            "Vague Index (Global)",
+            t("ceo.vague_index_global"),
             f"{vague_rate:.1f}%",
-            help="Share of calls with a vague outcome (no clear next step).",
+            help=t("ceo.vague_index_help"),
         )
     with top_cols[2]:
         st.metric(
-            "Total Market Friction",
+            t("ceo.total_market_friction"),
             f"{avg_market_friction:.2f}",
-            help="Follow-up load: Flups / Primary Calls, averaged by market.",
+            help=t("ceo.total_market_friction_help"),
         )
 
     st.markdown("---")
 
     st.markdown("<div id='total-friction'></div>", unsafe_allow_html=True)
-    st.subheader("Total Friction")
-    render_hint("Friction Index = Flups / Primary Calls. Higher values mean more follow-ups per processed lead.")
+    st.subheader(t("ceo.total_friction"))
+    render_hint(t("ceo.total_friction_hint"))
 
     fr_sql = rpc_df("rpc_ceo_total_friction", rpc_params)
     if fr_sql.empty:
-        st.warning("No data available for Total Friction for current filters.")
+        st.warning(t("ceo.no_data_total_friction"))
         return
 
     fig_fr = px.bar(
@@ -70,11 +71,11 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         template=_plotly_template(),
         pattern_shape_sequence=[""],
         custom_data=["primaries", "followups", "calls_in_calc"],
-        labels={"friction_index": "Friction Index (Flup / Primary)", "market": "Market"},
+        labels={"friction_index": "Friction Index (Flup / Primary)", "market": t("cmo.market")},
     )
     fig_fr.update_traces(
         hovertemplate=(
-            "Market: %{x}<br>"
+            f"{t('cmo.market')}: "+"%{x}<br>"
             "Type: %{fullData.name}<br>"
             "Friction Index: %{y:.2f}<br>"
             "Primaries: %{customdata[0]}<br>"
@@ -85,31 +86,38 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     st.plotly_chart(fig_fr, use_container_width=True)
 
     st.markdown("<div id='vague-index-by-market'></div>", unsafe_allow_html=True)
-    st.subheader("Vague Index by Market")
-    render_hint("Vague is the only negative outcome. Everything else is treated as Defined Next Step.")
+    st.subheader(t("ceo.vague_index_market"))
+    render_hint(t("ceo.vague_hint"))
     vi = rpc_df("rpc_ceo_vague_index_by_market", rpc_params)
     vi = vi[vi["outcome_category"].isin(["Defined Next Step", "Vague"])].copy() if not vi.empty else vi
+    if not vi.empty:
+        vi["outcome_display"] = vi["outcome_category"].map(
+            {
+                "Defined Next Step": t("ceo.defined_next_step"),
+                "Vague": t("ceo.vague"),
+            }
+        ).fillna(vi["outcome_category"])
     fig_vi = px.bar(
         vi,
         x="market",
         y="count",
-        color="outcome_category",
+        color="outcome_display" if not vi.empty else "outcome_category",
         barmode="relative",
         template=_plotly_template(),
         pattern_shape_sequence=[""],
-        color_discrete_map={"Defined Next Step": "#7d3cff", "Vague": "#e74c3c"},
+        color_discrete_map={t("ceo.defined_next_step"): "#7d3cff", t("ceo.vague"): "#e74c3c"},
     )
-    fig_vi.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title="Market", legend_title="")
+    fig_vi.update_layout(barnorm="percent", yaxis_title="Share (%)", xaxis_title=t("cmo.market"), legend_title="")
     st.plotly_chart(fig_vi, use_container_width=True)
 
     st.markdown("---")
 
     st.markdown("<div id='one-call-close-rate-by-pipeline'></div>", unsafe_allow_html=True)
-    st.subheader("One-Call-Close Rate by Pipeline")
-    render_hint("Leads with exactly 1 Intro Call and 1 Sales Call, and no Flups.")
+    st.subheader(t("ceo.occ_rate"))
+    render_hint(t("ceo.occ_hint"))
     occ = rpc_df("rpc_ceo_one_call_close_rate_by_pipeline", rpc_params)
     if occ.empty:
-        st.warning("No data available for One-Call-Close Rate for current filters.")
+        st.warning(t("ceo.no_data_occ"))
     else:
         fig_occ = px.bar(
             occ.sort_values("occ_rate_pct", ascending=False),
@@ -118,24 +126,22 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
             template=_plotly_template(),
             pattern_shape_sequence=[""],
             hover_data=["occ_leads", "total_leads"],
-            labels={"pipeline_name": "Pipeline", "occ_rate_pct": "OCC Rate (%)"},
+            labels={"pipeline_name": t("cmo.pipeline"), "occ_rate_pct": "OCC Rate (%)"},
         )
         st.plotly_chart(fig_occ, use_container_width=True)
 
     st.markdown("<div id='talk-time-per-lead-by-pipeline'></div>", unsafe_allow_html=True)
-    st.subheader("Сall type per Lead by Pipeline")
-    render_hint("100% split of total pipeline calls by call type. Hover shows averages, leads, calls, and minutes.")
+    st.subheader(t("ceo.call_type_per_lead"))
+    render_hint(t("ceo.call_type_per_lead_hint"))
 
     tt_sql = rpc_df("rpc_ceo_talk_time_per_lead_by_pipeline", rpc_params)
     if tt_sql.empty:
-        st.warning("No data available for Talk Time chart for current filters.")
+        st.warning(t("ceo.no_data_talk_time"))
         return
 
     calls_total = tt_sql.groupby("pipeline_name", dropna=False)["calls_type"].sum().reset_index(name="calls_total_pipeline")
     tt_sql = tt_sql.merge(calls_total, on="pipeline_name", how="left")
-    tt_sql["share_calls_pct"] = (
-        tt_sql["calls_type"] / tt_sql["calls_total_pipeline"].replace(0, pd.NA) * 100
-    ).fillna(0.0)
+    tt_sql["share_calls_pct"] = (tt_sql["calls_type"] / tt_sql["calls_total_pipeline"].replace(0, pd.NA) * 100).fillna(0.0)
 
     fig_share = px.bar(
         tt_sql,
@@ -153,12 +159,12 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
             "avg_minutes_per_lead_type",
             "total_minutes_pipeline",
         ],
-        labels={"pipeline_name": "Pipeline", "share_calls_pct": "Share (%)"},
+        labels={"pipeline_name": t("cmo.pipeline"), "share_calls_pct": "Share (%)"},
     )
-    fig_share.update_layout(yaxis_title="Share (%)", xaxis_title="Pipeline", legend_title="")
+    fig_share.update_layout(yaxis_title="Share (%)", xaxis_title=t("cmo.pipeline"), legend_title="")
     fig_share.update_traces(
         hovertemplate=(
-            "Pipeline: %{x}<br>"
+            f"{t('cmo.pipeline')}: "+"%{x}<br>"
             "Type: %{fullData.name}<br>"
             "Share of Calls: %{y:.2f}%<br>"
             "Avg Minutes/Call: %{customdata[3]:.2f}<br>"
@@ -172,8 +178,8 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
     st.plotly_chart(fig_share, use_container_width=True)
 
     st.markdown("<div id='total-talk-time-by-pipeline'></div>", unsafe_allow_html=True)
-    st.subheader("Total Talk Time by Pipeline")
-    render_hint("100% split of total pipeline calls by call type. Hover shows leads, calls, and minutes.")
+    st.subheader(t("ceo.total_talk_time"))
+    render_hint(t("ceo.total_talk_time_hint"))
     fig_tot = px.bar(
         tt_sql,
         x="pipeline_name",
@@ -183,12 +189,12 @@ def render_ceo_dashboard(date_range, selected_markets, selected_pipelines):
         template=_plotly_template(),
         pattern_shape_sequence=[""],
         custom_data=["leads_total", "calls_type", "total_minutes_type", "total_minutes_pipeline"],
-        labels={"pipeline_name": "Pipeline", "share_calls_pct": "Share (%)"},
+        labels={"pipeline_name": t("cmo.pipeline"), "share_calls_pct": "Share (%)"},
     )
-    fig_tot.update_layout(yaxis_title="Share (%)", xaxis_title="Pipeline", legend_title="")
+    fig_tot.update_layout(yaxis_title="Share (%)", xaxis_title=t("cmo.pipeline"), legend_title="")
     fig_tot.update_traces(
         hovertemplate=(
-            "Pipeline: %{x}<br>"
+            f"{t('cmo.pipeline')}: "+"%{x}<br>"
             "Type: %{fullData.name}<br>"
             "Share of Calls: %{y:.2f}%<br>"
             "Leads: %{customdata[0]}<br>"

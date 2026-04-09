@@ -1,8 +1,9 @@
 import streamlit as st
+from i18n import t
 
 
 def render_hint(text: str):
-    st.caption(f"❓ {text}")
+    st.caption(f"{t('shared.hint_prefix')}: {text}")
 
 
 def render_data_health_volume(
@@ -11,9 +12,9 @@ def render_data_health_volume(
     date_range_in_result: tuple | None = None,
     expanded: bool = False,
 ):
-    with st.expander("Data Health & Volume", expanded=expanded):
-        st.write(f"**Total Records Loaded from DB:** {int(total_records_loaded)}")
-        st.write(f"**Records Shown (after filters):** {int(records_shown)}")
+    with st.expander(t("shared.data_health_volume"), expanded=expanded):
+        st.write(f"**{t('shared.total_records')}:** {int(total_records_loaded)}")
+        st.write(f"**{t('shared.records_shown')}:** {int(records_shown)}")
         if date_range_in_result is not None:
             start, end = date_range_in_result
-            st.write(f"**Date Range in Result:** {start} → {end}")
+            st.write(f"**{t('shared.date_range_result')}:** {start} -> {end}")

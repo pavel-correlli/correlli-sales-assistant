@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from database import fetch_view_data, rpc_df
+from i18n import t
 from views.shared_ui import render_hint
 
 
@@ -215,14 +216,14 @@ def _render_attribute_frequency_heatmap(
 ):
     df = _fetch_attribute_frequency_for_heatmap(attr_type, date_range, selected_markets, selected_pipelines)
     if df.empty:
-        st.warning(f"No data available for {attr_type} heatmap with current filters.")
+        st.warning(t("cmo.no_data_heatmap_attr", attr_type=attr_type))
         return
 
     df["attr_value"] = df["attr_value"].astype(str).str.strip()
     df["pipeline_name"] = df["pipeline_name"].astype(str).str.strip()
     df = df[(df["attr_value"] != "") & (df["pipeline_name"] != "")].copy()
     if df.empty:
-        st.warning(f"No valid values to render {attr_type} heatmap after cleaning.")
+        st.warning(t("cmo.no_valid_values_attr", attr_type=attr_type))
         return
 
     df["mentions_per_call"] = (
@@ -280,13 +281,13 @@ def _render_attribute_frequency_heatmap(
                 hovertemplate=(
                     f"{attr_type}: %{{y}}<br>"
                     "Pipeline: %{x}<br>"
-                    "Calls with entity: %{customdata[0]}<br>"
+                    f"{t('cmo.calls_with_entity')}: "+"%{customdata[0]}<br>"
                     "Total calls: %{customdata[1]}<br>"
-                    "Mentions: %{customdata[2]}<br>"
-                    "Mentions per call: %{customdata[3]:.2f}<br>"
-                    "Share of mentions in pipeline: %{customdata[4]:.1%}<br>"
-                    "Frequency: %{z:.1%}<br>"
-                    "Formula: Calls with entity / Total calls<extra></extra>"
+                    f"{t('cmo.mentions')}: "+"%{customdata[2]}<br>"
+                    f"{t('cmo.mentions_per_call')}: "+"%{customdata[3]:.2f}<br>"
+                    f"{t('cmo.share_mentions_pipeline')}: "+"%{customdata[4]:.1%}<br>"
+                    f"{t('cmo.frequency')}: "+"%{z:.1%}<br>"
+                    f"{t('cmo.formula_frequency')}<extra></extra>"
                 ),
             )
         ]
@@ -296,7 +297,7 @@ def _render_attribute_frequency_heatmap(
         margin=dict(l=10, r=10, t=10, b=90),
         paper_bgcolor=_traffic_chart_bgcolor(),
         plot_bgcolor=_traffic_chart_bgcolor(),
-        xaxis_title="Pipeline",
+        xaxis_title=t("cmo.pipeline"),
         yaxis_title=attr_type,
         height=max(520, 24 * len(z.index) + 260),
     )
@@ -306,14 +307,11 @@ def _render_attribute_frequency_heatmap(
 
 
 def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
-    st.markdown("<h1 style='text-align:center;'>Traffic Quality & Viscosity</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align:center;'>{t('cmo.title')}</h1>", unsafe_allow_html=True)
 
     st.markdown("<div id='traffic-viscosity-vs-intro-friction'></div>", unsafe_allow_html=True)
-    st.subheader("Traffic Viscosity vs Intro Friction")
-    render_hint(
-        "Viscosity means how many calls are required to process one lead (Calls / Leads). "
-        "Higher viscosity usually indicates wasted touches, poor lead quality, or weak routing."
-    )
+    st.subheader(t("cmo.section.traffic_visc"))
+    render_hint(t("cmo.hint.traffic_visc"))
     date_start = date_range[0] if len(date_range) == 2 else None
     date_end = date_range[1] if len(date_range) == 2 else None
     rpc_params = {
@@ -322,11 +320,11 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         "markets": selected_markets or [],
         "pipelines": selected_pipelines or [],
     }
-    with st.spinner("Loading CMO dataset..."):
+    with st.spinner(t("cmo.loading_dataset")):
         merged_for_chart = rpc_df("rpc_cmo_viscosity_intro_friction_by_manager", rpc_params)
 
     if merged_for_chart.empty:
-        st.warning("No data available for current filters (rpc_cmo_viscosity_intro_friction_by_manager).")
+        st.warning(t("cmo.no_data_dataset"))
         return
 
     for col in ["total_calls", "total_leads", "intro_primaries", "intro_followups"]:
@@ -343,9 +341,9 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         value_name="value",
     )
     long_df["metric"] = long_df["metric"].map(
-        {"viscosity_index": "Viscosity Index", "intro_friction_index": "Intro Friction Index"}
+        {"viscosity_index": t("cmo.viscosity_index"), "intro_friction_index": t("cmo.intro_friction_index")}
     )
-    long_df["mkt_market"] = long_df["mkt_market"].fillna("Unknown").astype(str).str.strip()
+    long_df["mkt_market"] = long_df["mkt_market"].fillna(t("cmo.unknown")).astype(str).str.strip()
 
     fig_bar = px.bar(
         long_df,
@@ -356,12 +354,12 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         text="mkt_market",
         template=_plotly_template(),
         pattern_shape_sequence=[""],
-        labels={"mkt_manager": "Traffic Manager", "value": "Index"},
+        labels={"mkt_manager": t("cmo.traffic_manager"), "value": t("cmo.index")},
         custom_data=["mkt_market", "total_calls", "total_leads", "intro_primaries", "intro_followups"],
     )
     fig_bar.update_traces(textposition="inside", texttemplate="%{text}")
     fig_bar.for_each_trace(
-        lambda t: t.update(
+        lambda tr: tr.update(
             hovertemplate=(
                 "Traffic Manager: %{x}<br>"
                 "Market: %{customdata[0]}<br>"
@@ -370,7 +368,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
                 "Total Leads: %{customdata[2]}<br>"
                 "Formula: Calls / Leads<extra></extra>"
             )
-            if t.name == "Viscosity Index"
+            if tr.name == t("cmo.viscosity_index")
             else (
                 "Traffic Manager: %{x}<br>"
                 "Market: %{customdata[0]}<br>"
@@ -381,14 +379,14 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
             )
         )
     )
-    fig_bar.update_layout(xaxis_title="Traffic Manager", margin=dict(l=10, r=10, t=10, b=80))
+    fig_bar.update_layout(xaxis_title=t("cmo.traffic_manager"), margin=dict(l=10, r=10, t=10, b=80))
     fig_bar.update_xaxes(tickangle=-35, automargin=True)
     st.plotly_chart(fig_bar, use_container_width=True)
 
     st.markdown("<div id='intro-friction-traffic-manager'></div>", unsafe_allow_html=True)
-    st.subheader("Intro Friction / Traffic Manager")
-    render_hint("Intro Friction shows follow-up load on intro calls (Intro Flups / Intro Calls).")
-    with st.spinner("Loading heatmap dataset..."):
+    st.subheader(t("cmo.section.intro_friction"))
+    render_hint(t("cmo.hint.intro_friction"))
+    with st.spinner(t("cmo.loading_heatmap")):
         by_mm = rpc_df(
             "rpc_cmo_intro_friction_heatmap",
             {
@@ -400,7 +398,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         )
 
     if by_mm.empty:
-        st.warning("No heatmap data available for current filters (rpc_cmo_intro_friction_heatmap).")
+        st.warning(t("cmo.no_data_heatmap"))
         return
 
     by_mm["intro_calls"] = pd.to_numeric(by_mm.get("intro_calls"), errors="coerce").fillna(0).astype(int)
@@ -423,7 +421,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         & (~by_mm["mkt_manager"].isin({"", "0", "nan", "None"}))
     ].copy()
     if by_mm.empty:
-        st.warning("No valid market/manager values for heatmap after cleaning.")
+        st.warning(t("cmo.no_valid_market_manager"))
         return
 
     friction = by_mm.pivot(index="mkt_market", columns="mkt_manager", values="intro_friction_index").fillna(0)
@@ -452,7 +450,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
                 colorscale="Reds",
                 zmin=0,
                 showscale=True,
-                colorbar=dict(title="Intro Friction", tickformat=".2f"),
+                colorbar=dict(title=t("cmo.intro_friction"), tickformat=".2f"),
                 hovertemplate=(
                     "Market: %{y}<br>"
                     "Traffic Manager: %{x}<br>"
@@ -470,8 +468,8 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
         margin=dict(l=10, r=10, t=10, b=90),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        xaxis_title="Traffic Manager",
-        yaxis_title="Market",
+        xaxis_title=t("cmo.traffic_manager"),
+        yaxis_title=t("cmo.market"),
         height=max(480, 28 * len(friction.index) + 220),
     )
     fig_hm.update_xaxes(tickangle=-35, automargin=True)
@@ -479,14 +477,11 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     st.plotly_chart(fig_hm, use_container_width=True)
 
     st.markdown("<div id='attribute-frequency-heatmaps'></div>", unsafe_allow_html=True)
-    render_hint(
-        "These heatmaps show how frequently an entity appears in calls within each pipeline "
-        "(Calls with entity / Total calls)."
-    )
+    render_hint(t("cmo.section.entity_heatmaps_hint"))
     st.markdown("<div id='goal-heatmap'></div>", unsafe_allow_html=True)
     _render_attribute_frequency_heatmap(
         attr_type="Goal",
-        title="Goal Frequency / Pipeline",
+        title=t("cmo.section.goal"),
         colorscale=_entity_heatmap_colorscale("Goal"),
         date_range=date_range,
         selected_markets=selected_markets,
@@ -495,7 +490,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     st.markdown("<div id='objection-heatmap'></div>", unsafe_allow_html=True)
     _render_attribute_frequency_heatmap(
         attr_type="Objection",
-        title="Objection Frequency / Pipeline",
+        title=t("cmo.section.objection"),
         colorscale=_entity_heatmap_colorscale("Objection"),
         date_range=date_range,
         selected_markets=selected_markets,
@@ -504,15 +499,15 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
     st.markdown("<div id='fear-heatmap'></div>", unsafe_allow_html=True)
     _render_attribute_frequency_heatmap(
         attr_type="Fear",
-        title="Fear Frequency / Pipeline",
+        title=t("cmo.section.fear"),
         colorscale=_entity_heatmap_colorscale("Fear"),
         date_range=date_range,
         selected_markets=selected_markets,
         selected_pipelines=selected_pipelines,
     )
 
-    with st.expander("Entity heatmaps debug", expanded=False):
-        debug_on = st.checkbox("Show debug", value=False, key="dbg_entity_heatmaps_v1")
+    with st.expander(t("cmo.debug.expander"), expanded=False):
+        debug_on = st.checkbox(t("cmo.debug.show"), value=False, key="dbg_entity_heatmaps_v1")
         if debug_on:
             df_calls_dbg = fetch_view_data("Algonova_Calls_Raw")
             st.write(
@@ -564,7 +559,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
 
                 for col in ["parent_goals", "objection_list", "parent_fears"]:
                     if col not in df_calls_dbg.columns:
-                        st.write({col: "missing"})
+                        st.write({col: t("cmo.debug.missing")})
                         continue
                     s = df_calls_dbg[col].astype(str).str.strip()
                     s = s[~s.str.lower().isin(["", "nan", "none", "null"])].copy()
@@ -611,7 +606,7 @@ def render_cmo_analytics(date_range, selected_markets, selected_pipelines):
                     st.write({f"attrs_call_id_intersection_{t}": int(len(calls_ids & ids_t))})
 
             st.markdown("---")
-            st.markdown("**Entity volume (used in heatmaps for current filters)**")
+            st.markdown(f"**{t('cmo.debug.entity_volume')}**")
             for t in ["Goal", "Objection", "Fear"]:
                 df_calc = _fetch_attribute_frequency_for_heatmap(t, date_range, selected_markets, selected_pipelines)
                 if df_calc.empty:

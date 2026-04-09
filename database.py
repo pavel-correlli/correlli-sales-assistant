@@ -5,6 +5,7 @@ import os
 import time
 import httpx
 import psycopg2
+from i18n import t
 
 
 def _get_nested_secret(section: str, key: str):
@@ -93,10 +94,7 @@ def get_supabase_client() -> Client:
     url, key = _resolve_supabase_config()
     url, key = _resolve_supabase_config()
     if not url or not key:
-        st.error(
-            "Supabase secrets не найдены. Добавь в Streamlit Secrets либо блок "
-            "[supabase] с url/key, либо ключи SUPABASE_URL и SUPABASE_KEY."
-        )
+        st.error(t("db.supabase_secrets_missing"))
         st.stop()
     return create_client(url, key)
 
