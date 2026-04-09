@@ -22,7 +22,7 @@ def _to_num(series: pd.Series) -> pd.Series:
 
 
 def _load_cso_quality_df(date_range, selected_markets, selected_pipelines, selected_managers=None) -> pd.DataFrame:
-    df = fetch_view_data("Algonova_Calls_Raw")
+    df = fetch_view_data("v_analytics_calls")
     if df.empty:
         return df
 
@@ -185,6 +185,8 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
         "managers": selected_managers or [],
     }
 
+    _render_cso_sales_quality(date_range, selected_markets, selected_pipelines, selected_managers)
+
     st.markdown("<div id='operations-feed'></div>", unsafe_allow_html=True)
     df_kpi = rpc_df("rpc_cso_ops_kpis", params)
     if df_kpi.empty:
@@ -207,39 +209,6 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
     with ops_cols[5]:
         avg_q = kpi.get("avg_quality", None)
         st.metric(t("cso.kpi.avg_quality"), "-" if avg_q in (None, "", "nan") else f"{float(avg_q):.2f}")
-
-    tab_a, tab_b = st.tabs([t("cso.tab.anomalies"), t("cso.tab.low_quality")])
-    with tab_a:
-        anomalies = rpc_df("rpc_cso_anomalies", params)
-        show_cols = _existing_columns(anomalies, ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "audio_url", "kommo_link"])
-        if anomalies.empty:
-            st.success(t("cso.anomalies.empty"))
-        else:
-            out = anomalies.copy()
-            if "pipeline_name" in out.columns:
-                out["pipeline_name"] = out["pipeline_name"].apply(pipeline_label)
-            st.dataframe(
-                out[show_cols],
-                use_container_width=True,
-                hide_index=True,
-                column_config={"audio_url": st.column_config.LinkColumn(t("cso.audio_url")), "kommo_link": st.column_config.LinkColumn(t("cso.kommo"))},
-            )
-
-    with tab_b:
-        low_q = rpc_df("rpc_cso_low_quality", params)
-        show_cols = _existing_columns(low_q, ["call_datetime", "manager", "pipeline_name", "average_quality", "audio_url", "kommo_link"])
-        if low_q.empty:
-            st.success(t("cso.low_quality.empty"))
-        else:
-            out = low_q.copy().sort_values("average_quality", ascending=True, na_position="last")
-            if "pipeline_name" in out.columns:
-                out["pipeline_name"] = out["pipeline_name"].apply(pipeline_label)
-            st.dataframe(
-                out[show_cols],
-                use_container_width=True,
-                hide_index=True,
-                column_config={"audio_url": st.column_config.LinkColumn(t("cso.audio_url")), "kommo_link": st.column_config.LinkColumn(t("cso.kommo"))},
-            )
 
     df_mgr = rpc_df("rpc_cso_talk_time_by_manager", params)
     if not df_mgr.empty and {"manager", "call_type_group", "minutes", "calls", "total_calls"}.issubset(df_mgr.columns):
@@ -499,7 +468,39 @@ def render_cso_dashboard(date_range, selected_markets, selected_pipelines, selec
     lb.columns = [t("cso.table.manager"), t("cso.table.total_calls"), t("cso.table.no_objections_calls"), t("cso.table.no_objections_share"), t("cso.table.market"), t("cso.table.avg_quality"), t("cso.table.intro_friction"), t("cso.table.sales_friction")]
     st.dataframe(lb, hide_index=True, use_container_width=True)
 
-    _render_cso_sales_quality(date_range, selected_markets, selected_pipelines, selected_managers)
+    st.markdown("---")
+    tab_a, tab_b = st.tabs([t("cso.tab.anomalies"), t("cso.tab.low_quality")])
+    with tab_a:
+        anomalies = rpc_df("rpc_cso_anomalies", params)
+        show_cols = _existing_columns(anomalies, ["call_datetime", "manager", "pipeline_name", "duration_min", "next_step_type", "audio_url", "kommo_link"])
+        if anomalies.empty:
+            st.success(t("cso.anomalies.empty"))
+        else:
+            out = anomalies.copy()
+            if "pipeline_name" in out.columns:
+                out["pipeline_name"] = out["pipeline_name"].apply(pipeline_label)
+            st.dataframe(
+                out[show_cols],
+                use_container_width=True,
+                hide_index=True,
+                column_config={"audio_url": st.column_config.LinkColumn(t("cso.audio_url")), "kommo_link": st.column_config.LinkColumn(t("cso.kommo"))},
+            )
+
+    with tab_b:
+        low_q = rpc_df("rpc_cso_low_quality", params)
+        show_cols = _existing_columns(low_q, ["call_datetime", "manager", "pipeline_name", "average_quality", "audio_url", "kommo_link"])
+        if low_q.empty:
+            st.success(t("cso.low_quality.empty"))
+        else:
+            out = low_q.copy().sort_values("average_quality", ascending=True, na_position="last")
+            if "pipeline_name" in out.columns:
+                out["pipeline_name"] = out["pipeline_name"].apply(pipeline_label)
+            st.dataframe(
+                out[show_cols],
+                use_container_width=True,
+                hide_index=True,
+                column_config={"audio_url": st.column_config.LinkColumn(t("cso.audio_url")), "kommo_link": st.column_config.LinkColumn(t("cso.kommo"))},
+            )
 
 
 if __name__ == "__main__":

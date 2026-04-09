@@ -32,7 +32,7 @@ ensure_chart_views = getattr(db, "ensure_chart_views", lambda: False)
 rpc_df = db.rpc_df
 rpc_df_long = getattr(db, "rpc_df_long", db.rpc_df)
 
-BUILD_ID = "2026-04-09-ru-sales-quality-01"
+BUILD_ID = "2026-04-09-ru-sales-quality-02"
 
 
 def _get_prev_ops_day(today: date) -> date:
@@ -142,12 +142,12 @@ def render_sidebar():
 
     sections_map: dict[str, list[tuple[str, str]]] = {
         "CSO": [
+            (t("section.sales_quality"), "sales-quality"),
             (t("section.operations_feed"), "operations-feed"),
             (t("section.manager_timeline"), "manager-productivity-timeline"),
             (t("section.call_control"), "call-control"),
             (t("section.friction_resistance"), "friction-and-resistance"),
             (t("section.discovery_depth"), "discovery-depth-index"),
-            (t("section.sales_quality"), "sales-quality"),
         ],
         "CEO": [
             (t("section.total_friction"), "total-friction"),
